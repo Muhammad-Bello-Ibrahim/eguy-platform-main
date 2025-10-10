@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import DataPlan from "@/lib/models/DataPlan";
 import { Database } from "@/lib/database";
-
+export const dynamic = "force-dynamic";
 export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
   await Database.getDb();
   const body = await req.json();
