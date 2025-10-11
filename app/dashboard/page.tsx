@@ -125,15 +125,13 @@ export default function DashboardPage() {
     }
   }, []);
 
-  const [firstName, setFirstName] = useState<string>("");
+  const [username, setUsername] = useState<string>("");
   useEffect(() => {
     fetch("/api/user")
       .then((res) => res.json())
       .then((data) => {
         if (data.user && data.user.username) {
-          const username = data.user.username.trim();
-          const nameParts = username.split(" ");
-          setFirstName(nameParts.length > 0 && nameParts[0] ? nameParts[0] : username);
+          setUsername(data.user.username.trim());
         }
       });
   }, []);
@@ -152,7 +150,7 @@ export default function DashboardPage() {
                 <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
                   <User className="w-4 h-4 text-white" />
                 </div>
-                <span className="text-gray-900 font-medium">{firstName || "User"}</span>
+                <span className="text-gray-900 font-medium">{username || "User"}</span>
               </button>
             </div>
             <div className="flex items-center gap-2">

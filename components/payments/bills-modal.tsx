@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Loader2, Zap, Tv, GraduationCap, Droplets } from "lucide-react"
+import { Loader2, Receipt } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 
 interface BillsModalProps {
@@ -19,10 +19,10 @@ interface BillsModalProps {
 }
 
 const billTypes = [
-  { value: "electricity", label: "Electricity", icon: Zap, color: "text-yellow-600" },
-  { value: "water", label: "Water", icon: Droplets, color: "text-blue-600" },
-  { value: "tv", label: "TV Subscription", icon: Tv, color: "text-purple-600" },
-  { value: "education", label: "Education", icon: GraduationCap, color: "text-green-600" },
+  { value: "electricity", label: "Electricity", icon: "⚡", color: "text-yellow-600" },
+  { value: "water", label: "Water", icon: "💧", color: "text-blue-600" },
+  { value: "tv", label: "TV Subscription", icon: "📺", color: "text-purple-600" },
+  { value: "education", label: "Education", icon: "🎓", color: "text-green-600" },
 ]
 
 const providers = {
@@ -114,40 +114,40 @@ export function BillsModal({ isOpen, onClose, onSuccess }: BillsModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle className="flex items-center space-x-2">
-            {selectedBillType ? (
-              <selectedBillType.icon className={`h-5 w-5 ${selectedBillType.color}`} />
-            ) : (
-              <Zap className="h-5 w-5" />
-            )}
-            <span>Pay Bills</span>
+      <DialogContent className="sm:max-w-md bg-white border border-gray-200 shadow-lg">
+        <DialogHeader className="pb-4">
+          <DialogTitle className="flex items-center gap-3 text-xl font-bold text-gray-900">
+            <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+              <Receipt className="w-5 h-5 text-purple-600" />
+            </div>
+            Pay Bills
           </DialogTitle>
-          <DialogDescription>Pay your utility bills quickly and securely</DialogDescription>
+          <DialogDescription className="text-gray-600">
+            Pay your utility bills quickly and securely
+          </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
           {error && (
-            <Alert variant="destructive">
-              <AlertDescription>{error}</AlertDescription>
+            <Alert variant="destructive" className="rounded-lg border-red-200 bg-red-50">
+              <AlertDescription className="font-medium text-red-800">{error}</AlertDescription>
             </Alert>
           )}
 
-          <div className="space-y-2 w-full">
-            <Label htmlFor="serviceType" className="text-sm font-semibold text-green-700 mb-1">Service Type</Label>
+          <div className="space-y-3">
+            <Label htmlFor="serviceType" className="text-sm font-semibold text-gray-900">Service Type</Label>
             <Select
               value={formData.serviceType}
               onValueChange={(value) => setFormData((prev) => ({ ...prev, serviceType: value, provider: "" }))}
             >
-              <SelectTrigger className="w-full rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-base font-semibold text-green-700 focus:outline-none">
+              <SelectTrigger className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-base font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500">
                 <SelectValue placeholder="Select service type" />
               </SelectTrigger>
               <SelectContent className="w-full">
                 {billTypes.map((type) => (
                   <SelectItem key={type.value} value={type.value}>
                     <div className="flex items-center space-x-2">
-                      <type.icon className={`w-4 h-4 ${type.color}`} />
+                      <span>{type.icon}</span>
                       <span>{type.label}</span>
                     </div>
                   </SelectItem>
@@ -157,13 +157,13 @@ export function BillsModal({ isOpen, onClose, onSuccess }: BillsModalProps) {
           </div>
 
           {formData.serviceType && (
-            <div className="space-y-2 w-full">
-              <Label htmlFor="provider" className="text-sm font-semibold text-green-700 mb-1">Provider</Label>
+            <div className="space-y-3">
+              <Label htmlFor="provider" className="text-sm font-semibold text-gray-900">Provider</Label>
               <Select
                 value={formData.provider}
                 onValueChange={(value) => setFormData((prev) => ({ ...prev, provider: value }))}
               >
-                <SelectTrigger className="w-full rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-base font-semibold text-green-700 focus:outline-none">
+                <SelectTrigger className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-base font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500">
                   <SelectValue placeholder="Select provider" />
                 </SelectTrigger>
                 <SelectContent className="w-full">
@@ -177,7 +177,7 @@ export function BillsModal({ isOpen, onClose, onSuccess }: BillsModalProps) {
             </div>
           )}
 
-          <div className="space-y-2">
+          <div className="space-y-3">
             <Label htmlFor="recipient">
               {formData.serviceType === "electricity"
                 ? "Meter Number"
@@ -205,12 +205,13 @@ export function BillsModal({ isOpen, onClose, onSuccess }: BillsModalProps) {
               }
               value={formData.recipient}
               onChange={(e) => setFormData((prev) => ({ ...prev, recipient: e.target.value }))}
+              className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-purple-500"
               required
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="amount">Amount (NGN)</Label>
+          <div className="space-y-3">
+            <Label htmlFor="amount" className="text-sm font-semibold text-gray-900">Amount (₦)</Label>
             <Input
               id="amount"
               type="number"
@@ -219,23 +220,30 @@ export function BillsModal({ isOpen, onClose, onSuccess }: BillsModalProps) {
               onChange={(e) => setFormData((prev) => ({ ...prev, amount: e.target.value }))}
               min="100"
               step="1"
+              className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-purple-500"
               required
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="customerInfo">Customer Name (Optional)</Label>
+          <div className="space-y-3">
+            <Label htmlFor="customerInfo" className="text-sm font-semibold text-gray-900">Customer Name (Optional)</Label>
             <Input
               id="customerInfo"
               type="text"
               placeholder="Enter customer name"
               value={formData.customerInfo}
               onChange={(e) => setFormData((prev) => ({ ...prev, customerInfo: e.target.value }))}
+              className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-purple-500"
             />
           </div>
 
-          <div className="flex space-x-2">
-            <Button type="button" variant="outline" onClick={onClose} className="flex-1 bg-transparent">
+          <div className="flex gap-3 pt-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+              className="flex-1 rounded-xl border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 transition-all duration-200"
+            >
               Cancel
             </Button>
             <Button
@@ -243,7 +251,7 @@ export function BillsModal({ isOpen, onClose, onSuccess }: BillsModalProps) {
               disabled={
                 isLoading || !formData.serviceType || !formData.provider || !formData.recipient || !formData.amount
               }
-              className="flex-1"
+              className="flex-1 rounded-xl bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-bold text-lg shadow-lg hover:shadow-purple-500/25 transition-all duration-200 border-0 disabled:opacity-50"
             >
               {isLoading ? (
                 <>

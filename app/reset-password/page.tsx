@@ -31,82 +31,79 @@ export default function ResetPasswordPage() {
 
   if (token) {
     return (
-      <div className="min-h-screen w-full flex bg-gradient-to-br from-slate-50 via-white to-slate-100">
-        {/* Left side - Security Dashboard */}
-        <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-red-600 via-orange-600 to-yellow-600 p-8 relative overflow-hidden">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_50%,_rgba(255,255,255,0.1),transparent_50%)]"></div>
+      <div className="min-h-screen w-full flex bg-gray-50">
+        {/* Left side - Large Typography Design */}
+        <div className="hidden lg:flex lg:w-1/2 bg-gray-50 p-8 relative">
+          {/* Animated background patterns */}
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_40%,_rgba(245,158,11,0.03),transparent_50%)]"></div>
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_60%,_rgba(251,191,36,0.03),transparent_50%)]"></div>
 
-          {/* Animated background elements */}
-          <div className="absolute top-10 left-10 w-32 h-32 bg-white/10 rounded-full blur-xl animate-pulse"></div>
-          <div className="absolute top-20 right-20 w-24 h-24 bg-white/10 rounded-full blur-xl animate-pulse delay-1000"></div>
-          <div className="absolute bottom-20 left-1/3 w-40 h-40 bg-white/10 rounded-full blur-xl animate-pulse delay-500"></div>
+          {/* Floating orbs */}
+          <div className="absolute top-16 left-16 w-32 h-32 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full blur-3xl opacity-20 animate-pulse"></div>
+          <div className="absolute top-32 right-32 w-24 h-24 bg-gradient-to-r from-red-400 to-pink-400 rounded-full blur-3xl opacity-20 animate-pulse delay-1000"></div>
+          <div className="absolute bottom-32 left-1/4 w-40 h-40 bg-gradient-to-r from-orange-400 to-yellow-400 rounded-full blur-3xl opacity-15 animate-pulse delay-500"></div>
 
           <div className="relative z-10 w-full h-full flex flex-col justify-center">
-            <div className="mb-8">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center">
-                  <Shield className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h2 className="text-2xl font-bold text-white">Security Center</h2>
-                  <p className="text-orange-100">Real-time protection monitoring</p>
-                </div>
+            <div className="space-y-8">
+              {/* Main headline */}
+              <div className="space-y-4">
+                <h1 className="text-6xl md:text-7xl font-black text-gray-900 leading-tight">
+                  <span className="bg-gradient-to-r from-orange-600 via-red-600 to-yellow-600 bg-clip-text text-transparent">
+                    Reset
+                  </span>
+                  <br />
+                  <span className="bg-gradient-to-r from-red-600 via-yellow-600 to-orange-600 bg-clip-text text-transparent">
+                    Secure
+                  </span>
+                </h1>
+                <p className="text-xl md:text-2xl text-gray-600 font-light leading-relaxed max-w-lg">
+                  Regain access to your account with our secure password reset process. Your security is our top priority.
+                </p>
               </div>
-            </div>
 
-            {/* Security metrics */}
-            <div className="space-y-6 mb-8">
-              {securityMetrics.map((item, index) => (
-                <div key={index} className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-orange-100 text-sm font-medium">{item.label}</span>
-                    <div className={`flex items-center gap-1 ${item.trend === 'up' ? 'text-green-400' : 'text-red-400'}`}>
-                      {item.trend === 'up' ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
-                      <span className="text-xs font-medium">{item.change > 0 ? '+' : ''}{item.change.toFixed(1)}%</span>
-                    </div>
+              {/* Security highlights */}
+              <div className="space-y-6">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center flex-shrink-0">
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
                   </div>
-                  <div className="text-2xl font-bold text-white mb-2">
-                    {item.value.toLocaleString()}
-                    {item.label.includes('Score') && '/100'}
-                  </div>
-                  <div className="w-full bg-white/20 rounded-full h-2">
-                    <div
-                      className={`h-2 rounded-full ${item.trend === 'up' ? 'bg-green-400' : 'bg-red-400'} transition-all duration-1000`}
-                      style={{ width: `${Math.max(20, Math.min(100, 50 + item.change * 2))}%` }}
-                    ></div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-1">Bank-Grade Security</h3>
+                    <p className="text-gray-600 text-sm leading-relaxed">
+                      Military-level encryption protecting your password reset process
+                    </p>
                   </div>
                 </div>
-              ))}
-            </div>
 
-            {/* Security alerts */}
-            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 mb-8">
-              <div className="flex items-center gap-2 mb-4">
-                <AlertTriangle className="w-5 h-5 text-yellow-300" />
-                <h3 className="text-lg font-semibold text-white">Security Alerts</h3>
-              </div>
-              <div className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                  <span className="text-green-100 text-sm">All systems operational</span>
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-gradient-to-r from-red-500 to-yellow-500 rounded-full flex items-center justify-center flex-shrink-0">
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-1">Instant Verification</h3>
+                    <p className="text-gray-600 text-sm leading-relaxed">
+                      Quick email/SMS verification for immediate account recovery
+                    </p>
+                  </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-                  <span className="text-blue-100 text-sm">Biometric verification active</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
-                  <span className="text-purple-100 text-sm">Encryption protocols updated</span>
-                </div>
-              </div>
-            </div>
 
-            {/* Protection status */}
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-white mb-2">🔒</div>
-                <div className="text-sm font-medium text-white">Account Protected</div>
-                <div className="text-xs text-orange-200">Military-grade security</div>
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full flex items-center justify-center flex-shrink-0">
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-1">Privacy Protected</h3>
+                    <p className="text-gray-600 text-sm leading-relaxed">
+                      Your personal information stays secure throughout the process
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -133,82 +130,79 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen w-full flex bg-gradient-to-br from-slate-50 via-white to-slate-100">
-      {/* Left side - Financial Dashboard Animation */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 via-purple-600 to-blue-800 p-8 relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_50%,_rgba(255,255,255,0.1),transparent_50%)]"></div>
+    <div className="min-h-screen w-full flex bg-gray-50">
+      {/* Left side - Large Typography Design */}
+      <div className="hidden lg:flex lg:w-1/2 bg-gray-50 p-8 relative">
+        {/* Animated background patterns */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_40%,_rgba(59,130,246,0.03),transparent_50%)]"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_60%,_rgba(99,102,241,0.03),transparent_50%)]"></div>
 
-        {/* Animated background elements */}
-        <div className="absolute top-10 left-10 w-32 h-32 bg-white/10 rounded-full blur-xl animate-pulse"></div>
-        <div className="absolute top-20 right-20 w-24 h-24 bg-white/10 rounded-full blur-xl animate-pulse delay-1000"></div>
-        <div className="absolute bottom-20 left-1/3 w-40 h-40 bg-white/10 rounded-full blur-xl animate-pulse delay-500"></div>
+        {/* Floating orbs */}
+        <div className="absolute top-16 left-16 w-32 h-32 bg-gradient-to-r from-indigo-400 to-purple-400 rounded-full blur-3xl opacity-20 animate-pulse"></div>
+        <div className="absolute top-32 right-32 w-24 h-24 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-full blur-3xl opacity-20 animate-pulse delay-1000"></div>
+        <div className="absolute bottom-32 left-1/4 w-40 h-40 bg-gradient-to-r from-purple-400 to-indigo-400 rounded-full blur-3xl opacity-15 animate-pulse delay-500"></div>
 
         <div className="relative z-10 w-full h-full flex flex-col justify-center">
-          <div className="mb-8">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center">
-                <Lock className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h2 className="text-2xl font-bold text-white">Password Recovery</h2>
-                <p className="text-blue-100">Secure account access</p>
-              </div>
+          <div className="space-y-8">
+            {/* Main headline */}
+            <div className="space-y-4">
+              <h1 className="text-6xl md:text-7xl font-black text-gray-900 leading-tight">
+                <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                  Recover
+                </span>
+                <br />
+                <span className="bg-gradient-to-r from-indigo-600 via-purple-600 to-blue-600 bg-clip-text text-transparent">
+                  Access
+                </span>
+              </h1>
+              <p className="text-xl md:text-2xl text-gray-600 font-light leading-relaxed max-w-lg">
+                Forgot your password? No worries. We'll help you regain access to your account quickly and securely.
+              </p>
             </div>
-          </div>
 
-          {/* Recovery metrics */}
-          <div className="space-y-6 mb-8">
-            {[
-              { label: "Recovery Requests", value: 247, change: -12.3, trend: "down", color: "blue" },
-              { label: "Success Rate", value: 98.7, change: 0.5, trend: "up", color: "green" },
-              { label: "Avg Response Time", value: 2.3, change: -8.1, trend: "down", color: "purple" },
-              { label: "Security Checks", value: 15, change: 3.2, trend: "up", color: "orange" }
-            ].map((item, index) => (
-              <div key={index} className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-blue-100 text-sm font-medium">{item.label}</span>
-                  <div className={`flex items-center gap-1 ${item.trend === 'up' ? 'text-green-400' : 'text-red-400'}`}>
-                    {item.trend === 'up' ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
-                    <span className="text-xs font-medium">{item.change > 0 ? '+' : ''}{item.change.toFixed(1)}%</span>
-                  </div>
+            {/* Security highlights */}
+            <div className="space-y-6">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full flex items-center justify-center flex-shrink-0">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
                 </div>
-                <div className="text-2xl font-bold text-white mb-2">
-                  {item.value.toLocaleString()}
-                  {item.label.includes('Rate') && '%'}
-                  {item.label.includes('Time') && 'min'}
-                </div>
-                <div className="w-full bg-white/20 rounded-full h-2">
-                  <div
-                    className={`h-2 rounded-full ${item.trend === 'up' ? 'bg-green-400' : 'bg-red-400'} transition-all duration-1000`}
-                    style={{ width: `${Math.max(20, Math.min(100, 50 + item.change * 2))}%` }}
-                  ></div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-1">Email Verification</h3>
+                  <p className="text-gray-600 text-sm leading-relaxed">
+                    Secure link sent to your registered email address for verification
+                  </p>
                 </div>
               </div>
-            ))}
-          </div>
 
-          {/* Security features */}
-          <div className="grid grid-cols-2 gap-4 mb-8">
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-              <div className="text-center">
-                <Shield className="w-8 h-8 text-blue-300 mx-auto mb-2" />
-                <div className="text-sm font-medium text-white">SSL Encrypted</div>
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-1">Protected Process</h3>
+                  <p className="text-gray-600 text-sm leading-relaxed">
+                    All password resets are encrypted and time-limited for maximum security
+                  </p>
+                </div>
               </div>
-            </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-              <div className="text-center">
-                <Lock className="w-8 h-8 text-purple-300 mx-auto mb-2" />
-                <div className="text-sm font-medium text-white">Secure Tokens</div>
-              </div>
-            </div>
-          </div>
 
-          {/* Recovery success */}
-          <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-white mb-2">✅</div>
-              <div className="text-sm font-medium text-white">99.8% Success Rate</div>
-              <div className="text-xs text-blue-200">Secure password recovery</div>
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-1">Instant Recovery</h3>
+                  <p className="text-gray-600 text-sm leading-relaxed">
+                    Get back into your account within minutes with our streamlined process
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>

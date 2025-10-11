@@ -139,37 +139,42 @@ export function DataModal({ isOpen, onClose, onSuccess }: DataModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle className="flex items-center space-x-2">
-            <Wifi className="w-7 h-7" />
-            <span>Buy Data Bundle</span>
+      <DialogContent className="sm:max-w-md bg-white border border-gray-200 shadow-lg">
+        <DialogHeader className="pb-4">
+          <DialogTitle className="flex items-center gap-3 text-xl font-bold text-gray-900">
+            <div className="w-10 h-10 bg-teal-100 rounded-full flex items-center justify-center">
+              <Wifi className="w-5 h-5 text-teal-600" />
+            </div>
+            Buy Data Bundle
           </DialogTitle>
-          <DialogDescription>Purchase data bundles for internet access</DialogDescription>
+          <DialogDescription className="text-gray-600">
+            Purchase data bundles for internet access
+          </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
           {error && (
-            <Alert variant="destructive">
-              <AlertDescription>{error}</AlertDescription>
+            <Alert variant="destructive" className="rounded-lg border-red-200 bg-red-50">
+              <AlertDescription className="font-medium text-red-800">{error}</AlertDescription>
             </Alert>
           )}
+
           {fetching ? (
             <div className="space-y-4">
-              <Skeleton className="h-10 w-full rounded-xl" />
-              <Skeleton className="h-10 w-full rounded-xl" />
-              <Skeleton className="h-10 w-full rounded-xl" />
+              <Skeleton className="h-12 w-full rounded-xl" />
+              <Skeleton className="h-12 w-full rounded-xl" />
+              <Skeleton className="h-12 w-full rounded-xl" />
             </div>
           ) : (
             <>
-              <div className="space-y-2 w-full">
-                <Label htmlFor="network" className="text-sm font-semibold text-green-700 mb-1">Network</Label>
+              <div className="space-y-3">
+                <Label htmlFor="network" className="text-sm font-semibold text-gray-900">Network Provider</Label>
                 <Select
                   value={formData.network}
                   onValueChange={(value) => setFormData((prev) => ({ ...prev, network: value, plan: "" }))}
                 >
-                  <SelectTrigger className="w-full rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-base font-semibold text-green-700 focus:outline-none">
-                    <SelectValue placeholder="Select network" />
+                  <SelectTrigger className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-base font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    <SelectValue placeholder="Select network provider" />
                   </SelectTrigger>
                   <SelectContent className="w-full">
                     {bundles.map((bundle) => (
@@ -184,26 +189,27 @@ export function DataModal({ isOpen, onClose, onSuccess }: DataModalProps) {
                 </Select>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="phone">Phone Number</Label>
+              <div className="space-y-3">
+                <Label htmlFor="phone" className="text-sm font-semibold text-gray-900">Phone Number</Label>
                 <Input
                   id="phone"
                   type="tel"
                   placeholder="08012345678"
                   value={formData.phone}
                   onChange={(e) => setFormData((prev) => ({ ...prev, phone: e.target.value }))}
+                  className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-teal-500"
                   required
                 />
               </div>
 
               {formData.network && (
-                <div className="space-y-2 w-full">
-                  <Label htmlFor="plan" className="text-sm font-semibold text-green-700 mb-1">Data Plan</Label>
+                <div className="space-y-3">
+                  <Label htmlFor="plan" className="text-sm font-semibold text-gray-900">Data Plan</Label>
                   <Select
                     value={formData.plan}
                     onValueChange={(value) => setFormData((prev) => ({ ...prev, plan: value }))}
                   >
-                    <SelectTrigger className="w-full rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-base font-semibold text-green-700 focus:outline-none">
+                    <SelectTrigger className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-base font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-500">
                       <SelectValue placeholder="Select data plan" />
                     </SelectTrigger>
                     <SelectContent className="w-full">
@@ -214,7 +220,7 @@ export function DataModal({ isOpen, onClose, onSuccess }: DataModalProps) {
                           <SelectItem key={plan.dataPlan} value={plan.dataPlan}>
                             <div className="flex items-center justify-between w-full">
                               <span>{plan.dataBundle} {plan.duration} ({plan.type})</span>
-                              <span className="font-medium">₦{plan.price}</span>
+                              <span className="font-medium text-teal-600">₦{plan.price}</span>
                             </div>
                           </SelectItem>
                         ))}
@@ -224,22 +230,27 @@ export function DataModal({ isOpen, onClose, onSuccess }: DataModalProps) {
               )}
 
               {selectedPlan && (
-                <div className="bg-muted/50 p-3 rounded-lg">
+                <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
                   <div className="flex justify-between items-center">
-                    <span className="text-sm">Total Amount:</span>
-                    <span className="font-bold text-primary">₦{selectedPlan.price}</span>
+                    <span className="text-sm font-medium text-gray-900">Total Amount:</span>
+                    <span className="font-bold text-teal-600">₦{selectedPlan.price}</span>
                   </div>
                 </div>
               )}
 
-              <div className="flex space-x-2">
-                <Button type="button" variant="outline" onClick={onClose} className="flex-1 bg-transparent">
+              <div className="flex gap-3 pt-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={onClose}
+                  className="flex-1 rounded-xl border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 transition-all duration-200"
+                >
                   Cancel
                 </Button>
                 <Button
                   type="submit"
                   disabled={isLoading || !formData.network || !formData.phone || !formData.plan}
-                  className="flex-1"
+                  className="flex-1 rounded-xl bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 text-white font-bold text-lg shadow-lg hover:shadow-teal-500/25 transition-all duration-200 border-0 disabled:opacity-50"
                 >
                   {isLoading ? (
                     <>
