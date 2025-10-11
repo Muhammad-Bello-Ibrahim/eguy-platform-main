@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import DataPlan from "@/lib/models/DataPlan";
 import { Database } from "@/lib/database";
 
+export const dynamic = "force-dynamic";
 // GET: List all data plans
 export async function GET() {
   await Database.getDb();
