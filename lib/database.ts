@@ -221,4 +221,14 @@ export class Database {
     const referrals = await db.collection("referrals").find({ referrerId: userId }).toArray()
     return referrals.map((r: any) => ({ ...r, id: r._id.toString() }))
   }
+
+  static async findTransactionByReference(reference: string): Promise<Transaction | null> {
+    const db = await getDb()
+    const transaction = await db.collection("transactions").findOne({ reference })
+    if (!transaction) return null
+    return {
+      ...transaction,
+      id: transaction._id.toString(),
+    }
+  }
 }

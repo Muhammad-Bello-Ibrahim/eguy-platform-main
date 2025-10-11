@@ -1,54 +1,73 @@
 // ...existing code...
-"use client";
+"use client"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Wallet, Users, Smartphone, Shield, TrendingUp, Zap, Menu } from "lucide-react"
+import { Card, CardContent } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { ThemeToggle } from "@/components/theme-toggle"
 import { Drawer, DrawerTrigger, DrawerContent, DrawerClose } from "@/components/ui/drawer"
 import { useState } from "react"
-
+import { Menu, Wallet, Smartphone, Shield, TrendingUp, Users, Zap, ArrowRight, Star, CheckCircle, ChevronRight, Phone, Heart, Globe, Award, Clock, DollarSign, CreditCard, PiggyBank, BarChart3, TrendingDown, Activity } from "lucide-react"
 
 export default function HomePage() {
   const [open, setOpen] = useState(false);
+
   return (
-    <div className="min-h-screen w-full flex flex-col bg-primary/5">
-      {/* Header - transparent, no shadow */}
-      <header className="w-full bg-transparent border-0 m-0 p-0 fixed top-0 z-50">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between ">
-          <div className="flex items-center space-x-2 ml-lg-50">
-            <span className="text-3xl font-bold text-primary">eGuy</span>
+    <div className="min-h-screen w-full bg-gradient-to-br from-slate-50 via-white to-slate-100 text-slate-900 relative overflow-hidden">
+      {/* Human-centric background elements */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_50%,_rgba(59,130,246,0.03),transparent_50%)] opacity-80"></div>
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,_rgba(147,51,234,0.03),transparent_50%)] opacity-80"></div>
+      <div className="absolute top-20 left-10 w-96 h-96 bg-gradient-to-r from-blue-100 to-purple-100 rounded-full mix-blend-multiply filter blur-3xl animate-pulse opacity-70"></div>
+      <div className="absolute top-40 right-10 w-96 h-96 bg-gradient-to-r from-purple-100 to-pink-100 rounded-full mix-blend-multiply filter blur-3xl animate-pulse delay-1000 opacity-70"></div>
+
+      {/* Navigation */}
+      <header className="relative z-50 w-full bg-white/80 backdrop-blur-lg border-b border-slate-200 shadow-sm">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center shadow-lg">
+              <span className="text-white font-bold text-lg">eG</span>
+            </div>
+            <span className="text-2xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">eGuy</span>
           </div>
-          {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center space-x-6 text-primary font-medium mr-50">
-            <Link href="#features" className="hover:text-[#1A202C] transition">Features</Link>
-            <Link href="#pricing" className="hover:text-[#1A202C] transition">Pricing</Link>
-            <Link href="#testimonials" className="hover:text-[#1A202C] transition">Testimonials</Link>
-            <Link href="/signin" className="hover:text-[#1A202C] transition">Login</Link>
-            <Link href="/signup">
-              <Button className="bg-primary text-primary-foreground font-bold rounded-full px-6 py-2 text-base hover:bg-primary/90 transition">Register</Button>
+
+          {/* Desktop Navigation */}
+          <nav className="hidden lg:flex items-center space-x-8">
+            <a href="#features" className="text-slate-600 hover:text-slate-900 transition-colors duration-300 font-medium">Features</a>
+            <a href="#how-it-works" className="text-slate-600 hover:text-slate-900 transition-colors duration-300 font-medium">How It Works</a>
+            <a href="#testimonials" className="text-slate-600 hover:text-slate-900 transition-colors duration-300 font-medium">Reviews</a>
+            <a href="#pricing" className="text-slate-600 hover:text-slate-900 transition-colors duration-300 font-medium">Pricing</a>
+            <ThemeToggle />
+            <Link href="/signin">
+              <Button className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-semibold rounded-full px-6 py-2 shadow-lg">
+                Sign In
+              </Button>
             </Link>
           </nav>
-          {/* Hamburger for mobile */}
-          <div className="md:hidden">
+
+          {/* Mobile Menu */}
+          <div className="lg:hidden flex items-center gap-4">
+            <ThemeToggle />
             <Drawer open={open} onOpenChange={setOpen}>
               <DrawerTrigger asChild>
-                <button aria-label="Open menu" onClick={() => setOpen(true)} className="p-2 rounded-full text-primary hover:bg-primary/10 focus:outline-none">
-                  <Menu size={32} />
-                </button>
+                <Button variant="ghost" size="icon" className="text-slate-900 hover:bg-slate-100">
+                  <Menu size={24} />
+                </Button>
               </DrawerTrigger>
-              <DrawerContent className="bg-white p-6">
-                <div className="flex flex-col gap-6 text-primary font-medium">
+              <DrawerContent className="bg-white border-slate-200">
+                <div className="flex flex-col gap-6 p-6">
                   <DrawerClose asChild>
-                    <button aria-label="Close menu" onClick={() => setOpen(false)} className="self-end mb-2 p-2 rounded-full text-primary hover:bg-primary/10 focus:outline-none">
-                      <Menu size={32} className="rotate-90" />
-                    </button>
+                    <Button variant="ghost" className="self-end">
+                      <Menu size={24} className="rotate-90" />
+                    </Button>
                   </DrawerClose>
-                  <Link href="#features" className="hover:text-[#1A202C] transition" onClick={() => setOpen(false)}>Features</Link>
-                  <Link href="#pricing" className="hover:text-[#1A202C] transition" onClick={() => setOpen(false)}>Pricing</Link>
-                  <Link href="#testimonials" className="hover:text-[#1A202C] transition" onClick={() => setOpen(false)}>Testimonials</Link>
-                  <Link href="/signin" className="hover:text-[#1A202C] transition" onClick={() => setOpen(false)}>Login</Link>
-                  <Link href="/signup" onClick={() => setOpen(false)}>
-                    <Button className="bg-primary text-primary-foreground font-bold rounded-full px-6 py-2 text-base hover:bg-primary/90 transition w-full">Register</Button>
+                  <a href="#features" className="text-lg font-medium text-slate-900 hover:text-blue-600 transition-colors py-2" onClick={() => setOpen(false)}>Features</a>
+                  <a href="#how-it-works" className="text-lg font-medium text-slate-900 hover:text-blue-600 transition-colors py-2" onClick={() => setOpen(false)}>How It Works</a>
+                  <a href="#testimonials" className="text-lg font-medium text-slate-900 hover:text-blue-600 transition-colors py-2" onClick={() => setOpen(false)}>Reviews</a>
+                  <a href="#pricing" className="text-lg font-medium text-slate-900 hover:text-blue-600 transition-colors py-2" onClick={() => setOpen(false)}>Pricing</a>
+                  <Link href="/signin" onClick={() => setOpen(false)}>
+                    <Button className="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold rounded-full py-3">
+                      Sign In
+                    </Button>
                   </Link>
                 </div>
               </DrawerContent>
@@ -57,321 +76,722 @@ export default function HomePage() {
         </div>
       </header>
 
-      {/* 1. Hero Section - two columns */}
-  <section className="w-full bg-gradient-to-br from-primary/5 to-secondary/5 py-20 px-4 ">
-        <div className="container mx-auto flex flex-col md:flex-row items-stretch justify-between gap-12 mt-24">
-          {/* Left column: heading, text, buttons */}
-          <div className="flex-1 max-w-xl flex flex-col justify-center min-h-[400px] md:min-h-[500px] ml-50">
-            <h1 className="text-5xl md:text-6xl font-extrabold text-foreground mb-6 tracking-tight leading-tight">
-              Your Financial Freedom<br />Starts <span className="text-primary">Here</span>
-            </h1>
-            <p className="text-lg md:text-xl text-[#4A5568] mb-8 font-medium">
-              eGuy is your all-in-one fintech platform for wallet services, bill payments, and earning through our ElevateX referral system.
+      {/* Hero Section - Human Centric */}
+      <section className="relative w-full py-20 lg:py-32 px-4 sm:px-6 lg:px-8 overflow-hidden">
+        <div className="container mx-auto relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            {/* Left side - Content */}
+            <div className="text-center lg:text-left">
+              <Badge className="mb-6 bg-blue-100 text-blue-700 border-blue-200 px-4 py-2 text-sm font-medium">
+                🎉 Join 50,000+ Happy Users
+              </Badge>
+
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold text-slate-900 mb-8 leading-tight">
+                Your Money,
+                <span className="block bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent">
+                  Simplified
+                </span>
+              </h1>
+
+              <p className="text-xl sm:text-2xl text-slate-600 mb-12 leading-relaxed max-w-2xl">
+                Experience banking made personal. Send money, pay bills, buy airtime, and grow your savings with the fintech app that understands your needs.
+              </p>
+
+              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start items-center mb-16">
+                <Link href="/signup">
+                  <Button size="lg" className="group bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-bold rounded-full px-10 py-4 text-lg shadow-xl transition-all duration-500 hover:scale-105 min-w-[200px]">
+                    <span className="mr-2">Start Free Today</span>
+                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
+                  </Button>
+                </Link>
+                <Link href="/signin">
+                  <Button size="lg" variant="outline" className="border-2 border-blue-200 text-blue-600 hover:text-white hover:bg-blue-50 font-bold rounded-full px-10 py-4 text-lg shadow-lg transition-all duration-300 min-w-[200px]">
+                    I Have an Account
+                  </Button>
+                </Link>
+              </div>
+
+              {/* Trust indicators */}
+              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-8 text-sm text-slate-500">
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-5 h-5 text-green-500" />
+                  <span>Bank-grade security</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-5 h-5 text-green-500" />
+                  <span>Instant transactions</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-5 h-5 text-green-500" />
+                  <span>24/7 support</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Right side - Phone mockup */}
+            <div className="flex items-center justify-center">
+              <div className="relative group">
+                <div className="absolute -inset-4 bg-gradient-to-r from-blue-400 via-purple-400 to-blue-600 rounded-3xl blur-2xl opacity-20 group-hover:opacity-30 transition-opacity duration-500"></div>
+                <div className="relative bg-white rounded-3xl shadow-2xl p-2 transform rotate-3 group-hover:rotate-0 transition-transform duration-500">
+                  <div className="bg-slate-900 rounded-2xl p-6 text-white">
+                    <div className="flex items-center justify-between mb-6">
+                      <div className="flex items-center space-x-2">
+                        <div className="w-8 h-8 bg-gradient-to-r from-blue-400 to-purple-400 rounded-lg flex items-center justify-center">
+                          <span className="text-white font-bold text-sm">eG</span>
+                        </div>
+                        <span className="font-semibold">eGuy</span>
+                      </div>
+                      <div className="flex space-x-1">
+                        <div className="w-2 h-2 bg-red-400 rounded-full"></div>
+                        <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
+                        <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                      </div>
+                    </div>
+
+                    {/* App interface mockup */}
+                    <div className="space-y-4">
+                      <div className="bg-white/10 rounded-xl p-3">
+                        <div className="text-sm opacity-80 mb-1">Balance</div>
+                        <div className="text-2xl font-bold">₦125,430</div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="bg-white/10 rounded-lg p-2 text-center">
+                          <div className="text-xs opacity-80">Send</div>
+                          <ArrowRight className="w-4 h-4 mx-auto mt-1" />
+                        </div>
+                        <div className="bg-white/10 rounded-lg p-2 text-center">
+                          <div className="text-xs opacity-80">Receive</div>
+                          <ArrowRight className="w-4 h-4 mx-auto mt-1 rotate-180" />
+                        </div>
+                      </div>
+                      <div className="bg-gradient-to-r from-blue-400 to-purple-400 rounded-xl p-3 text-center">
+                        <div className="text-sm font-medium">Quick Actions</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Stats Section - Human Touch */}
+      <section className="relative w-full py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-50 to-purple-50">
+        <div className="container mx-auto">
+          <div className="text-center mb-16">
+            <Badge className="mb-6 bg-purple-100 text-purple-700 border-purple-200 px-4 py-2 text-sm font-medium">
+              📈 Growing Together
+            </Badge>
+            <h2 className="text-4xl sm:text-5xl font-extrabold text-slate-900 mb-6">
+              Trusted by Real People, <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Like You</span>
+            </h2>
+            <p className="text-xl text-slate-600 max-w-2xl mx-auto">
+              See why thousands choose eGuy for their daily financial needs
             </p>
-            <div className="flex gap-4 mt-6">
+          </div>
+
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 max-w-5xl mx-auto">
+            {[
+              { number: "50K+", label: "Happy Users", color: "from-blue-500 to-blue-600", icon: Users },
+              { number: "₦2M+", label: "Processed Daily", color: "from-purple-500 to-purple-600", icon: DollarSign },
+              { number: "99.9%", label: "Uptime", color: "from-green-500 to-green-600", icon: Activity },
+              { number: "< 30sec", label: "Avg Response", color: "from-orange-500 to-orange-600", icon: Clock }
+            ].map((stat, index) => (
+              <Card key={index} className="group bg-white/70 backdrop-blur-sm border-slate-200 hover:border-blue-300 transition-all duration-500 hover:scale-105 shadow-lg">
+                <CardContent className="p-6 text-center">
+                  <div className="flex justify-center mb-4">
+                    <div className={`p-3 bg-gradient-to-r ${stat.color} rounded-2xl`}>
+                      <stat.icon className="text-white w-6 h-6" />
+                    </div>
+                  </div>
+                  <div className={`text-3xl lg:text-4xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent mb-3 group-hover:scale-110 transition-transform duration-300`}>
+                    {stat.number}
+                  </div>
+                  <div className="text-base font-medium text-slate-600">{stat.label}</div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Features Section - Comprehensive */}
+      <section id="features" className="relative w-full py-24 px-4 sm:px-6 lg:px-8 bg-white overflow-hidden">
+        <div className="container mx-auto">
+          <div className="text-center mb-16">
+            <Badge className="mb-6 bg-blue-100 text-blue-700 border-blue-200 px-4 py-2 text-sm font-medium">
+              ⚡ Everything You Need
+            </Badge>
+            <h2 className="text-4xl sm:text-5xl font-extrabold text-slate-900 mb-6">
+              All Your Financial Tools in <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent">One App</span>
+            </h2>
+            <p className="text-xl text-slate-600 max-w-3xl mx-auto">
+              From sending money to friends to paying bills and growing your savings, eGuy makes every financial interaction simple and secure.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-20">
+            {/* Feature list */}
+            <div className="space-y-8">
+              {[
+                {
+                  icon: Wallet,
+                  title: "Smart Wallet Management",
+                  description: "Track your spending, set budgets, and manage multiple accounts all in one beautiful interface designed for real people.",
+                  color: "text-blue-600"
+                },
+                {
+                  icon: Smartphone,
+                  title: "Instant Airtime & Data",
+                  description: "Top up your phone or buy data bundles from all Nigerian networks instantly. No more running out of airtime at crucial moments.",
+                  color: "text-purple-600"
+                },
+                {
+                  icon: CreditCard,
+                  title: "Bill Payments Made Easy",
+                  description: "Pay electricity, water, cable TV, and internet bills with just a few taps. Never miss a payment deadline again.",
+                  color: "text-green-600"
+                },
+                {
+                  icon: PiggyBank,
+                  title: "Automated Savings",
+                  description: "Set up automatic savings goals and watch your money grow. Whether saving for a vacation or emergency fund, we've got you covered.",
+                  color: "text-orange-600"
+                }
+              ].map((feature, index) => (
+                <Card key={index} className="group bg-gradient-to-r from-white to-slate-50 border-slate-200 hover:border-blue-300 transition-all duration-500 hover:scale-[1.02] shadow-lg">
+                  <CardContent className="p-6">
+                    <div className="flex items-start gap-4">
+                      <div className={`p-3 bg-gradient-to-r from-slate-100 to-slate-200 rounded-2xl group-hover:scale-110 transition-all duration-300`}>
+                        <feature.icon className={`${feature.color} w-6 h-6`} />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-xl font-bold text-slate-900 mb-2 group-hover:text-blue-600 transition-colors duration-300">
+                          {feature.title}
+                        </h3>
+                        <p className="text-slate-600 leading-relaxed">{feature.description}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            {/* Phone mockup */}
+            <div className="flex items-center justify-center">
+              <div className="relative group">
+                <div className="absolute -inset-4 bg-gradient-to-r from-purple-400 via-blue-400 to-purple-600 rounded-3xl blur-2xl opacity-20 group-hover:opacity-30 transition-opacity duration-500"></div>
+                <div className="relative bg-white rounded-3xl shadow-2xl p-2 transform -rotate-2 group-hover:rotate-1 transition-transform duration-500">
+                  <div className="bg-slate-900 rounded-2xl p-6 text-white">
+                    <div className="flex items-center justify-between mb-6">
+                      <div className="flex items-center space-x-2">
+                        <div className="w-8 h-8 bg-gradient-to-r from-green-400 to-blue-400 rounded-lg flex items-center justify-center">
+                          <span className="text-white font-bold text-sm">eG</span>
+                        </div>
+                        <span className="font-semibold">eGuy</span>
+                      </div>
+                      <div className="text-xs opacity-70">9:41</div>
+                    </div>
+
+                    {/* Transaction history */}
+                    <div className="space-y-3">
+                      <div className="bg-white/10 rounded-xl p-3">
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-sm opacity-80">Airtime Purchase</span>
+                          <span className="text-sm font-medium">-₦1,000</span>
+                        </div>
+                        <div className="text-xs opacity-60">MTN • Today 2:30 PM</div>
+                      </div>
+                      <div className="bg-white/10 rounded-xl p-3">
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-sm opacity-80">Money Received</span>
+                          <span className="text-sm font-medium text-green-400">+₦5,000</span>
+                        </div>
+                        <div className="text-xs opacity-60">From John D. • Yesterday</div>
+                      </div>
+                      <div className="bg-white/10 rounded-xl p-3">
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-sm opacity-80">Bill Payment</span>
+                          <span className="text-sm font-medium">-₦2,500</span>
+                        </div>
+                        <div className="text-xs opacity-60">Electricity • 2 days ago</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works - Step by Step */}
+      <section id="how-it-works" className="w-full py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-slate-50 to-blue-50">
+        <div className="container mx-auto">
+          <div className="text-center mb-16">
+            <Badge className="mb-6 bg-green-100 text-green-700 border-green-200 px-4 py-2 text-sm font-medium">
+              🚀 Simple Steps
+            </Badge>
+            <h2 className="text-4xl sm:text-5xl font-extrabold text-slate-900 mb-6">
+              Get Started in <span className="bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">3 Easy Steps</span>
+            </h2>
+            <p className="text-xl text-slate-600 max-w-2xl mx-auto">
+              Join thousands of Nigerians who have simplified their financial lives with eGuy
+            </p>
+          </div>
+
+          <div className="relative max-w-6xl mx-auto">
+            {/* Process steps */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+              {[
+                {
+                  step: "01",
+                  title: "Create Your Account",
+                  desc: "Sign up in seconds with just your phone number and email. No complicated forms or waiting periods.",
+                  icon: Users,
+                  color: "from-blue-500 to-blue-600"
+                },
+                {
+                  step: "02",
+                  title: "Add Money",
+                  desc: "Fund your wallet using bank transfer, card, or other payment methods. Money arrives instantly.",
+                  icon: Wallet,
+                  color: "from-purple-500 to-purple-600"
+                },
+                {
+                  step: "03",
+                  title: "Start Using",
+                  desc: "Send money, pay bills, buy airtime, and manage your finances. Everything works seamlessly.",
+                  icon: Smartphone,
+                  color: "from-green-500 to-green-600"
+                }
+              ].map((item, index) => (
+                <Card key={index} className="group bg-white/80 backdrop-blur-sm border-slate-200 hover:border-blue-300 transition-all duration-500 hover:scale-105 shadow-lg relative">
+                  <CardContent className="p-8 text-center">
+                    <div className="flex justify-center mb-6">
+                      <div className={`w-16 h-16 bg-gradient-to-r ${item.color} rounded-2xl flex items-center justify-center shadow-lg`}>
+                        <span className="text-white font-bold text-xl">{item.step}</span>
+                      </div>
+                    </div>
+                    <h3 className="font-bold text-xl text-slate-900 mb-4">{item.title}</h3>
+                    <p className="text-slate-600 leading-relaxed">{item.desc}</p>
+                    {index < 2 && (
+                      <div className="hidden md:block absolute -right-4 top-1/2 -translate-y-1/2 text-blue-400">
+                        <ChevronRight className="w-6 h-6" />
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            {/* Central phone mockup */}
+            <div className="flex justify-center">
+              <div className="relative group">
+                <div className="absolute -inset-4 bg-gradient-to-r from-blue-400 via-purple-400 to-green-400 rounded-3xl blur-2xl opacity-20 group-hover:opacity-30 transition-opacity duration-500"></div>
+                <Card className="bg-white/90 backdrop-blur-sm border-slate-200 shadow-xl">
+                  <CardContent className="p-8">
+                    <div className="bg-slate-900 rounded-2xl p-6 text-white max-w-sm mx-auto">
+                      <div className="text-center mb-6">
+                        <div className="w-12 h-12 bg-gradient-to-r from-blue-400 to-purple-400 rounded-xl mx-auto mb-3 flex items-center justify-center">
+                          <span className="text-white font-bold">eG</span>
+                        </div>
+                        <h4 className="font-bold text-lg">Welcome to eGuy!</h4>
+                        <p className="text-sm opacity-80">Your financial companion</p>
+                      </div>
+                      <div className="space-y-3">
+                        <div className="bg-white/10 rounded-lg p-3 text-center">
+                          <div className="text-sm opacity-80 mb-1">Quick Actions</div>
+                          <div className="grid grid-cols-3 gap-2 mt-2">
+                            <div className="bg-white/10 rounded p-2 text-center">
+                              <ArrowRight className="w-4 h-4 mx-auto mb-1" />
+                              <div className="text-xs">Send</div>
+                            </div>
+                            <div className="bg-white/10 rounded p-2 text-center">
+                              <Smartphone className="w-4 h-4 mx-auto mb-1" />
+                              <div className="text-xs">Airtime</div>
+                            </div>
+                            <div className="bg-white/10 rounded p-2 text-center">
+                              <CreditCard className="w-4 h-4 mx-auto mb-1" />
+                              <div className="text-xs">Bills</div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials - Real People */}
+      <section id="testimonials" className="relative w-full py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-white to-slate-50 overflow-hidden">
+        <div className="container mx-auto">
+          <div className="text-center mb-16">
+            <Badge className="mb-6 bg-purple-100 text-purple-700 border-purple-200 px-4 py-2 text-sm font-medium">
+              💬 Real Stories from Real People
+            </Badge>
+            <h2 className="text-4xl sm:text-5xl font-extrabold text-slate-900 mb-6">
+              See What Our Users <span className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">Are Saying</span>
+            </h2>
+            <p className="text-xl text-slate-600 max-w-2xl mx-auto">
+              Don't just take our word for it. Here's what real Nigerians are saying about their experience with eGuy.
+            </p>
+          </div>
+
+          {/* Testimonial cards */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {[
+              {
+                name: "Sarah Adebayo",
+                role: "Small Business Owner",
+                location: "Lagos",
+                content: "eGuy has revolutionized how I handle my business payments. The referral system helped me earn extra income while providing excellent service to my customers.",
+                rating: 5,
+                avatar: "https://randomuser.me/api/portraits/women/44.jpg",
+                bgColor: "from-blue-50 to-blue-100"
+              },
+              {
+                name: "Michael Okoro",
+                role: "Software Developer",
+                location: "Abuja",
+                content: "The app is incredibly intuitive and fast. I can send money to family, pay bills, and buy airtime all in seconds. The security features give me complete peace of mind.",
+                rating: 5,
+                avatar: "https://randomuser.me/api/portraits/men/32.jpg",
+                bgColor: "from-purple-50 to-purple-100"
+              },
+              {
+                name: "Grace Nwosu",
+                role: "Teacher",
+                location: "Port Harcourt",
+                content: "As a teacher, I need reliable financial services. eGuy never disappoints. The customer support is excellent, and everything just works as expected.",
+                rating: 5,
+                avatar: "https://randomuser.me/api/portraits/women/68.jpg",
+                bgColor: "from-green-50 to-green-100"
+              }
+            ].map((testimonial, index) => (
+              <Card key={index} className={`group bg-gradient-to-r ${testimonial.bgColor} border-slate-200 hover:border-blue-300 transition-all duration-500 hover:scale-105 shadow-lg relative overflow-hidden`}>
+                <CardContent className="p-8">
+                  <div className="absolute top-4 right-4 text-yellow-400">
+                    {[...Array(testimonial.rating)].map((_, i) => (
+                      <Star key={i} className="w-5 h-5 fill-current" />
+                    ))}
+                  </div>
+
+                  <div className="flex items-center gap-4 mb-6">
+                    <img src={testimonial.avatar} alt={testimonial.name} className="w-16 h-16 rounded-full border-4 border-white shadow-lg" />
+                    <div>
+                      <div className="font-bold text-lg text-slate-900">{testimonial.name}</div>
+                      <div className="text-sm text-slate-600">{testimonial.role}</div>
+                      <div className="text-xs text-slate-500">{testimonial.location}</div>
+                    </div>
+                  </div>
+
+                  <p className="text-slate-700 mb-6 italic leading-relaxed">"{testimonial.content}"</p>
+
+                  <div className="flex items-center gap-2 text-sm text-slate-500">
+                    <CheckCircle className="w-4 h-4 text-green-500" />
+                    <span>Verified User</span>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing Section - Simple & Clear */}
+      <section id="pricing" className="w-full py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-slate-50 to-purple-50">
+        <div className="container mx-auto">
+          <div className="text-center mb-16">
+            <Badge className="mb-6 bg-green-100 text-green-700 border-green-200 px-4 py-2 text-sm font-medium">
+              💰 Transparent Pricing
+            </Badge>
+            <h2 className="text-4xl sm:text-5xl font-extrabold text-slate-900 mb-6">
+              Choose Your <span className="bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">Perfect Plan</span>
+            </h2>
+            <p className="text-xl text-slate-600 max-w-2xl mx-auto">
+              Start free and upgrade as you grow. No hidden fees, no surprises.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            {/* Free Plan */}
+            <Card className="bg-white border-slate-200 shadow-lg hover:shadow-xl transition-all duration-500">
+              <CardContent className="p-8">
+                <div className="text-center mb-6">
+                  <h3 className="font-bold text-2xl text-slate-900 mb-2">Free</h3>
+                  <div className="text-4xl font-bold text-slate-900 mb-2">₦0</div>
+                  <div className="text-slate-600">Perfect for getting started</div>
+                </div>
+
+                <div className="space-y-4 mb-8">
+                  <div className="flex items-center gap-3">
+                    <CheckCircle className="w-5 h-5 text-green-500" />
+                    <span className="text-slate-700">Basic wallet features</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <CheckCircle className="w-5 h-5 text-green-500" />
+                    <span className="text-slate-700">₦10,000 daily limit</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <CheckCircle className="w-5 h-5 text-green-500" />
+                    <span className="text-slate-700">Email support</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <CheckCircle className="w-5 h-5 text-green-500" />
+                    <span className="text-slate-700">Basic security features</span>
+                  </div>
+                </div>
+
+                <Button className="w-full bg-slate-100 text-slate-700 hover:bg-slate-200 font-semibold rounded-full py-3">
+                  Get Started Free
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Pro Plan */}
+            <Card className="group bg-gradient-to-r from-blue-500 to-purple-500 text-white border-0 shadow-xl hover:shadow-2xl transition-all duration-500 scale-105">
+              <CardContent className="p-8">
+                <div className="text-center mb-6">
+                  <Badge className="mb-4 bg-white/20 text-white border-white/30 px-3 py-1 text-sm">
+                    Most Popular
+                  </Badge>
+                  <h3 className="font-bold text-2xl mb-2">Pro</h3>
+                  <div className="text-4xl font-bold mb-2">₦2,999</div>
+                  <div className="opacity-90">Per month</div>
+                </div>
+
+                <div className="space-y-4 mb-8">
+                  <div className="flex items-center gap-3">
+                    <CheckCircle className="w-5 h-5 text-white" />
+                    <span>Unlimited transactions</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <CheckCircle className="w-5 h-5 text-white" />
+                    <span>₦1,000,000 daily limit</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <CheckCircle className="w-5 h-5 text-white" />
+                    <span>Priority support</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <CheckCircle className="w-5 h-5 text-white" />
+                    <span>Advanced security features</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <CheckCircle className="w-5 h-5 text-white" />
+                    <span>Referral bonuses</span>
+                  </div>
+                </div>
+
+                <Button className="w-full bg-white text-blue-600 hover:bg-slate-100 font-semibold rounded-full py-3">
+                  Start Pro Trial
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Enterprise Plan */}
+            <Card className="bg-white border-slate-200 shadow-lg hover:shadow-xl transition-all duration-500">
+              <CardContent className="p-8">
+                <div className="text-center mb-6">
+                  <h3 className="font-bold text-2xl text-slate-900 mb-2">Enterprise</h3>
+                  <div className="text-4xl font-bold text-slate-900 mb-2">₦9,999</div>
+                  <div className="text-slate-600">Per month</div>
+                </div>
+
+                <div className="space-y-4 mb-8">
+                  <div className="flex items-center gap-3">
+                    <CheckCircle className="w-5 h-5 text-green-500" />
+                    <span className="text-slate-700">Everything in Pro</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <CheckCircle className="w-5 h-5 text-green-500" />
+                    <span>₦5,000,000 daily limit</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <CheckCircle className="w-5 h-5 text-green-500" />
+                    <span>Dedicated support</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <CheckCircle className="w-5 h-5 text-green-500" />
+                    <span>Custom integrations</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <CheckCircle className="w-5 h-5 text-green-500" />
+                    <span>Advanced analytics</span>
+                  </div>
+                </div>
+
+                <Button className="w-full bg-slate-100 text-slate-700 hover:bg-slate-200 font-semibold rounded-full py-3">
+                  Contact Sales
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section - Human Touch */}
+      <section className="w-full py-20 px-4 sm:px-6 lg:px-8 bg-white">
+        <div className="container mx-auto">
+          <div className="text-center mb-16">
+            <Badge className="mb-6 bg-orange-100 text-orange-700 border-orange-200 px-4 py-2 text-sm font-medium">
+              ❓ Questions & Answers
+            </Badge>
+            <h2 className="text-4xl sm:text-5xl font-extrabold text-slate-900 mb-6">
+              Got Questions? <span className="bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">We Have Answers</span>
+            </h2>
+            <p className="text-xl text-slate-600 max-w-2xl mx-auto">
+              Everything you need to know about using eGuy for your financial needs.
+            </p>
+          </div>
+
+          <div className="max-w-4xl mx-auto space-y-6">
+            {[
+              {
+                question: "How secure is my money with eGuy?",
+                answer: "Your security is our top priority. We use bank-grade encryption, two-factor authentication, and follow all regulatory requirements. Your funds are protected by insurance and our partnership with licensed financial institutions."
+              },
+              {
+                question: "How quickly can I send money?",
+                answer: "Money transfers happen instantly within the eGuy network. Bank transfers typically take 2-5 minutes, while card payments are processed immediately. You'll always know the exact timing before confirming any transaction."
+              },
+              {
+                question: "What bills can I pay through eGuy?",
+                answer: "You can pay electricity bills (PHED, AEDC, etc.), water bills, cable TV (DSTV, GOtv, StarTimes), internet bills, and many other services. We support all major utility providers across Nigeria."
+              },
+              {
+                question: "How does the referral system work?",
+                answer: "Share your unique referral link with friends and family. When they sign up and make their first transaction, you both get rewarded. It's our way of saying thank you for helping us grow our community of happy users."
+              }
+            ].map((faq, index) => (
+              <Card key={index} className="bg-gradient-to-r from-slate-50 to-white border-slate-200 hover:border-orange-300 transition-all duration-300">
+                <CardContent className="p-6">
+                  <h3 className="font-bold text-lg text-slate-900 mb-3">{faq.question}</h3>
+                  <p className="text-slate-600 leading-relaxed">{faq.answer}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section - Personal Touch */}
+      <section className="relative w-full py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-600 to-purple-600 overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_rgba(255,255,255,0.1),transparent_70%)]"></div>
+
+        <div className="container mx-auto text-center relative z-10">
+          <div className="max-w-4xl mx-auto">
+            <div className="inline-flex items-center px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-white font-medium text-sm mb-6">
+              <Heart className="w-4 h-4 mr-2" />
+              Join 50,000+ Happy Users
+            </div>
+
+            <h2 className="text-4xl sm:text-5xl font-extrabold text-white mb-6">
+              Ready to Simplify Your <span className="block">Financial Life?</span>
+            </h2>
+
+            <p className="text-xl text-blue-100 mb-12 max-w-2xl mx-auto">
+              Join thousands of Nigerians who have already discovered the joy of stress-free financial management with eGuy.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/signup">
-                <Button size="lg" className="bg-primary text-primary-foreground font-bold rounded-full px-8 py-3 text-lg shadow-md hover:bg-primary/90 transition">Register</Button>
+                <Button size="lg" className="group bg-white text-blue-600 hover:bg-slate-100 font-bold rounded-full px-10 py-4 text-lg shadow-2xl transition-all duration-500 hover:scale-105 min-w-[200px]">
+                  <span className="mr-2">Start Your Journey</span>
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
+                </Button>
               </Link>
               <Link href="/signin">
-                <Button size="lg" variant="outline" className="border-2 border-primary text-primary font-bold rounded-full px-8 py-3 text-lg shadow-md hover:bg-primary hover:text-primary-foreground transition">Login</Button>
+                <Button size="lg" variant="outline" className="border-2 border-white/30 text-white hover:text-blue-600 hover:bg-white font-bold rounded-full px-10 py-4 text-lg shadow-lg transition-all duration-300 min-w-[200px]">
+                  Sign In Instead
+                </Button>
               </Link>
             </div>
           </div>
-          {/* Right column: eGuy screenshot image */}
-          <div className="flex-1 flex items-center justify-center min-h-[400px] md:min-h-[500px]">
-            <img
-              src="/hero.png"
-              alt="eGuy Hero Screenshot"
-              className="rounded-2xl object-contain h-[500px] w-auto max-w-xs"
-            />
-          </div>
         </div>
       </section>
 
-      {/* 2. Partners Slideshow Section */}
-      <section className="w-full py-4 bg-primary/5">
-        <div className="overflow-hidden relative h-16 flex items-center">
-          <div className="w-full h-full flex items-center">
-            <div className="flex gap-10 animate-scroll-partners min-w-[200%]">
-              {/* Show 4 logos per view, repeat for infinite effect */}
-                {/* All images in public folder, repeated for infinite effect */}
-                {["/mtn.jpeg","/glo.jpeg","/9mobile.jpeg","/aitel.jpeg","/gotv.jpeg","/StarTimes.jpeg","/dstv.jpeg"].map((src, i) => (
-                  <img key={src + i} src={src} alt={src.split('/').pop()?.split('.')[0]} className="h-16 w-auto rounded" />
-                ))}
-                {/* Repeat for infinite effect */}
-                {["/mtn.jpeg","/glo.jpeg","/9mobile.jpeg","/aitel.jpeg","/gotv.jpeg","/StarTimes.jpeg","/dstv.jpeg"].map((src, i) => (
-                  <img key={src + 'repeat' + i} src={src} alt={src.split('/').pop()?.split('.')[0]} className="h-16 w-auto rounded" />
-                ))}
+      {/* Footer - Comprehensive */}
+      <footer className="relative border-t border-slate-200 bg-slate-50">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+            <div className="md:col-span-2">
+              <div className="flex items-center space-x-3 mb-6">
+                <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center shadow-lg">
+                  <span className="text-white font-bold text-xl">eG</span>
+                </div>
+                <span className="text-2xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">eGuy</span>
+              </div>
+              <p className="text-slate-600 text-lg leading-relaxed mb-6 max-w-md">
+                Your trusted fintech partner for seamless payments, smart wallet management, and instant earnings through our innovative referral system. Built for Nigerians, by Nigerians.
+              </p>
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2 bg-white/80 backdrop-blur-sm rounded-full px-4 py-2 shadow-sm">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                  <span className="text-sm font-medium text-slate-600">50,000+ Active Users</span>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      </section>
-        <style jsx>{`
-          .animate-scroll-partners {
-            animation: scroll-partners 40s linear infinite;
-          }
-          @keyframes scroll-partners {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
-          }
-        `}</style>
 
-      {/* 3. Info Section - two columns (image left, text right) */}
-      <section className="w-full bg-gradient-to-br from-primary/5 to-secondary/5 py-20 px-4 ">
-        <div className="container mx-auto flex flex-col md:flex-row items-stretch justify-between gap-12">
-          {/* Left column: image */}
-          <div className="flex-1 flex items-center justify-center min-h-[400px] md:min-h-[500px]">
-            <img
-              src="/hero.png"
-              alt="eGuy Hero Screenshot"
-              className="rounded-2xl object-contain h-[500px] w-auto max-w-xs"
-            />
-          </div>
-          {/* Right column: heading, paragraph, button */}
-          <div className="flex-1 max-w-xl flex flex-col justify-center min-h-[400px] md:min-h-[500px] mr-50">
-            <h1 className="text-4xl md:text-5xl font-extrabold text-foreground mb-4 tracking-tight leading-tight">
-              Discover More<br />With eGuy
-            </h1>
-            <h2 className="text-2xl md:text-3xl font-bold text-primary mb-2">All Your Bills, One Place</h2>
-            <p className="text-lg md:text-xl text-[#4A5568] mb-8 font-medium">
-              Pay bills, buy airtime, and manage your wallet seamlessly. Experience the convenience and security of a unified fintech platform.
-            </p>
-            <div className="mt-4">
-              <Button size="lg" className="bg-primary text-primary-foreground font-bold rounded-full px-8 py-3 text-lg shadow-md hover:bg-primary/90 transition">Read More</Button>
-            </div>
-          </div>
-        </div>
-      </section>
-      {/* 4. Features Section - two columns */}
-      <section className="w-full bg-gradient-to-br from-primary/5 to-secondary/5 py-20 px-4 ">
-        <div className="container mx-auto flex flex-col md:flex-row items-stretch justify-between gap-12">
-          {/* Left column: heading, paragraph, feature list */}
-          <div className="flex-1 max-w-xl flex flex-col justify-center min-h-[400px] md:min-h-[500px] ml-50">
-            <h2 className="text-4xl md:text-5xl font-extrabold text-primary mb-4 leading-tight">
-              All-in-One Fintech<br />System Features
-            </h2>
-            <p className="text-lg md:text-xl text-[#4A5568] mb-4 font-medium">Explore the powerful features that make eGuy your go-to fintech platform.</p>
-            <ul className="space-y-6 mb-6">
-              <li className="flex items-center gap-4">
-                <Wallet className="text-primary w-8 h-8" />
-                <span className="text-base md:text-lg font-semibold text-foreground">Multi-purpose Wallet</span>
-              </li>
-              <li className="flex items-center gap-4">
-                <Smartphone className="text-primary w-8 h-8" />
-                <span className="text-base md:text-lg font-semibold text-foreground">Airtime & Data Purchase</span>
-              </li>
-              <li className="flex items-center gap-4">
-                <Shield className="text-primary w-8 h-8" />
-                <span className="text-base md:text-lg font-semibold text-foreground">Secure Bill Payments</span>
-              </li>
-            </ul>
             <div>
-              <Button size="lg" className="bg-primary text-primary-foreground font-bold rounded-full px-8 py-3 text-lg shadow-md hover:bg-primary/90 transition">Get It Now</Button>
+              <h3 className="font-bold text-lg mb-6 text-slate-900">Services</h3>
+              <div className="space-y-4">
+                {[
+                  'Money Transfer',
+                  'Bill Payments',
+                  'Airtime & Data',
+                  'Savings',
+                  'Referrals'
+                ].map((service) => (
+                  <div key={service} className="text-slate-600 hover:text-slate-900 transition-colors duration-300 font-medium">
+                    {service}
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-          {/* Right column: image */}
-          <div className="flex-1 flex items-center justify-center min-h-[400px] md:min-h-[500px]">
-            <img
-              src="/hero.png"
-              alt="System Features Image"
-              className="rounded-2xl object-contain h-[500px] w-auto max-w-xs"
-            />
-          </div>
-        </div>
-      </section>
 
-      {/* 5. ElevateX Section - two columns */}
-      <section className="w-full bg-gradient-to-br from-primary/5 to-secondary/5 py-20 px-4 ">
-        <div className="container mx-auto flex flex-col md:flex-row items-stretch justify-between gap-12">
-          {/* Left column: image */}
-          <div className="flex-1 flex items-center justify-center min-h-[400px] md:min-h-[500px]">
-            <img
-              src="/hero.png"
-              alt="ElevateX Image"
-              className="rounded-2xl object-contain h-[500px] w-auto max-w-xs"
-            />
-          </div>
-          {/* Right column: heading, paragraph, feature list */}
-          <div className="flex-1 max-w-xl flex flex-col justify-center min-h-[400px] md:min-h-[500px] mr-50">
-            <h2 className="text-4xl md:text-5xl font-extrabold text-primary mb-4 leading-tight">
-              ElevateX Referral<br />System
-            </h2>
-            <p className="text-lg md:text-xl text-[#4A5568] mb-4 font-medium">Unlock new earning opportunities with ElevateX. Refer friends, grow your network, and earn rewards instantly.</p>
-            <ul className="space-y-6 mb-6">
-              <li className="flex items-center gap-4">
-                <TrendingUp className="text-primary w-8 h-8" />
-                <span className="text-base md:text-lg font-semibold text-foreground">Earn on Every Referral</span>
-              </li>
-              <li className="flex items-center gap-4">
-                <Users className="text-primary w-8 h-8" />
-                <span className="text-base md:text-lg font-semibold text-foreground">Grow Your Network</span>
-              </li>
-              <li className="flex items-center gap-4">
-                <Zap className="text-primary w-8 h-8" />
-                <span className="text-base md:text-lg font-semibold text-foreground">Instant Payouts</span>
-              </li>
-            </ul>
             <div>
-              <a href="/whitepaper.pdf" download>
-                <Button size="lg" className="bg-primary text-primary-foreground font-bold rounded-full px-8 py-3 text-lg shadow-md hover:bg-primary/90 transition">Download Whitepaper</Button>
-              </a>
+              <h3 className="font-bold text-lg mb-6 text-slate-900">Support</h3>
+              <div className="space-y-4">
+                {[
+                  'Help Center',
+                  'Contact Us',
+                  'Privacy Policy',
+                  'Terms of Service',
+                  'Security'
+                ].map((link) => (
+                  <div key={link} className="text-slate-600 hover:text-slate-900 transition-colors duration-300 font-medium">
+                    {link}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
-      </section>
 
-      {/* 6. How It Works Section */}
-      <section className="w-full py-20 px-4 bg-primary/5">
-        <div className="container mx-auto flex flex-col items-center">
-          <div className="mb-10">
-            <h2 className="text-4xl md:text-5xl font-extrabold text-primary text-center leading-tight mb-20">
-              How It Works<br />Get Started in Minutes
-            </h2>
-          </div>
-          <div className="relative w-full flex justify-center items-center" style={{ minHeight: 340 }}>
-            {/* Left side rows */}
-            <div className="absolute left-1/2 -translate-x-[180%] top-1/2 -translate-y-1/2 flex flex-col gap-56 h-auto justify-center items-end text-right">
-              <div className="flex flex-col items-end gap-2">
-                <Shield className="text-primary w-10 h-10 mb-2" />
-                <h3 className="font-bold text-lg mb-1 text-primary text-right">Sign Up</h3>
-                <p className="text-[#4A5568] max-w-xs text-right">Create your free account in seconds and get started instantly.</p>
-              </div>
-              <div className="flex flex-col items-end gap-2">
-                <Wallet className="text-primary w-10 h-10 mb-2" />
-                <h3 className="font-bold text-lg mb-1 text-primary text-right">Fund Wallet</h3>
-                <p className="text-[#4A5568] max-w-xs text-right">Deposit money and access all services securely.</p>
-              </div>
-            </div>
-            {/* Center image */}
-            <div className="flex flex-col items-center justify-center w-full">
-              <img src="/hero.png" alt="How It Works" className="rounded-2xl object-contain h-[500px] w-auto max-w-xs mx-auto" />
-            </div>
-            {/* Right side rows */}
-            <div className="absolute right-1/2 translate-x-[180%] top-1/2 -translate-y-1/2 flex flex-col gap-56 h-auto justify-center items-start">
-              <div className="flex flex-col items-start gap-2">
-                <Smartphone className="text-primary w-10 h-10 mb-2" />
-                <h3 className="font-bold text-lg mb-1 text-primary text-left">Use Services</h3>
-                <p className="text-[#4A5568] max-w-xs text-left">Buy airtime, pay bills, and enjoy seamless transactions.</p>
-              </div>
-              <div className="flex flex-col items-start gap-2">
-                <TrendingUp className="text-primary w-10 h-10 mb-2" />
-                <h3 className="font-bold text-lg mb-1 text-primary text-left">Start Earning</h3>
-                <p className="text-[#4A5568] max-w-xs text-left">Refer friends and earn instantly with ElevateX.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-         {/* 7. Testimonial Section - two columns */}
-      <section className="w-full py-20 px-4 bg-primary/5">
-        <div className="container mx-auto flex flex-col md:flex-row gap-12 items-stretch">
-          {/* Left column: heading and paragraph */}
-          <div className="flex-1 flex flex-col justify-center max-w-xl ml-40">
-            <h2 className="text-4xl md:text-5xl font-extrabold text-primary mb-4 leading-tight">
-              What Our Users Say<br />Real Experiences
-            </h2>
-            <p className="text-lg md:text-xl text-[#4A5568] mb-6 font-medium">
-              Discover how eGuy has transformed the financial lives of our users. From seamless bill payments to instant earnings, our platform is trusted by thousands for its reliability, security, and ease of use. Join the community and experience the difference yourself.
-            </p>
-          </div>
-          {/* Right column: vertical testimonial cards block */}
-          <div className="flex-1 flex flex-col gap-2 items-center">
-            {/* Card 1 */}
-            <div className="bg-white rounded-xl shadow p-4 flex gap-4 w-full max-w-md min-h-[120px]">
-              {/* Left: user image */}
-              <div className="flex items-center justify-center">
-                <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Jane Doe" className="rounded-full w-16 h-16 object-cover" />
-              </div>
-              {/* Right: testimonial, username, stars */}
-              <div className="flex flex-col justify-between flex-1">
-                <p className="text-[#4A5568] mb-2">eGuy made bill payments. I love the instant payouts!</p>
-                <div className="mt-2 font-bold text-primary">Jane Doe</div>
-                <div className="flex gap-1 mt-2">
-                  {[...Array(5)].map((_, i) => (
-                    <span key={i} className="text-yellow-400">★</span>
-                  ))}
-                </div>
-              </div>
-            </div>
-            {/* Card 2 - shifted left */}
-            <div className="bg-white rounded-xl shadow p-4 flex gap-4 w-full max-w-md min-h-[120px] ml-26">
-              <div className="flex items-center justify-center">
-                <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="John Smith" className="rounded-full w-16 h-16 object-cover" />
-              </div>
-              <div className="flex flex-col justify-between flex-1">
-                <p className="text-[#4A5568] mb-2">The referral system is a game changer. I earn every week just by inviting friends!</p>
-                <div className="mt-2 font-bold text-primary">John Smith</div>
-                <div className="flex gap-1 mt-2">
-                  {[...Array(5)].map((_, i) => (
-                    <span key={i} className="text-yellow-400">★</span>
-                  ))}
-                </div>
-              </div>
-            </div>
-            {/* Card 3 */}
-            <div className="bg-white rounded-xl shadow p-4 flex gap-4 w-full max-w-md min-h-[120px]">
-              <div className="flex items-center justify-center">
-                <img src="https://randomuser.me/api/portraits/women/68.jpg" alt="Amina Yusuf" className="rounded-full w-16 h-16 object-cover" />
-              </div>
-              <div className="flex flex-col justify-between flex-1">
-                <p className="text-[#4A5568] mb-2">Secure, fast, and reliable. eGuy is my go-to for all things fintech!</p>
-                <div className="mt-2 font-bold text-primary">Amina Yusuf</div>
-                <div className="flex gap-1 mt-2">
-                  {[...Array(5)].map((_, i) => (
-                    <span key={i} className="text-yellow-400">★</span>
-                  ))}
+          <div className="border-t border-slate-200 pt-8">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+              <p className="text-slate-500 text-center md:text-left">
+                © 2024 eGuy. All rights reserved. Built with ❤️ for Nigerians.
+              </p>
+              <div className="flex items-center gap-6">
+                <div className="flex items-center gap-2 text-sm text-slate-500">
+                  <span>Secured by</span>
+                  <div className="flex items-center gap-1">
+                    <Shield className="w-4 h-4 text-blue-500" />
+                    <span className="font-medium text-blue-500">Bank-grade Security</span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </section>
-            {/* 8. Why Choose eGuy Section */}
-      <section className="w-full py-20 px-4 bg-gradient-to-br from-primary/5 to-secondary/5">
-        <div className="container mx-auto flex flex-col items-center">
-          <h2 className="text-4xl md:text-5xl font-extrabold text-primary mb-4 leading-tight text-center">Why Choose eGuy?</h2>
-          <p className="text-lg md:text-xl text-[#4A5568] mb-10 font-medium text-center max-w-2xl">
-            eGuy is designed for simplicity, security, and speed. Our platform brings together all your financial needs in one place, with a focus on user experience and reliability. Here’s why thousands trust eGuy for their daily transactions.
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 w-full max-w-5xl">
-            <div className="bg-white rounded-xl shadow p-6 flex flex-col items-center">
-              <Shield className="text-primary w-10 h-10 mb-4" />
-              <h3 className="font-bold text-lg mb-2 text-primary text-center">Secure & Reliable</h3>
-              <p className="text-[#4A5568] text-center">Your data and funds are protected with industry-leading security measures.</p>
-            </div>
-            <div className="bg-white rounded-xl shadow p-6 flex flex-col items-center">
-              <Wallet className="text-primary w-10 h-10 mb-4" />
-              <h3 className="font-bold text-lg mb-2 text-primary text-center">All-in-One Wallet</h3>
-              <p className="text-[#4A5568] text-center">Manage your money, pay bills, and buy airtime or data from one dashboard.</p>
-            </div>
-            <div className="bg-white rounded-xl shadow p-6 flex flex-col items-center">
-              <TrendingUp className="text-primary w-10 h-10 mb-4" />
-              <h3 className="font-bold text-lg mb-2 text-primary text-center">Instant Earnings</h3>
-              <p className="text-[#4A5568] text-center">Earn rewards instantly through our ElevateX referral system.</p>
-            </div>
-            <div className="bg-white rounded-xl shadow p-6 flex flex-col items-center">
-              <Smartphone className="text-primary w-10 h-10 mb-4" />
-              <h3 className="font-bold text-lg mb-2 text-primary text-center">Easy to Use</h3>
-              <p className="text-[#4A5568] text-center">Enjoy a simple, intuitive interface designed for everyone.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-        {/* Footer */}
-        <footer className="border-t bg-primary/5 mt-20">
-          <div className="container mx-auto px-4 py-8">
-            <div className="text-center">
-              <div className="flex items-center justify-center space-x-2 mb-4">
-                <div className="w-6 h-6 bg-primary rounded flex items-center justify-center">
-                  <span className="text-primary-foreground font-bold text-xs">eG</span>
-                </div>
-                <span className="text-lg font-bold text-primary">eGuy</span>
-              </div>
-              <p className="text-sm text-muted-foreground">© 2024 eGuy. All rights reserved.</p>
-            </div>
-          </div>
-        </footer>
-   </div>
+      </footer>
+    </div>
   )
 }

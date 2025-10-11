@@ -5,8 +5,9 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { DepositModal } from "@/components/dashboard/deposit-modal";
 import { WithdrawModal } from "@/components/dashboard/withdraw-modal";
-import { Users, TrendingUp, Zap } from "lucide-react";
+import { Users, TrendingUp, Zap, ArrowLeft } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useRouter } from "next/navigation";
 
 // Format time to 12-hour
 function format12Hour(timeStr: string) {
@@ -27,7 +28,9 @@ function formatDDMMYY(dateStr: string) {
 	const year = String(d.getFullYear()).slice(-2);
 	return `${day}${month}${year}`;
 }
+
 export default function ElevatexPage() {
+	const router = useRouter();
 	// ...existing code...
 	const [earningHistory, setEarningHistory] = useState<any[]>([]);
 	const [earnings, setEarnings] = useState<number>(0);
@@ -148,7 +151,7 @@ export default function ElevatexPage() {
 
 	if (isLoading) {
 		return (
-			<div className="min-h-screen flex items-center justify-center">
+			<div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 flex items-center justify-center">
 				<div className="space-y-4 w-full max-w-md">
 					<Skeleton className="h-10 w-2/3 rounded-xl" />
 					<Skeleton className="h-8 w-full rounded-xl" />
@@ -159,178 +162,211 @@ export default function ElevatexPage() {
 		);
 	}
 
-		return (
-			<div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 flex flex-col items-center p-4 pb-24">
-			{/* Top Section: Home & Time */}
-
-			{/* Wallet Card - Green theme, Material style */}
-			<div className="w-full max-w-md mx-auto bg-green-600 rounded-3xl p-6 mb-4 flex flex-col gap-2 relative">
-				<div className="flex items-center gap-2">
-					<span className="text-lg font-bold text-white">Balance</span>
+	return (
+		<div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
+			{/* Header */}
+			<header className="sticky top-0 z-40 py-4 bg-white/80 backdrop-blur-sm border-b border-slate-200">
+				<div className="container mx-auto px-4 sm:px-6 lg:px-8">
+					<div className="flex items-center justify-between">
+						<button
+							onClick={() => router.back()}
+							className="flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors"
+						>
+							<ArrowLeft className="w-5 h-5" />
+							<span className="font-medium">Back</span>
+						</button>
+						<h1 className="text-xl font-bold text-slate-900">ElevateX</h1>
+						<div className="w-20"></div>
+					</div>
 				</div>
-				<div className="flex items-center justify-between mt-2">
-					<div className="flex items-center gap-6 justify-between">
-						<span className="text-3xl font-extrabold text-white tracking-wide">
-							{isLoading ? <span className="animate-pulse text-green-100">Loading...</span> : `₦${balance.toLocaleString()}`}
-						</span>
+			</header>
+
+			{/* Main Content */}
+			<main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-24">
+				{/* Wallet Card - Updated theme */}
+				<Card className="bg-gradient-to-r from-blue-500 to-purple-600 border-none rounded-2xl p-6 mb-6 max-w-md mx-auto">
+					<div className="flex flex-col gap-4">
+						<div className="flex items-center justify-between">
+							<span className="text-lg font-semibold text-white tracking-wide">Balance</span>
+						</div>
+						<div className="flex items-center justify-between">
+							<div className="text-3xl md:text-4xl font-extrabold tracking-tight text-white">
+								₦{balance.toLocaleString()}
+							</div>
+						</div>
 						{subscribed && (
-							<div className="flex flex-col items-center bg-yellow-900/20 px-2 py-1 rounded-xl">
-								<span className="text-xs font-semibold text-white muted mb-0.5">Earnings</span>
-								<span className="text-sm font-bold text-white ">₦{earnings.toLocaleString()}</span>
+							<div className="bg-white/20 rounded-xl px-3 py-2">
+								<div className="text-sm font-medium text-white/80 mb-1">ElevateX Earnings</div>
+								<div className="text-xl font-bold text-white">₦{earnings.toLocaleString()}</div>
+							</div>
+						)}
+						{!subscribed ? (
+							<Button
+								className="w-full mt-4 bg-white text-blue-600 hover:bg-slate-100 font-semibold"
+								onClick={handleActivateElevatex}
+								disabled={activating || balance < 1000}
+							>
+								{activating ? "Activating..." : "Activate ElevateX"}
+							</Button>
+						) : (
+							<div className="grid grid-cols-2 gap-3 mt-4">
+								<Button
+									className="bg-white/20 hover:bg-white/30 text-white border border-white/30 rounded-xl py-3 font-semibold"
+									onClick={() => setShowDeposit(true)}
+								>
+									<span>Add Funds</span>
+								</Button>
+								<Button
+									className="bg-white/20 hover:bg-white/30 text-white border border-white/30 rounded-xl py-3 font-semibold"
+									onClick={() => setShowWithdraw(true)}
+								>
+									<span>Withdraw</span>
+								</Button>
 							</div>
 						)}
 					</div>
+					{/* Deposit Modal */}
+					<DepositModal
+						isOpen={showDeposit}
+						onClose={() => setShowDeposit(false)}
+						onSuccess={() => {
+							setShowDeposit(false);
+							// Refresh balance after deposit
+							fetch("/api/wallet/balance")
+								.then((res) => res.json())
+								.then((data) => {
+									if (typeof data.balance === "number") {
+										setBalance(data.balance);
+									}
+								});
+						}}
+					/>
+					{/* Withdraw Modal */}
+					<WithdrawModal
+						isOpen={showWithdraw}
+						onClose={() => setShowWithdraw(false)}
+						onSuccess={() => {
+							setShowWithdraw(false);
+							// Refresh balance after withdrawal
+							fetch("/api/wallet/balance")
+								.then((res) => res.json())
+								.then((data) => {
+									if (typeof data.balance === "number") {
+										setBalance(data.balance);
+									}
+								});
+						}}
+					/>
+				</Card>
 
-				</div>
-				{!subscribed ? (
-					<Button
-						className="w-full mt-4 bg-white text-green-700 font-semibold"
-						onClick={handleActivateElevatex}
-						disabled={activating || balance < 1000}
-					>
-						{activating ? "Activating..." : "Activate ElevateX"}
-					</Button>
-				) : (
-					<div className="grid grid-cols-2 gap-2 mt-4">
-						<Button
-							className="w-full p-3 rounded-xl bg-white text-green-700 font-semibold border border-green-200 hover:bg-green-800 hover:text-white transition text-base flex items-center justify-center gap-2"
-							onClick={() => setShowDeposit(true)}
-						>
-							<span className="text-sm md:text-base">Add Funds</span>
-						</Button>
-						<Button
-							className="w-full py-3 rounded-xl text-green-700 bg-white font-semibold border border-green-200 hover:bg-green-800 hover:text-white transition text-base flex items-center justify-center gap-2"
-							onClick={() => setShowWithdraw(true)}
-						>
-							<span className="text-sm md:text-base">Withdraw</span>
-						</Button>
-					</div>
+				{/* Tree Levels - Single Horizontal Bar for All Levels */}
+				<Card className="bg-white/80 backdrop-blur-sm border-slate-200 shadow-lg mb-6 max-w-md mx-auto">
+					<CardHeader className="pb-3">
+						<CardTitle className="flex items-center gap-2 text-slate-900">
+							<Users className="w-5 h-5" />
+							Referral Progress
+						</CardTitle>
+					</CardHeader>
+					<CardContent className="pt-0">
+						{/* Icons above each segment */}
+						<div className="flex w-full justify-between mb-2 px-1">
+							{[1, 2, 3, 4, 5].map((level) => {
+								// Mock progress for each level
+								const referralCount = [5, 10, 25, 50, 100][level - 1];
+								const userCount = Math.min(referralCount, level === 1 ? directReferrals.length : referralCount);
+								const iconColor = userCount === referralCount ? "text-green-600" : "text-gray-400";
+								return (
+									<div key={level} className="flex flex-col items-center w-1/5">
+										<Users className={`h-6 w-6 ${iconColor}`} />
+									</div>
+								);
+							})}
+						</div>
+						{/* Single horizontal progress bar divided into 5 segments */}
+						{/* Progress bar with proportional logic */}
+						<div className="w-full h-3 bg-slate-200 rounded-full flex overflow-hidden relative mb-2">
+							{/* Filled bar proportional to total referrals */}
+							<div className="absolute top-0 left-0 h-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full" style={{ width: `${progressPercent}%` }}></div>
+							{/* Segments for each level */}
+							{[1, 2, 3, 4, 5].map((level, idx) => (
+								<div
+									key={level}
+									className="h-3"
+									style={{ width: "20%", background: "transparent" }}
+								></div>
+							))}
+						</div>
+						{/* Points for referrals in incomplete levels */}
+						<div className="w-full flex justify-between mt-1 px-1 mb-2">
+							{[1, 2, 3, 4, 5].map((level, idx) => (
+								<span key={level} className="w-1/5 flex justify-center">
+									{referralsPerLevel[idx] > 0 && referralsPerLevel[idx] < 5 && (
+										<span className="inline-block w-2 h-2 bg-yellow-400 rounded-full"></span>
+									)}
+								</span>
+							))}
+						</div>
+						{/* Level names below each segment */}
+						<div className="flex w-full justify-between px-1">
+							{[1, 2, 3, 4, 5].map((level) => (
+								<span key={level} className="text-xs font-semibold text-slate-600 w-1/5 text-center">Level {level}</span>
+							))}
+						</div>
+					</CardContent>
+				</Card>
+
+				{/* Referral Link - single row with copy icon */}
+				{subscribed && referralCode && (
+					<Card className="bg-white/80 backdrop-blur-sm border-slate-200 shadow-lg mb-6 max-w-md mx-auto">
+						<CardContent className="p-4">
+							<div className="flex items-center gap-2">
+								<span className="font-mono text-sm flex-1 bg-slate-50 px-3 py-2 rounded-lg">{referralLink}</span>
+								<Button size="sm" variant="outline" onClick={handleCopyReferral} className="shrink-0">
+									{copied ? "Copied!" : "Copy"}
+								</Button>
+							</div>
+						</CardContent>
+					</Card>
 				)}
-				{/* Deposit Modal */}
-				<DepositModal
-					isOpen={showDeposit}
-					onClose={() => setShowDeposit(false)}
-					onSuccess={() => {
-						setShowDeposit(false);
-						// Refresh balance after deposit
-						fetch("/api/wallet/balance")
-							.then((res) => res.json())
-							.then((data) => {
-								if (typeof data.balance === "number") {
-									setBalance(data.balance);
-								}
-							});
-					}}
-				/>
-				{/* Withdraw Modal */}
-				<WithdrawModal
-					isOpen={showWithdraw}
-					onClose={() => setShowWithdraw(false)}
-					onSuccess={() => {
-						setShowWithdraw(false);
-						// Refresh balance after withdrawal
-						fetch("/api/wallet/balance")
-							.then((res) => res.json())
-							.then((data) => {
-								if (typeof data.balance === "number") {
-									setBalance(data.balance);
-								}
-							});
-					}}
-				/>
-			</div>
 
-			{/* Tree Levels - Single Horizontal Bar for All Levels */}
-			<div className="w-full max-w-md mx-auto mb-6 flex flex-col items-center">
-				{/* Icons above each segment */}
-				<div className="flex w-full justify-between mb-1 px-1">
-					{[1, 2, 3, 4, 5].map((level) => {
-						// Mock progress for each level
-						const referralCount = [5, 10, 25, 50, 100][level - 1];
-						const userCount = Math.min(referralCount, level === 1 ? directReferrals.length : referralCount);
-						const iconColor = userCount === referralCount ? "text-green-600" : "text-gray-400";
-						return (
-							<div key={level} className="flex flex-col items-center w-1/5">
-								<Users className={`h-6 w-6 ${iconColor}`} />
+				{/* Earning History */}
+				<Card className="bg-white/80 backdrop-blur-sm border-slate-200 shadow-lg max-w-md mx-auto">
+					<CardHeader className="pb-3">
+						<CardTitle className="flex items-center gap-2 text-slate-900">
+							<TrendingUp className="w-5 h-5" />
+							Earning History
+						</CardTitle>
+					</CardHeader>
+					<CardContent className="pt-0">
+						{earningHistory.length === 0 ? (
+							<div className="text-center py-8 text-slate-500">
+								<p>No earnings yet.</p>
 							</div>
-						);
-					})}
-				</div>
-				{/* Single horizontal progress bar divided into 5 segments */}
-				{/* Progress bar with proportional logic */}
-				<div className="w-full h-2 bg-gray-200 rounded-full flex overflow-hidden relative">
-					{/* Filled bar proportional to total referrals */}
-					<div className="absolute top-0 left-0 h-2 bg-green-600 rounded-full" style={{ width: `${progressPercent}%` }}></div>
-					{/* Segments for each level */}
-					{[1, 2, 3, 4, 5].map((level, idx) => (
-						<div
-							key={level}
-							className="h-2"
-							style={{ width: "20%", background: "transparent" }}
-						></div>
-					))}
-				</div>
-				{/* Points for referrals in incomplete levels */}
-				<div className="w-full flex justify-between mt-1 px-1">
-					{[1, 2, 3, 4, 5].map((level, idx) => (
-						<span key={level} className="w-1/5 flex justify-center">
-							{referralsPerLevel[idx] > 0 && referralsPerLevel[idx] < 5 && (
-								<span className="inline-block w-2 h-2 bg-yellow-400 rounded-full"></span>
-							)}
-						</span>
-					))}
-				</div>
-				{/* Level names below each segment */}
-				<div className="flex w-full justify-between mt-1 px-1">
-					{[1, 2, 3, 4, 5].map((level) => (
-						<span key={level} className="text-xs font-semibold text-muted-foreground w-1/5 text-center">Level {level}</span>
-					))}
-				</div>
-			</div>
-
-			{/* Referral Link - single row with copy icon */}
-			{subscribed && referralCode && (
-				<div className="w-full max-w-md mx-auto mb-6 flex items-center gap-2 bg-white rounded-xl px-4 py-3 shadow">
-					<span className="font-mono text-xs flex-1">{referralLink}</span>
-					<Button size="sm" variant="outline" onClick={handleCopyReferral}>
-						{copied ? "Copied!" : "Copy"}
-					</Button>
-				</div>
-			)}
-
-			{/* Earning History */}
-			<div className="w-full max-w-md mx-auto mt-6 rounded-2xl p-0 mb-6">
-				<div className="flex items-center justify-between px-2 pt-2 pb-1">
-					<span className="text-base font-semibold text-muted-foreground mt-2">Earning History</span>
-					<span className="text-xs text-muted-foreground">Recent</span>
-				</div>
-				<ul className="divide-y divide-gray-200">
-					{earningHistory.length === 0 ? (
-						<li className="px-2 py-3 text-xs text-gray-400">No earnings yet.</li>
-					) : earningHistory.map((tx: any, idx: number) => (
-						<li key={idx} className="flex items-center px-2 py-3 gap-2">
-							{/* User icon: first letter of referred user's name */}
-							<div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center mr-2">
-								<span className="text-green-700 font-bold text-lg">{tx.referredUserName?.charAt(0).toUpperCase() || "?"}</span>
+						) : (
+							<div className="space-y-3">
+								{earningHistory.map((tx: any, idx: number) => (
+									<div key={idx} className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
+										{/* User icon: first letter of referred user's name */}
+										<div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+											<span className="text-blue-700 font-bold text-lg">{tx.referredUserName?.charAt(0).toUpperCase() || "?"}</span>
+										</div>
+										<div className="flex-1 min-w-0">
+											<div className="font-medium text-sm text-slate-900">{tx.referredUserName || "Unknown"}</div>
+											<div className="text-xs text-slate-500">Level {tx.level}</div>
+										</div>
+										<div className="text-right">
+											<div className="text-sm font-bold text-green-600">₦{tx.amount}</div>
+											<div className="text-xs text-slate-400">
+												{tx.date ? formatDDMMYY(tx.date) : tx.date}
+											</div>
+										</div>
+									</div>
+								))}
 							</div>
-							<div className="flex-1">
-								<div className="font-medium text-sm">{tx.referredUserName || "Unknown"}</div>
-								<div className="text-xs text-gray-500">Level {tx.level}, email: {tx.referredUserEmail || "Unknown"}</div>
-							</div>
-							<div className="text-xs text-green-700 font-bold">₦{tx.amount}</div>
-							<div className="text-xs text-gray-400 ml-2">{tx.time}</div>
-							<div className="flex flex-col items-end ml-2">
-								<span className="text-xs text-gray-500">
-									{tx.time ? format12Hour(tx.time) : "--:--"}
-								</span>
-								<span className="text-xs text-gray-400">
-									{tx.date ? formatDDMMYY(tx.date) : tx.date}
-								</span>
-							</div>
-						</li>
-					))}
-				</ul>
-			</div>
+						)}
+					</CardContent>
+				</Card>
+			</main>
 		</div>
 	);
 }

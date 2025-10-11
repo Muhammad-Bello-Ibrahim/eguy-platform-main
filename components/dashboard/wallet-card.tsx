@@ -53,7 +53,7 @@ export function WalletCard({ onDeposit, onWithdraw, onTransfer }: WalletCardProp
   }
 
   return (
-    <Card className="bg-green-600 border-none rounded-2xl p-5 shadow-none">
+    <Card className="bg-gradient-to-r from-purple-500 to-purple-600 border-none rounded-2xl p-5 shadow-none">
       <div className="flex flex-col gap-4">
         {/* Top row: Balance label */}
         <div className="w-full flex items-center justify-between">
@@ -63,7 +63,7 @@ export function WalletCard({ onDeposit, onWithdraw, onTransfer }: WalletCardProp
         <div className="w-full flex items-center justify-between">
           <div className="text-3xl md:text-4xl font-extrabold tracking-tight text-white">
             {isLoading ? (
-              <span className="animate-pulse text-green-100">Loading...</span>
+              <span className="animate-pulse text-purple-100">Loading...</span>
             ) : isBalanceVisible ? (
               formatCurrency(balance)
             ) : (
@@ -75,12 +75,28 @@ export function WalletCard({ onDeposit, onWithdraw, onTransfer }: WalletCardProp
             size="icon"
             aria-label="Toggle balance visibility"
             onClick={() => setIsBalanceVisible(!isBalanceVisible)}
-            className="h-9 w-9 p-0 text-white hover:bg-green-600/30"
+            className="h-9 w-9 p-0 text-white hover:bg-purple-600/30"
           >
             {isBalanceVisible ? <Eye className="h-5 w-5" /> : <EyeOff className="h-5 w-5" />}
           </Button>
         </div>
-        {/* Actions row removed for clean look */}
+        {/* Actions row */}
+        <div className="flex gap-3 mt-2">
+          <Button
+            onClick={onDeposit}
+            className="flex-1 bg-white/20 hover:bg-white/30 text-white border border-white/30 rounded-xl py-3 font-semibold transition-all duration-200 hover:scale-105"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Add Money
+          </Button>
+          <Button
+            onClick={onTransfer}
+            className="flex-1 bg-white/20 hover:bg-white/30 text-white border border-white/30 rounded-xl py-3 font-semibold transition-all duration-200 hover:scale-105"
+          >
+            <ArrowUpRight className="w-4 h-4 mr-2" />
+            Transfer
+          </Button>
+        </div>
       </div>
     </Card>
   )

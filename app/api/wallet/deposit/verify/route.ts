@@ -26,21 +26,42 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Payment not successful" }, { status: 400 });
     }
 
-    // Check if transaction is already completed
-    const transactions = await Database.getUserTransactions(userId);
-    const tx = transactions.find((t: any) => t.reference === reference);
-    console.log("Deposit verification: Found transaction:", tx);
-    if (tx && tx.status === "completed") {
+    // Check if transaction exists and belongs to user
+    const tx = await Database.findTransactionByReference(reference);
+
+    if (!tx) {
+      console.log("Deposit verification: Transaction not found");
+      return NextResponse.json({ error: "Transaction not found" }, { status: 404 });
+    }
+
+    if (tx.userId !== userId) {
+      console.log("Deposit verification: Transaction does not belong to user");
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    }
+
+    if (tx.status === "completed") {
       console.log("Deposit verification: Transaction already completed, skipping credit.");
       return NextResponse.json({ message: "Already credited" });
+    }
+
+    // Verify the amount matches
+    const expectedAmount = tx.amount;
+    const paystackAmount = verifyData.data.amount / 100; // Convert from kobo to naira
+
+    if (Math.abs(expectedAmount - paystackAmount) > 0.01) { // Allow small floating point differences
+      console.error(`Amount mismatch: expected ${expectedAmount}, got ${paystackAmount}`);
+      return NextResponse.json({ error: "Amount verification failed" }, { status: 400 });
     }
     // Show wallet balance before deposit
     const userBefore = await Database.findUserById(userId);
     console.log("Wallet balance before deposit:", userBefore?.walletBalance);
+
     // Update transaction record to completed
     await Database.updateTransactionStatus(reference, "completed");
-    // Credit user's wallet
-    await Database.updateUserWallet(userId, verifyData.data.amount / 100);
+
+    // Credit user's wallet with the expected amount
+    await Database.updateUserWallet(userId, expectedAmount);
+
     // Show wallet balance after deposit
     const userAfter = await Database.findUserById(userId);
     console.log("Wallet balance after deposit:", userAfter?.walletBalance);
