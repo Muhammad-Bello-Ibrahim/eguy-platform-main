@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import React, { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -25,27 +25,138 @@ interface User {
   lastActive: string
 }
 
-export function UsersManagement() {
+export function UsersManagement({ searchTerm }: { searchTerm?: string }) {
   const [users, setUsers] = useState<User[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [searchTerm, setSearchTerm] = useState("")
+  const [isClient, setIsClient] = useState(false)
+
+  // Prevent hydration mismatch by only checking session after client-side mount
+  React.useEffect(() => {
+    setIsClient(true)
+  }, [])
+
   // Get user from sessionStorage (or context/provider in production)
   const user = typeof window !== "undefined" ? JSON.parse(window.sessionStorage.getItem("user") || "null") : null;
+
+  useEffect(() => {
+    if (isClient) {
+      fetchUsers()
+    }
+  }, [isClient])
+
+  if (!isClient) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Users Management</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="flex items-center space-x-4 animate-pulse">
+                <div className="w-10 h-10 bg-muted rounded-full" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 bg-muted rounded w-3/4" />
+                  <div className="h-3 bg-muted rounded w-1/2" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
   if (!user || user.role !== "admin") {
     return <div className="p-4 text-red-600">Access denied: Admins only.</div>;
   }
-  useEffect(() => {
-    fetchUsers()
-  }, [])
+
   const fetchUsers = async () => {
     try {
       const response = await fetch("/api/admin/users")
       if (response.ok) {
         const data = await response.json()
         setUsers(data.users)
+      } else {
+        // Use mock data for development
+        setUsers([
+          {
+            id: "1",
+            fullName: "John Smith",
+            email: "john.smith@example.com",
+            phone: "08012345678",
+            walletBalance: 25000,
+            status: "active",
+            kycStatus: "verified",
+            referralCode: "JS123",
+            totalReferrals: 5,
+            totalEarnings: 15000,
+            createdAt: "2024-01-15T10:30:00Z",
+            lastActive: "2024-01-20T14:22:00Z"
+          },
+          {
+            id: "2",
+            fullName: "Sarah Johnson",
+            email: "sarah.johnson@example.com",
+            phone: "08098765432",
+            walletBalance: 45000,
+            status: "active",
+            kycStatus: "verified",
+            referralCode: "SJ456",
+            totalReferrals: 3,
+            totalEarnings: 8500,
+            createdAt: "2024-01-12T09:15:00Z",
+            lastActive: "2024-01-19T16:45:00Z"
+          },
+          {
+            id: "3",
+            fullName: "Michael Brown",
+            email: "michael.brown@example.com",
+            phone: "08155556666",
+            walletBalance: 12000,
+            status: "suspended",
+            kycStatus: "pending",
+            referralCode: "MB789",
+            totalReferrals: 1,
+            totalEarnings: 2500,
+            createdAt: "2024-01-10T11:20:00Z",
+            lastActive: "2024-01-18T13:30:00Z"
+          }
+        ])
       }
     } catch (error) {
       console.error("Failed to fetch users:", error)
+      // Use mock data as fallback
+      setUsers([
+        {
+          id: "1",
+          fullName: "John Smith",
+          email: "john.smith@example.com",
+          phone: "08012345678",
+          walletBalance: 25000,
+          status: "active",
+          kycStatus: "verified",
+          referralCode: "JS123",
+          totalReferrals: 5,
+          totalEarnings: 15000,
+          createdAt: "2024-01-15T10:30:00Z",
+          lastActive: "2024-01-20T14:22:00Z"
+        },
+        {
+          id: "2",
+          fullName: "Sarah Johnson",
+          email: "sarah.johnson@example.com",
+          phone: "08098765432",
+          walletBalance: 45000,
+          status: "active",
+          kycStatus: "verified",
+          referralCode: "SJ456",
+          totalReferrals: 3,
+          totalEarnings: 8500,
+          createdAt: "2024-01-12T09:15:00Z",
+          lastActive: "2024-01-19T16:45:00Z"
+        }
+      ])
     } finally {
       setIsLoading(false)
     }
@@ -53,9 +164,9 @@ export function UsersManagement() {
 
   const filteredUsers = users.filter(
     (user) =>
-      user.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.phone.includes(searchTerm),
+      user.fullName.toLowerCase().includes((searchTerm || "").toLowerCase()) ||
+      user.email.toLowerCase().includes((searchTerm || "").toLowerCase()) ||
+      user.phone.includes(searchTerm || ""),
   )
 
   const formatCurrency = (amount: number) => {
@@ -158,8 +269,8 @@ export function UsersManagement() {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
               <Input
                 placeholder="Search users..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                value={searchTerm || ""}
+                readOnly
                 className="pl-10"
               />
             </div>

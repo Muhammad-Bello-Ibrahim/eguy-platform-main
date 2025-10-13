@@ -13,17 +13,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
-  ProfileIcon,
-  EyeOffIcon,
-  AddMoneyIcon,
-  AirtimeIcon,
-  DataIcon,
-  ElectricityIcon,
-  ExamPinIcon,
-  ReferEarnIcon
-} from "@/components/ui/material-dashboard-icons";
-import { useRouter } from "next/navigation";
-import {
   Wallet,
   Smartphone,
   Zap,
@@ -35,16 +24,23 @@ import {
   CreditCard,
   ArrowUpRight,
   Eye,
-  User,
+  User as UserIcon,
   Home,
   Receipt,
   Settings,
   Bell,
-  TrendingUp
+  TrendingUp,
+  RefreshCw
 } from "lucide-react";
+import { ProfileIcon, EyeOffIcon, AddMoneyIcon, AirtimeIcon, DataIcon, ElectricityIcon, CableIcon, ExamPinIcon, ReferEarnIcon } from "@/components/ui/material-dashboard-icons";
+import { useRouter } from "next/navigation";
 
 export default function DashboardPage() {
   const router = useRouter();
+
+  // User data state
+  const [user, setUser] = useState(null);
+  const [isLoadingUser, setIsLoadingUser] = useState(true);
 
   // Dashboard analytics state
   const [analytics, setAnalytics] = useState({
@@ -55,6 +51,18 @@ export default function DashboardPage() {
     transactionsCount: 0,
     avgTransaction: 0
   });
+
+  // Load user data
+  useEffect(() => {
+    fetchUserData();
+
+    // Set up polling to check for balance updates every 30 seconds
+    const interval = setInterval(() => {
+      fetchUserData();
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   // Load analytics data
   useEffect(() => {
@@ -68,6 +76,25 @@ export default function DashboardPage() {
       .catch((error) => console.error("Failed to load analytics:", error));
   }, []);
 
+  const fetchUserData = async () => {
+    try {
+      setIsLoadingUser(true);
+      const response = await fetch("/api/user");
+      if (response.ok) {
+        const data = await response.json();
+        setUser(data.user);
+      }
+    } catch (error) {
+      console.error("Failed to load user data:", error);
+    } finally {
+      setIsLoadingUser(false);
+    }
+  };
+
+  const refreshBalance = () => {
+    fetchUserData();
+  };
+
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
   const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
   const [isAirtimeModalOpen, setIsAirtimeModalOpen] = useState(false);
@@ -77,9 +104,18 @@ export default function DashboardPage() {
 
   const handleTransactionSuccess = () => {
     setRefreshKey((prev) => prev + 1);
+    // Refresh user balance after successful transaction
+    setTimeout(() => {
+      refreshBalance();
+    }, 1000);
   };
+
   const handleWithdrawSuccess = () => {
     setRefreshKey((prev) => prev + 1);
+    // Refresh user balance after successful withdrawal
+    setTimeout(() => {
+      refreshBalance();
+    }, 1000);
   };
 
   // Paystack verification logic
@@ -130,9 +166,27 @@ export default function DashboardPage() {
     fetch("/api/user")
       .then((res) => res.json())
       .then((data) => {
-        if (data.user && data.user.username) {
-          setUsername(data.user.username.trim());
+        console.log("User data received:", data); // Debug log
+        if (data.user) {
+          let displayName = "User"; // Default fallback
+
+          // Try different name fields
+          if (data.user.fullName) {
+            displayName = data.user.fullName.trim().split(' ')[0];
+          } else if (data.user.firstName) {
+            displayName = data.user.firstName;
+          } else if (data.user.name) {
+            displayName = data.user.name.trim().split(' ')[0];
+          } else if (data.user.username) {
+            displayName = data.user.username.trim().split(' ')[0];
+          }
+
+          setUsername(displayName);
+          console.log("Setting username to:", displayName); // Debug log
         }
+      })
+      .catch((error) => {
+        console.error("Error fetching user data:", error);
       });
   }, []);
 
@@ -148,9 +202,9 @@ export default function DashboardPage() {
                 className="flex items-center gap-3 hover:bg-gray-50 rounded-lg px-3 py-2 transition-colors"
               >
                 <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                  <User className="w-4 h-4 text-white" />
+                  <UserIcon className="w-4 h-4 text-white" />
                 </div>
-                <span className="text-gray-900 font-medium">{username || "User"}</span>
+                <span className="text-gray-900 font-medium">Hi, {username || "User"}</span>
               </button>
             </div>
             <div className="flex items-center gap-2">
@@ -162,16 +216,14 @@ export default function DashboardPage() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 -my-12">
-        {/* Wallet Card - Clean and Prominent */}
-        <div className="mb-8">
-          <div className="max-w-md mx-auto">
-            <WalletCard
-              onDeposit={() => setIsDepositModalOpen(true)}
-              onWithdraw={() => setIsWithdrawModalOpen(true)}
-              onTransfer={() => {}}
-              key={refreshKey}
-            />
-          </div>
+        {/* Wallet Card - Clean Design */}
+        <div className="max-w-md mx-auto mb-8">
+          <WalletCard
+            onDeposit={() => setIsDepositModalOpen(true)}
+            onWithdraw={() => setIsWithdrawModalOpen(true)}
+            onTransfer={() => setIsWithdrawModalOpen(true)}
+            refreshTrigger={refreshKey}
+          />
         </div>
 
         {/* Quick Actions - Clean Grid */}
@@ -204,7 +256,7 @@ export default function DashboardPage() {
                   onClick: () => setIsBillsModalOpen(true)
                 },
                 {
-                  icon: ExamPinIcon,
+                  icon: CableIcon,
                   label: "Exam Pin",
                   color: "bg-pink-50 hover:bg-pink-100 text-pink-700 border border-pink-200",
                   onClick: () => setIsBillsModalOpen(true)
@@ -213,7 +265,7 @@ export default function DashboardPage() {
                   icon: ReferEarnIcon,
                   label: "Refer",
                   color: "bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200",
-                  onClick: () => {}
+                  onClick: () => router.push('/elevatex')
                 }
               ].map((action, index) => (
                 <button

@@ -111,14 +111,6 @@ export default function ResetPasswordPage() {
 
         {/* Right side - Form */}
         <div className="w-full lg:w-1/2 flex flex-col">
-          {/* Back to home link */}
-          <div className="absolute top-6 left-6 z-10">
-            <Link href="/" className="group flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors duration-300">
-              <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform duration-300" />
-              <span className="text-sm font-medium">Back to Home</span>
-            </Link>
-          </div>
-
           <div className="flex-1 flex items-center justify-center p-8">
             <div className="w-full max-w-md">
               <ResetPasswordForm />
@@ -210,14 +202,6 @@ export default function ResetPasswordPage() {
 
       {/* Right side - Form */}
       <div className="w-full lg:w-1/2 flex flex-col">
-        {/* Back to home link */}
-        <div className="absolute top-6 left-6 z-10">
-          <Link href="/" className="group flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors duration-300">
-            <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform duration-300" />
-            <span className="text-sm font-medium">Back to Home</span>
-          </Link>
-        </div>
-
         <div className="flex-1 flex items-center justify-center p-8">
           <div className="w-full max-w-md">
             <ResetRequestForm />

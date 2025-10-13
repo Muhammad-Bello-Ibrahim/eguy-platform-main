@@ -42,6 +42,11 @@ export function SigninForm() {
         throw new Error(data.error || "Something went wrong")
       }
 
+      // Store user data in sessionStorage for admin panel access
+      if (typeof window !== "undefined") {
+        sessionStorage.setItem("user", JSON.stringify(data.user))
+      }
+
       router.push("/dashboard")
     } catch (error) {
       setError(error instanceof Error ? error.message : "Something went wrong")

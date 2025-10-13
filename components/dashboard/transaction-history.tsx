@@ -24,8 +24,10 @@ import {
   ChevronDown,
   ChevronUp,
   Receipt,
-  Calendar
+  Calendar,
+  Download,
 } from "lucide-react"
+import { ReceiptModal } from "@/components/receipt/receipt-modal"
 
 interface Transaction {
   id: string
@@ -49,6 +51,8 @@ export function TransactionHistory({ refreshKey }: TransactionHistoryProps) {
   const [isLoading, setIsLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [expandedTransaction, setExpandedTransaction] = useState<string | null>(null)
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null)
+  const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false)
 
   useEffect(() => {
     fetchTransactions()
@@ -162,8 +166,21 @@ export function TransactionHistory({ refreshKey }: TransactionHistoryProps) {
     }
   }
 
+  const openReceipt = (transaction: Transaction) => {
+    setSelectedTransaction(transaction)
+    setIsReceiptModalOpen(true)
+  }
+
+  const closeReceipt = () => {
+    setIsReceiptModalOpen(false)
+    setSelectedTransaction(null)
+  }
+
   const filteredTransactions = useMemo(() => {
     let filtered = transactions
+
+    // Sort by createdAt in descending order (newest first)
+    filtered = filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
 
     // Filter by search term
     if (searchTerm) {
@@ -212,157 +229,182 @@ export function TransactionHistory({ refreshKey }: TransactionHistoryProps) {
   }
 
   return (
-    <div className="w-full">
-      <div className="mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="flex items-center gap-2 text-lg font-semibold text-gray-900">
-            <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-            </svg>
-            Transaction History
-          </h2>
-          <button className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1" onClick={() => window.location.href = '/transactions'}>
-            View All
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
-        </div>
-
-        {/* Search Bar */}
-        <div className="relative mb-6">
-          <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-          <Input
-            placeholder="Search transactions..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-          />
-        </div>
-      </div>
-
-      <div className="space-y-4">
-        {filteredTransactions.length === 0 ? (
-          <div className="text-center py-12">
-            <svg className="h-16 w-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-            </svg>
-            <p className="text-gray-500 mb-2">
-              {searchTerm ? "No transactions match your search" : "No transactions yet"}
-            </p>
-            <p className="text-sm text-gray-400">
-              {searchTerm
-                ? "Try adjusting your search criteria"
-                : "Your transaction history will appear here"
-              }
-            </p>
+    <>
+      <div className="w-full">
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="flex items-center gap-2 text-lg font-semibold text-gray-900">
+              <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              </svg>
+              Transaction History
+            </h2>
+            <button className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1" onClick={() => window.location.href = '/transactions'}>
+              View All
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
           </div>
-        ) : (
-          filteredTransactions.slice(0, 5).map((transaction, index) => (
-            <div
-              key={transaction.id}
-              className={`group bg-gray-50 hover:bg-white rounded-lg p-4 border border-gray-200 hover:border-gray-300 transition-all duration-200 cursor-pointer ${
-                index === 4 ? 'mb-8' : ''
-              }`}
-              onClick={() => setExpandedTransaction(
-                expandedTransaction === transaction.id ? null : transaction.id
-              )}
-            >
-              <div className="flex items-center space-x-4">
-                <div className="flex-shrink-0">
-                  {getTransactionIcon(transaction.type)}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <div className="min-w-0">
-                      <p className="font-medium text-gray-900 truncate">{transaction.description}</p>
-                      <div className="flex flex-wrap items-center gap-2 mt-1">
-                        <span className="text-sm text-gray-500 flex items-center gap-1">
-                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                          </svg>
-                          {formatDate(transaction.createdAt)}
-                        </span>
-                        {transaction.category && (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
-                            {transaction.category}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      {getStatusBadge(transaction.status)}
-                      <div className="text-right">
-                        <p
-                          className={`font-semibold text-lg ${
-                            transaction.type === "deposit" || transaction.type === "referral_bonus"
-                              ? "text-green-600"
-                              : "text-red-600"
-                          }`}
-                        >
-                          {transaction.type === "deposit" || transaction.type === "referral_bonus" ? "+" : "-"}
-                          {formatCurrency(transaction.amount)}
-                        </p>
-                      </div>
-                      <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                        {expandedTransaction === transaction.id ? (
-                          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-                          </svg>
-                        ) : (
-                          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                          </svg>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
 
-              {/* Expanded Details */}
-              {expandedTransaction === transaction.id && (
-                <div className="mt-4 pt-4 border-t border-gray-200">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <p className="text-gray-500 mb-1">Transaction Type</p>
-                      <p className="font-medium text-gray-900 capitalize">{transaction.type.replace("_", " ")}</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-500 mb-1">Status</p>
-                      <div className="flex items-center gap-1">
+          {/* Search Bar */}
+          <div className="relative mb-6">
+            <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <Input
+              placeholder="Search transactions..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+            />
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          {filteredTransactions.length === 0 ? (
+            <div className="text-center py-12">
+              <svg className="h-16 w-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              </svg>
+              <p className="text-gray-500 mb-2">
+                {searchTerm ? "No transactions match your search" : "No transactions yet"}
+              </p>
+              <p className="text-sm text-gray-400">
+                {searchTerm
+                  ? "Try adjusting your search criteria"
+                  : "Your transaction history will appear here"
+                }
+              </p>
+            </div>
+          ) : (
+            filteredTransactions.slice(0, 5).map((transaction, index) => (
+              <div
+                key={transaction.id}
+                className={`group bg-gray-50 hover:bg-white rounded-lg p-4 border border-gray-200 hover:border-gray-300 transition-all duration-200 cursor-pointer ${
+                  index === 4 ? 'mb-8' : ''
+                }`}
+                onClick={() => setExpandedTransaction(
+                  expandedTransaction === transaction.id ? null : transaction.id
+                )}
+              >
+                <div className="flex items-center space-x-4">
+                  <div className="flex-shrink-0">
+                    {getTransactionIcon(transaction.type)}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="font-medium text-gray-900 truncate">{transaction.description}</p>
+                        <div className="flex flex-wrap items-center gap-2 mt-1">
+                          <span className="text-sm text-gray-500 flex items-center gap-1">
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            {formatDate(transaction.createdAt)}
+                          </span>
+                          {transaction.category && (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                              {transaction.category}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
                         {getStatusBadge(transaction.status)}
+                        <div className="text-right">
+                          <p
+                            className={`font-semibold text-lg ${
+                              transaction.type === "deposit" || transaction.type === "referral_bonus"
+                                ? "text-green-600"
+                                : "text-red-600"
+                            }`}
+                          >
+                            {transaction.type === "deposit" || transaction.type === "referral_bonus" ? "+" : "-"}
+                            {formatCurrency(transaction.amount)}
+                          </p>
+                        </div>
+                        <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                          {expandedTransaction === transaction.id ? (
+                            <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                            </svg>
+                          ) : (
+                            <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            </svg>
+                          )}
+                        </div>
                       </div>
                     </div>
-                    {transaction.reference && (
-                      <div>
-                        <p className="text-gray-500 mb-1">Reference</p>
-                        <p className="font-mono text-xs bg-gray-100 px-2 py-1 rounded text-gray-700">
-                          {transaction.reference}
-                        </p>
-                      </div>
-                    )}
-                    {transaction.provider && (
-                      <div>
-                        <p className="text-gray-500 mb-1">Provider</p>
-                        <p className="font-medium text-gray-900">{transaction.provider}</p>
-                      </div>
-                    )}
-                    {transaction.recipient && (
-                      <div className="sm:col-span-2">
-                        <p className="text-gray-500 mb-1">Recipient</p>
-                        <p className="font-medium text-gray-900">{transaction.recipient}</p>
-                      </div>
-                    )}
                   </div>
                 </div>
-              )}
-            </div>
-          ))
-        )}
+
+                {/* Expanded Details */}
+                {expandedTransaction === transaction.id && (
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <p className="text-gray-500 mb-1">Transaction Type</p>
+                        <p className="font-medium text-gray-900 capitalize">{transaction.type.replace("_", " ")}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500 mb-1">Status</p>
+                        <div className="flex items-center gap-1">
+                          {getStatusBadge(transaction.status)}
+                        </div>
+                      </div>
+                      {transaction.reference && (
+                        <div>
+                          <p className="text-gray-500 mb-1">Reference</p>
+                          <p className="font-mono text-xs bg-gray-100 px-2 py-1 rounded text-gray-700">
+                            {transaction.reference}
+                          </p>
+                        </div>
+                      )}
+                      {transaction.provider && (
+                        <div>
+                          <p className="text-gray-500 mb-1">Provider</p>
+                          <p className="font-medium text-gray-900">{transaction.provider}</p>
+                        </div>
+                      )}
+                      {transaction.recipient && (
+                        <div className="sm:col-span-2">
+                          <p className="text-gray-500 mb-1">Recipient</p>
+                          <p className="font-medium text-gray-900">{transaction.recipient}</p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Receipt Button */}
+                    <div className="mt-4 pt-4 border-t border-gray-200">
+                      <Button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          openReceipt(transaction)
+                        }}
+                        variant="outline"
+                        size="sm"
+                        className="w-full sm:w-auto"
+                      >
+                        <Receipt className="w-4 h-4 mr-2" />
+                        View Receipt
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))
+          )}
+        </div>
       </div>
-    </div>
+
+      {/* Receipt Modal */}
+      <ReceiptModal
+        transaction={selectedTransaction}
+        isOpen={isReceiptModalOpen}
+        onClose={closeReceipt}
+      />
+    </>
   )
 }

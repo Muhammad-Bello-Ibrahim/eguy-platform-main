@@ -9,6 +9,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Loader2, Smartphone } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { Skeleton } from "@/components/ui/skeleton"
+import { SuccessModal } from "@/components/ui/success-modal"
+import { ErrorModal } from "@/components/ui/error-modal"
 
 interface AirtimeModalProps {
   isOpen: boolean
@@ -26,6 +28,9 @@ export function AirtimeModal({ isOpen, onClose, onSuccess }: AirtimeModalProps) 
   })
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
+  const [successModalOpen, setSuccessModalOpen] = useState(false)
+  const [errorModalOpen, setErrorModalOpen] = useState(false)
+  const [transactionData, setTransactionData] = useState<any>(null)
   const { toast } = useToast()
 
   useEffect(() => {
@@ -34,9 +39,49 @@ export function AirtimeModal({ isOpen, onClose, onSuccess }: AirtimeModalProps) 
       try {
         const res = await fetch("/api/admin/airtime-plans");
         const data = await res.json();
-        setPlans(data);
+        if (data && data.length > 0) {
+          setPlans(data);
+        } else {
+          // Fallback data if database is empty
+          setPlans([
+            { _id: '1', network: 'MTN', amount: 100, price: 95, apiPrice: 90 },
+            { _id: '2', network: 'MTN', amount: 200, price: 190, apiPrice: 180 },
+            { _id: '3', network: 'MTN', amount: 500, price: 475, apiPrice: 450 },
+            { _id: '4', network: 'MTN', amount: 1000, price: 950, apiPrice: 900 },
+            { _id: '5', network: 'AIRTEL', amount: 100, price: 95, apiPrice: 90 },
+            { _id: '6', network: 'AIRTEL', amount: 200, price: 190, apiPrice: 180 },
+            { _id: '7', network: 'AIRTEL', amount: 500, price: 475, apiPrice: 450 },
+            { _id: '8', network: 'AIRTEL', amount: 1000, price: 950, apiPrice: 900 },
+            { _id: '9', network: 'GLO', amount: 100, price: 95, apiPrice: 90 },
+            { _id: '10', network: 'GLO', amount: 200, price: 190, apiPrice: 180 },
+            { _id: '11', network: 'GLO', amount: 500, price: 475, apiPrice: 450 },
+            { _id: '12', network: 'GLO', amount: 1000, price: 950, apiPrice: 900 },
+            { _id: '13', network: '9MOBILE', amount: 100, price: 95, apiPrice: 90 },
+            { _id: '14', network: '9MOBILE', amount: 200, price: 190, apiPrice: 180 },
+            { _id: '15', network: '9MOBILE', amount: 500, price: 475, apiPrice: 450 },
+            { _id: '16', network: '9MOBILE', amount: 1000, price: 950, apiPrice: 900 },
+          ]);
+        }
       } catch (e) {
-        // fallback
+        // Fallback data if API fails
+        setPlans([
+          { _id: '1', network: 'MTN', amount: 100, price: 95, apiPrice: 90 },
+          { _id: '2', network: 'MTN', amount: 200, price: 190, apiPrice: 180 },
+          { _id: '3', network: 'MTN', amount: 500, price: 475, apiPrice: 450 },
+          { _id: '4', network: 'MTN', amount: 1000, price: 950, apiPrice: 900 },
+          { _id: '5', network: 'AIRTEL', amount: 100, price: 95, apiPrice: 90 },
+          { _id: '6', network: 'AIRTEL', amount: 200, price: 190, apiPrice: 180 },
+          { _id: '7', network: 'AIRTEL', amount: 500, price: 475, apiPrice: 450 },
+          { _id: '8', network: 'AIRTEL', amount: 1000, price: 950, apiPrice: 900 },
+          { _id: '9', network: 'GLO', amount: 100, price: 95, apiPrice: 90 },
+          { _id: '10', network: 'GLO', amount: 200, price: 190, apiPrice: 180 },
+          { _id: '11', network: 'GLO', amount: 500, price: 475, apiPrice: 450 },
+          { _id: '12', network: 'GLO', amount: 1000, price: 950, apiPrice: 900 },
+          { _id: '13', network: '9MOBILE', amount: 100, price: 95, apiPrice: 90 },
+          { _id: '14', network: '9MOBILE', amount: 200, price: 190, apiPrice: 180 },
+          { _id: '15', network: '9MOBILE', amount: 500, price: 475, apiPrice: 450 },
+          { _id: '16', network: '9MOBILE', amount: 1000, price: 950, apiPrice: 900 },
+        ]);
       }
       setFetching(false);
     }
@@ -67,19 +112,41 @@ export function AirtimeModal({ isOpen, onClose, onSuccess }: AirtimeModalProps) 
         body: JSON.stringify(formData),
         headers: { "Content-Type": "application/json" },
       })
-      if (!response.ok) throw new Error("Airtime purchase failed")
-      setFormData({ network: "", phone: "", amount: "" })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || "Airtime purchase failed")
+      }
+
+      // Success - show success modal
+      setTransactionData({
+        title: "Airtime Purchase Successful",
+        description: `₦${amount} ${formData.network} airtime sent to ${formData.phone}`,
+        amount: amount,
+        service: `${formData.network} Airtime`,
+        transactionId: data.reference
+      })
+      setSuccessModalOpen(true)
+
       onSuccess()
-      toast({ title: "Airtime purchase initiated", description: "Complete payment to top up your phone." })
       onClose()
-    } catch (error: any) {
-      setError(error.message || "Something went wrong")
+      setFormData({ network: "", phone: "", amount: "" })
+    } catch (error) {
+      // Error - show error modal
+      setTransactionData({
+        title: "Airtime Purchase Failed",
+        description: error instanceof Error ? error.message : "Something went wrong",
+        errorCode: "AIRTIME_PURCHASE_ERROR"
+      })
+      setErrorModalOpen(true)
     } finally {
       setIsLoading(false)
     }
   }
 
   return (
+    <>
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md bg-white border border-gray-200 shadow-lg">
         <DialogHeader className="pb-4">
@@ -170,14 +237,6 @@ export function AirtimeModal({ isOpen, onClose, onSuccess }: AirtimeModalProps) 
 
               <div className="flex gap-3 pt-2">
                 <Button
-                  type="button"
-                  variant="outline"
-                  onClick={onClose}
-                  className="flex-1 rounded-xl border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 transition-all duration-200"
-                >
-                  Cancel
-                </Button>
-                <Button
                   type="submit"
                   disabled={isLoading || !formData.network || !formData.phone || !formData.amount}
                   className="flex-1 rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold text-lg shadow-lg hover:shadow-blue-500/25 transition-all duration-200 border-0 disabled:opacity-50"
@@ -197,5 +256,36 @@ export function AirtimeModal({ isOpen, onClose, onSuccess }: AirtimeModalProps) 
         </form>
       </DialogContent>
     </Dialog>
+
+    {/* Success Modal */}
+    {transactionData && (
+      <SuccessModal
+        isOpen={successModalOpen}
+        onClose={() => {
+          setSuccessModalOpen(false)
+          setTransactionData(null)
+        }}
+        title={transactionData.title}
+        description={transactionData.description}
+        transactionId={transactionData.transactionId}
+        amount={transactionData.amount}
+        service={transactionData.service}
+      />
+    )}
+
+    {/* Error Modal */}
+    {transactionData && (
+      <ErrorModal
+        isOpen={errorModalOpen}
+        onClose={() => {
+          setErrorModalOpen(false)
+          setTransactionData(null)
+        }}
+        title={transactionData.title}
+        description={transactionData.description}
+        errorCode={transactionData.errorCode}
+      />
+    )}
+  </>
   )
 }

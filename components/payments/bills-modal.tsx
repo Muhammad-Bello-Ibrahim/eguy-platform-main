@@ -75,18 +75,50 @@ export function BillsModal({ isOpen, onClose, onSuccess }: BillsModalProps) {
     }
 
     try {
-      const response = await fetch("/api/payments/bills", {
+      // Use specific API endpoints for different services
+      let endpoint = "/api/payments/bills"
+      let requestBody: any = {
+        serviceType: formData.serviceType,
+        provider: formData.provider,
+        amount: amount,
+        recipient: formData.recipient,
+        customerInfo: formData.customerInfo,
+      }
+
+      // Use specific APIs for better integration
+      if (formData.serviceType === "water") {
+        endpoint = "/api/payments/water"
+        requestBody = {
+          provider: formData.provider,
+          meterNumber: formData.recipient,
+          amount: amount,
+          customerInfo: formData.customerInfo,
+        }
+      } else if (formData.serviceType === "electricity") {
+        endpoint = "/api/payments/electricity"
+        requestBody = {
+          disco: formData.provider,
+          meterType: "prepaid", // Default to prepaid
+          meterNumber: formData.recipient,
+          amount: amount,
+        }
+      } else if (formData.serviceType === "education") {
+        endpoint = "/api/payments/education"
+        requestBody = {
+          service: formData.provider,
+          bills_code: formData.serviceType,
+          regNumber: formData.recipient,
+          amount: amount,
+        }
+      }
+      // TV subscriptions use the general bills API
+
+      const response = await fetch(endpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          serviceType: formData.serviceType,
-          provider: formData.provider,
-          amount: amount,
-          recipient: formData.recipient,
-          customerInfo: formData.customerInfo,
-        }),
+        body: JSON.stringify(requestBody),
       })
 
       const data = await response.json()
@@ -238,14 +270,6 @@ export function BillsModal({ isOpen, onClose, onSuccess }: BillsModalProps) {
           </div>
 
           <div className="flex gap-3 pt-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onClose}
-              className="flex-1 rounded-xl border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 transition-all duration-200"
-            >
-              Cancel
-            </Button>
             <Button
               type="submit"
               disabled={

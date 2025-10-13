@@ -21,19 +21,29 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Insufficient wallet balance" }, { status: 400 })
     }
 
-    // Integrate with SubAndGain API for bill payment (GET request, Cable TV example)
-    const username = process.env.username;
+    // Check SubAndGain API credentials
+    const username = process.env.SUBANDGAIN_USER_NAME;
     const apiKey = process.env.SUBANDGAIN_API_KEY;
+
+    if (!username || !apiKey) {
+      console.error("SubAndGain credentials not configured");
+      return NextResponse.json({ error: "Payment service not configured" }, { status: 500 });
+    }
+
+    // Integrate with SubAndGain API for bill payment (GET request, Cable TV example)
     const serviceUC = provider.toUpperCase();
     const url = `https://subandgain.com/api/bills.php?username=${username}&apiKey=${apiKey}&service=${serviceUC}&bills_code=${serviceType}&smartNumber=${recipient}`;
+    console.log("SubAndGain Bills API URL:", url); // Debug log
     const subaRes = await fetch(url);
     let subaData;
     try {
       subaData = await subaRes.json();
     } catch (e) {
       const text = await subaRes.text();
+      console.error("SubAndGain API Response (Bills):", text); // Debug log
       return NextResponse.json({ error: "Invalid response from SubAndGain", raw: text }, { status: 400 });
     }
+    console.log("SubAndGain API Response (Bills):", subaData); // Debug log
     if (!subaRes.ok || subaData.error) {
       return NextResponse.json({ error: subaData.description || "Bill payment failed" }, { status: 400 });
     }

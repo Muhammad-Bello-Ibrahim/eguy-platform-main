@@ -114,14 +114,6 @@ export function DepositModal({ isOpen, onClose, onSuccess }: DepositModalProps) 
 
           <div className="flex gap-3 pt-2">
             <Button
-              type="button"
-              variant="outline"
-              onClick={onClose}
-              className="flex-1 rounded-xl border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 transition-all duration-200"
-            >
-              Cancel
-            </Button>
-            <Button
               type="submit"
               disabled={isLoading}
               className="flex-1 rounded-xl bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold text-lg shadow-lg hover:shadow-green-500/25 transition-all duration-200 border-0"

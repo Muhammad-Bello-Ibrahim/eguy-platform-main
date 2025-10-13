@@ -5,13 +5,15 @@ import { ArrowLeft, Search, Calendar } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { ReceiptModal } from "@/components/receipt/receipt-modal";
 
 interface Transaction {
   id: string;
-  type: string;
+  type: "deposit" | "withdrawal" | "transfer" | "payment" | "referral_bonus" | "airtime" | "data" | "electricity" | "cable";
   amount: number;
   description: string;
-  status: string;
+  status: "pending" | "completed" | "failed" | "cancelled";
   createdAt: string;
   category?: string;
   reference?: string;
@@ -25,6 +27,18 @@ export default function AllTransactionsPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [expandedTransaction, setExpandedTransaction] = useState<string | null>(null);
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+  const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
+
+  const openReceipt = (transaction: Transaction) => {
+    setSelectedTransaction(transaction);
+    setIsReceiptModalOpen(true);
+  };
+
+  const closeReceipt = () => {
+    setIsReceiptModalOpen(false);
+    setSelectedTransaction(null);
+  };
 
   useEffect(() => {
     fetchTransactions();
@@ -126,11 +140,13 @@ export default function AllTransactionsPage() {
     }
   };
 
-  const filteredTransactions = transactions.filter((transaction) =>
-    transaction.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (transaction.reference && transaction.reference.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (transaction.category && transaction.category.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  const filteredTransactions = transactions
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .filter((transaction) =>
+      transaction.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (transaction.reference && transaction.reference.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (transaction.category && transaction.category.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
 
   if (loading) {
     return (
@@ -148,16 +164,8 @@ export default function AllTransactionsPage() {
       {/* Header */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <button
-              onClick={() => router.back()}
-              className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
-            >
-              <ArrowLeft className="w-5 h-5" />
-              <span className="font-medium">Back</span>
-            </button>
+          <div className="flex items-center justify-center h-16">
             <h1 className="text-xl font-bold text-gray-900">All Transactions</h1>
-            <div className="w-20"></div>
           </div>
         </div>
       </header>
@@ -295,6 +303,24 @@ export default function AllTransactionsPage() {
                         </div>
                       )}
                     </div>
+
+                    {/* Receipt Button */}
+                    <div className="mt-6 pt-6 border-t border-gray-200">
+                      <Button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openReceipt(transaction);
+                        }}
+                        variant="outline"
+                        size="sm"
+                        className="w-full sm:w-auto"
+                      >
+                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                        </svg>
+                        View Receipt
+                      </Button>
+                    </div>
                   </div>
                 )}
               </div>
@@ -302,6 +328,13 @@ export default function AllTransactionsPage() {
           </div>
         )}
       </main>
+
+      {/* Receipt Modal */}
+      <ReceiptModal
+        transaction={selectedTransaction}
+        isOpen={isReceiptModalOpen}
+        onClose={closeReceipt}
+      />
     </div>
   );
 }

@@ -48,12 +48,14 @@ export interface Referral {
   createdAt: Date
 }
 
-
+import mongoose from "mongoose"
 import { MongoClient, ObjectId } from "mongodb"
+
 const uri = process.env.DATABASE_URL || ""
 const client = new MongoClient(uri)
 const dbName = uri.split("/").pop()?.split("?")[0] || "eguy"
 let db: any
+let mongooseConnected = false
 
 async function getDb() {
   if (!db) {
@@ -63,8 +65,19 @@ async function getDb() {
   return db
 }
 
-
 export class Database {
+  static async connectMongoose() {
+    if (!mongooseConnected && uri) {
+      try {
+        await mongoose.connect(uri)
+        mongooseConnected = true
+        console.log("Mongoose connected successfully")
+      } catch (error) {
+        console.error("Mongoose connection error:", error)
+        throw error
+      }
+    }
+  }
   static async findUserByReferralCode(referralCode: string): Promise<DatabaseUser | null> {
     const db = await getDb();
     const user = await db.collection("users").findOne({ referralCode });
@@ -87,37 +100,28 @@ export class Database {
       id: user._id.toString(),
     };
   }
-  static async updateUserByEmail(email: string, updates: Partial<DatabaseUser>): Promise<DatabaseUser | null> {
-    const db = await getDb();
-    await db.collection("users").updateOne(
+  static async updateUserByEmail(email: string, updates: Partial<Omit<DatabaseUser, "id" | "createdAt" | "updatedAt" | "email" | "passwordHash">>): Promise<DatabaseUser | null> {
+    const db = await getDb()
+    const result = await db.collection("users").updateOne(
       { email },
-      { $set: { ...updates, updatedAt: new Date() } }
-    );
-    const user = await db.collection("users").findOne({ email });
-    if (!user) return null;
+      {
+        $set: {
+          ...updates,
+          updatedAt: new Date()
+        }
+      }
+    )
+
+    if (result.matchedCount === 0) {
+      return null
+    }
+
+    // Return the updated user
+    const updatedUser = await db.collection("users").findOne({ email })
     return {
-      ...user,
-      id: user._id.toString(),
-    };
-  }
-  static async saveVerificationToken(userId: string, token: string, expires: number): Promise<void> {
-    const db = await getDb();
-    await db.collection("verification_tokens").updateOne(
-      { userId },
-      { $set: { token, expires, used: false } },
-      { upsert: true }
-    );
-  }
-  static async getDb() {
-    return await getDb();
-  }
-  static async saveResetToken(userId: string, token: string, expires: number): Promise<void> {
-    const db = await getDb();
-    await db.collection("reset_tokens").updateOne(
-      { userId },
-      { $set: { token, expires, used: false } },
-      { upsert: true }
-    );
+      ...updatedUser,
+      id: updatedUser._id.toString(),
+    }
   }
   static async createUser(userData: Omit<DatabaseUser, "id" | "createdAt" | "updatedAt">): Promise<DatabaseUser> {
     const db = await getDb();
@@ -191,6 +195,12 @@ export class Database {
   static async getUserTransactions(userId: string): Promise<Transaction[]> {
     const db = await getDb()
     const transactions = await db.collection("transactions").find({ userId }).toArray()
+    return transactions.map((t: any) => ({ ...t, id: t._id.toString() }))
+  }
+
+  static async getAllTransactions(): Promise<Transaction[]> {
+    const db = await getDb()
+    const transactions = await db.collection("transactions").find({}).toArray()
     return transactions.map((t: any) => ({ ...t, id: t._id.toString() }))
   }
 

@@ -4,19 +4,20 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   const body = await request.json();
-  const { fullName, phone, avatar } = body;
-  if (!fullName || !phone) {
-    return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
-  }
+  const { fullName, phone, avatar, payoutAccount } = body;
+
   const user = await Database.findUserByEmail(session.user.email);
   if (!user) {
     return NextResponse.json({ error: "User not found" }, { status: 404 });
   }
+
   const updated = await Database.updateUserByEmail(session.user.email, {
     fullName,
     phone,
     avatar,
+    payoutAccount,
   });
+
   if (!updated) {
     return NextResponse.json({ error: "Failed to update user" }, { status: 500 });
   }

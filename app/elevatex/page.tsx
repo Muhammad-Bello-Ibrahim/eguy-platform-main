@@ -6,7 +6,6 @@ import { Badge } from "@/components/ui/badge";
 import { DepositModal } from "@/components/dashboard/deposit-modal";
 import { WithdrawModal } from "@/components/dashboard/withdraw-modal";
 import { Users, TrendingUp, Zap, ArrowLeft } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useRouter } from "next/navigation";
 
 // Format time to 12-hour
@@ -37,18 +36,36 @@ export default function ElevatexPage() {
 	const [subscribed, setSubscribed] = useState(false);
 	const [treeComplete, setTreeComplete] = useState(false);
 
-	// Fetch earning history and earning balance
+	const [elevatexTransactions, setElevatexTransactions] = useState<any[]>([]);
+	const [transactionsLoading, setTransactionsLoading] = useState(false);
+
+	// Calculate net earnings from transactions
+	const getNetEarnings = () => {
+		const earnings = elevatexTransactions
+			.filter((tx: any) => tx.type === 'earning' || tx.type === 'referral_bonus')
+			.reduce((sum: number, tx: any) => sum + (tx.amount || 0), 0);
+
+		const expenses = elevatexTransactions
+			.filter((tx: any) => tx.type === 'activation' || tx.type === 'withdrawal')
+			.reduce((sum: number, tx: any) => sum + Math.abs(tx.amount || 0), 0);
+
+		return earnings - expenses;
+	};
+
+	// Fetch all ElevateX-related transactions
 	useEffect(() => {
 		if (subscribed) {
-			fetch("/api/elevatex/earnings/history")
+			setTransactionsLoading(true);
+			fetch("/api/elevatex/transactions")
 				.then((res) => res.json())
 				.then((data) => {
-					setEarningHistory(data.history || []);
-				});
-			fetch("/api/elevatex/earnings")
-				.then((res) => res.json())
-				.then((data) => {
-					setEarnings(data.earnings ?? 0);
+					setElevatexTransactions(data.transactions || []);
+				})
+				.catch((error) => {
+					console.error("Failed to fetch ElevateX transactions:", error);
+				})
+				.finally(() => {
+					setTransactionsLoading(false);
 				});
 		}
 	}, [subscribed]);
@@ -151,12 +168,10 @@ export default function ElevatexPage() {
 
 	if (isLoading) {
 		return (
-			<div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 flex items-center justify-center">
-				<div className="space-y-4 w-full max-w-md">
-					<Skeleton className="h-10 w-2/3 rounded-xl" />
-					<Skeleton className="h-8 w-full rounded-xl" />
-					<Skeleton className="h-8 w-full rounded-xl" />
-					<Skeleton className="h-8 w-1/2 rounded-xl" />
+			<div className="min-h-screen bg-gray-50 flex items-center justify-center">
+				<div className="text-center">
+					<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+					<p className="text-gray-600">Loading ElevateX...</p>
 				</div>
 			</div>
 		);
@@ -164,23 +179,6 @@ export default function ElevatexPage() {
 
 	return (
 		<div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
-			{/* Header */}
-			<header className="sticky top-0 z-40 py-4 bg-white/80 backdrop-blur-sm border-b border-slate-200">
-				<div className="container mx-auto px-4 sm:px-6 lg:px-8">
-					<div className="flex items-center justify-between">
-						<button
-							onClick={() => router.back()}
-							className="flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors"
-						>
-							<ArrowLeft className="w-5 h-5" />
-							<span className="font-medium">Back</span>
-						</button>
-						<h1 className="text-xl font-bold text-slate-900">ElevateX</h1>
-						<div className="w-20"></div>
-					</div>
-				</div>
-			</header>
-
 			{/* Main Content */}
 			<main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-24">
 				{/* Wallet Card - Updated theme */}
@@ -329,37 +327,152 @@ export default function ElevatexPage() {
 					</Card>
 				)}
 
-				{/* Earning History */}
-				<Card className="bg-white/80 backdrop-blur-sm border-slate-200 shadow-lg max-w-md mx-auto">
+				{/* All ElevateX Transactions */}
+				<Card className="bg-white/80 backdrop-blur-sm border-slate-200 shadow-lg max-w-4xl mx-auto">
 					<CardHeader className="pb-3">
 						<CardTitle className="flex items-center gap-2 text-slate-900">
-							<TrendingUp className="w-5 h-5" />
-							Earning History
+							<Zap className="w-5 h-5" />
+							All ElevateX Transactions
 						</CardTitle>
 					</CardHeader>
 					<CardContent className="pt-0">
-						{earningHistory.length === 0 ? (
+						{transactionsLoading ? (
+							<div className="text-center py-8">
+								<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+								<p className="text-slate-600">Loading transactions...</p>
+							</div>
+						) : elevatexTransactions.length === 0 ? (
 							<div className="text-center py-8 text-slate-500">
-								<p>No earnings yet.</p>
+								<p>No ElevateX transactions yet.</p>
+								<p className="text-sm mt-2">All your ElevateX-related transactions will appear here.</p>
 							</div>
 						) : (
 							<div className="space-y-3">
-								{earningHistory.map((tx: any, idx: number) => (
-									<div key={idx} className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
-										{/* User icon: first letter of referred user's name */}
-										<div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-											<span className="text-blue-700 font-bold text-lg">{tx.referredUserName?.charAt(0).toUpperCase() || "?"}</span>
+								{/* Transaction Summary */}
+								<div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 p-4 bg-slate-50 rounded-lg">
+									<div className="text-center">
+										<div className="text-xl font-bold text-blue-600">{elevatexTransactions.length}</div>
+										<div className="text-sm text-slate-600">Total Transactions</div>
+									</div>
+									<div className="text-center">
+										<div className="text-xl font-bold text-green-600">
+											₦{elevatexTransactions
+												.filter((tx: any) => tx.type === 'earning' || tx.type === 'referral_bonus')
+												.reduce((sum: number, tx: any) => sum + (tx.amount || 0), 0)
+												.toLocaleString()}
 										</div>
-										<div className="flex-1 min-w-0">
-											<div className="font-medium text-sm text-slate-900">{tx.referredUserName || "Unknown"}</div>
-											<div className="text-xs text-slate-500">Level {tx.level}</div>
+										<div className="text-sm text-slate-600">Total Earnings</div>
+									</div>
+									<div className="text-center">
+										<div className="text-xl font-bold text-red-600">
+											₦{elevatexTransactions
+												.filter((tx: any) => tx.type === 'activation' || tx.type === 'withdrawal')
+												.reduce((sum: number, tx: any) => sum + Math.abs(tx.amount || 0), 0)
+												.toLocaleString()}
 										</div>
-										<div className="text-right">
-											<div className="text-sm font-bold text-green-600">₦{tx.amount}</div>
-											<div className="text-xs text-slate-400">
-												{tx.date ? formatDDMMYY(tx.date) : tx.date}
+										<div className="text-sm text-slate-600">Total Spent</div>
+									</div>
+									<div className="text-center">
+										<div className={`text-xl font-bold ${getNetEarnings() >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+											₦{Math.abs(getNetEarnings()).toLocaleString()}
+										</div>
+										<div className="text-sm text-slate-600">Net {getNetEarnings() >= 0 ? 'Profit' : 'Loss'}</div>
+									</div>
+								</div>
+
+								{/* Transaction List */}
+								{elevatexTransactions
+									.sort((a: any, b: any) => new Date(b.createdAt || b.date).getTime() - new Date(a.createdAt || a.date).getTime())
+									.map((tx: any, idx: number) => (
+									<div key={idx} className="group bg-white hover:bg-slate-50 rounded-lg p-4 border border-slate-200 hover:border-slate-300 transition-all duration-200">
+										<div className="flex items-center justify-between">
+											<div className="flex items-center gap-3">
+												{/* Transaction type icon */}
+												<div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+													tx.type === 'earning' || tx.type === 'referral_bonus'
+														? 'bg-green-100'
+														: tx.type === 'activation'
+														? 'bg-blue-100'
+														: 'bg-orange-100'
+												}`}>
+													{tx.type === 'earning' || tx.type === 'referral_bonus' ? (
+														<TrendingUp className="w-5 h-5 text-green-600" />
+													) : tx.type === 'activation' ? (
+														<Zap className="w-5 h-5 text-blue-600" />
+													) : (
+														<ArrowLeft className="w-5 h-5 text-orange-600" />
+													)}
+												</div>
+												<div className="flex-1 min-w-0">
+													<div className="font-semibold text-slate-900">{tx.description || `${tx.type.charAt(0).toUpperCase() + tx.type.slice(1)} Transaction`}</div>
+													<div className="flex items-center gap-2 mt-1">
+														<span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+															tx.type === 'earning' || tx.type === 'referral_bonus'
+																? 'bg-green-100 text-green-800'
+																: tx.type === 'activation'
+																? 'bg-blue-100 text-blue-800'
+																: 'bg-orange-100 text-orange-800'
+														}`}>
+															{tx.type.replace('_', ' ').toUpperCase()}
+														</span>
+														{tx.level && (
+															<span className="text-xs text-slate-500">Level {tx.level}</span>
+														)}
+													</div>
+												</div>
+											</div>
+
+											<div className="text-right">
+												<div className={`text-lg font-bold ${
+													tx.type === 'earning' || tx.type === 'referral_bonus'
+														? 'text-green-600'
+														: 'text-red-600'
+												}`}>
+													{tx.type === 'earning' || tx.type === 'referral_bonus' ? '+' : '-'}
+													₦{Math.abs(tx.amount || 0).toLocaleString()}
+												</div>
+												<div className="text-sm text-slate-500">
+													{tx.createdAt ? formatDDMMYY(tx.createdAt) : tx.date}
+												</div>
+												{tx.status && (
+													<div className={`text-xs mt-1 px-2 py-0.5 rounded-full inline-block ${
+														tx.status === 'completed'
+															? 'bg-green-100 text-green-800'
+															: tx.status === 'pending'
+															? 'bg-yellow-100 text-yellow-800'
+															: 'bg-red-100 text-red-800'
+													}`}>
+														{tx.status.toUpperCase()}
+													</div>
+												)}
 											</div>
 										</div>
+
+										{/* Additional Details */}
+										{(tx.reference || tx.provider || tx.recipient) && (
+											<div className="mt-3 pt-3 border-t border-slate-200">
+												<div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+													{tx.reference && (
+														<div>
+															<span className="font-medium text-slate-600">Reference:</span>
+															<div className="font-mono text-slate-900 mt-1">{tx.reference}</div>
+														</div>
+													)}
+													{tx.provider && (
+														<div>
+															<span className="font-medium text-slate-600">Provider:</span>
+															<div className="text-slate-900 mt-1">{tx.provider}</div>
+														</div>
+													)}
+													{tx.recipient && (
+														<div>
+															<span className="font-medium text-slate-600">Recipient:</span>
+															<div className="text-slate-900 mt-1">{tx.recipient}</div>
+														</div>
+													)}
+												</div>
+											</div>
+										)}
 									</div>
 								))}
 							</div>

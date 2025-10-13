@@ -12,6 +12,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Loader2, Wifi } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { Skeleton } from "@/components/ui/skeleton"
+import { SuccessModal } from "@/components/ui/success-modal"
+import { ErrorModal } from "@/components/ui/error-modal"
 
 interface DataModalProps {
   isOpen: boolean
@@ -33,7 +35,8 @@ type DataPlan = {
   duration: string;
   type: string;
   status: string;
-  price: { api_user: string }[];
+  price: number;
+  apiPrice: number;
 };
 
 type BundlesResponse = {
@@ -50,8 +53,78 @@ export function DataModal({ isOpen, onClose, onSuccess }: DataModalProps) {
       try {
         const res = await fetch("/api/admin/data-plans");
         const data = await res.json();
-        // Group by network for dropdown compatibility
-        const grouped = data.reduce((acc: any, plan: any) => {
+        if (data && data.length > 0) {
+          // Group by network for dropdown compatibility
+          const grouped = data.reduce((acc: any, plan: any) => {
+            if (!acc[plan.network]) acc[plan.network] = [];
+            acc[plan.network].push(plan);
+            return acc;
+          }, {});
+          setBundles(
+            Object.keys(grouped).map((network) => ({
+              NETWORK: network,
+              BUNDLE: grouped[network],
+            }))
+          );
+        } else {
+          // Fallback data if database is empty
+          const fallbackData = [
+            // MTN Plans
+            { _id: '1', network: 'MTN', dataBundle: '100MB', dataPlan: 'MTN_100MB', duration: '1 Day', type: 'Daily', status: 'Active', price: 100, apiPrice: 90 },
+            { _id: '2', network: 'MTN', dataBundle: '500MB', dataPlan: 'MTN_500MB', duration: '1 Day', type: 'Daily', status: 'Active', price: 150, apiPrice: 135 },
+            { _id: '3', network: 'MTN', dataBundle: '1GB', dataPlan: 'MTN_1GB', duration: '1 Day', type: 'Daily', status: 'Active', price: 250, apiPrice: 225 },
+            { _id: '4', network: 'MTN', dataBundle: '2GB', dataPlan: 'MTN_2GB', duration: '3 Days', type: 'Weekly', status: 'Active', price: 500, apiPrice: 450 },
+            { _id: '5', network: 'MTN', dataBundle: '5GB', dataPlan: 'MTN_5GB', duration: '7 Days', type: 'Weekly', status: 'Active', price: 1000, apiPrice: 900 },
+            // Airtel Plans
+            { _id: '6', network: 'AIRTEL', dataBundle: '100MB', dataPlan: 'AIRTEL_100MB', duration: '1 Day', type: 'Daily', status: 'Active', price: 100, apiPrice: 90 },
+            { _id: '7', network: 'AIRTEL', dataBundle: '500MB', dataPlan: 'AIRTEL_500MB', duration: '1 Day', type: 'Daily', status: 'Active', price: 150, apiPrice: 135 },
+            { _id: '8', network: 'AIRTEL', dataBundle: '1GB', dataPlan: 'AIRTEL_1GB', duration: '1 Day', type: 'Daily', status: 'Active', price: 250, apiPrice: 225 },
+            { _id: '9', network: 'AIRTEL', dataBundle: '2GB', dataPlan: 'AIRTEL_2GB', duration: '3 Days', type: 'Weekly', status: 'Active', price: 500, apiPrice: 450 },
+            { _id: '10', network: 'AIRTEL', dataBundle: '5GB', dataPlan: 'AIRTEL_5GB', duration: '7 Days', type: 'Weekly', status: 'Active', price: 1000, apiPrice: 900 },
+            // GLO Plans
+            { _id: '11', network: 'GLO', dataBundle: '100MB', dataPlan: 'GLO_100MB', duration: '1 Day', type: 'Daily', status: 'Active', price: 100, apiPrice: 90 },
+            { _id: '12', network: 'GLO', dataBundle: '500MB', dataPlan: 'GLO_500MB', duration: '1 Day', type: 'Daily', status: 'Active', price: 150, apiPrice: 135 },
+            { _id: '13', network: 'GLO', dataBundle: '1GB', dataPlan: 'GLO_1GB', duration: '1 Day', type: 'Daily', status: 'Active', price: 250, apiPrice: 225 },
+            { _id: '14', network: 'GLO', dataBundle: '2GB', dataPlan: 'GLO_2GB', duration: '3 Days', type: 'Weekly', status: 'Active', price: 500, apiPrice: 450 },
+            { _id: '15', network: 'GLO', dataBundle: '5GB', dataPlan: 'GLO_5GB', duration: '7 Days', type: 'Weekly', status: 'Active', price: 1000, apiPrice: 900 },
+            // 9MOBILE Plans
+            { _id: '16', network: '9MOBILE', dataBundle: '100MB', dataPlan: '9MOBILE_100MB', duration: '1 Day', type: 'Daily', status: 'Active', price: 100, apiPrice: 90 },
+            { _id: '17', network: '9MOBILE', dataBundle: '500MB', dataPlan: '9MOBILE_500MB', duration: '1 Day', type: 'Daily', status: 'Active', price: 150, apiPrice: 135 },
+            { _id: '18', network: '9MOBILE', dataBundle: '1GB', dataPlan: '9MOBILE_1GB', duration: '1 Day', type: 'Daily', status: 'Active', price: 250, apiPrice: 225 },
+            { _id: '19', network: '9MOBILE', dataBundle: '2GB', dataPlan: '9MOBILE_2GB', duration: '3 Days', type: 'Weekly', status: 'Active', price: 500, apiPrice: 450 },
+            { _id: '20', network: '9MOBILE', dataBundle: '5GB', dataPlan: '9MOBILE_5GB', duration: '7 Days', type: 'Weekly', status: 'Active', price: 1000, apiPrice: 900 },
+          ];
+
+          const grouped = fallbackData.reduce((acc: any, plan: any) => {
+            if (!acc[plan.network]) acc[plan.network] = [];
+            acc[plan.network].push(plan);
+            return acc;
+          }, {});
+          setBundles(
+            Object.keys(grouped).map((network) => ({
+              NETWORK: network,
+              BUNDLE: grouped[network],
+            }))
+          );
+        }
+      } catch (e) {
+        // Fallback data if API fails
+        const fallbackData = [
+          // MTN Plans
+          { _id: '1', network: 'MTN', dataBundle: '100MB', dataPlan: 'MTN_100MB', duration: '1 Day', type: 'Daily', status: 'Active', price: 100, apiPrice: 90 },
+          { _id: '2', network: 'MTN', dataBundle: '500MB', dataPlan: 'MTN_500MB', duration: '1 Day', type: 'Daily', status: 'Active', price: 150, apiPrice: 135 },
+          { _id: '3', network: 'MTN', dataBundle: '1GB', dataPlan: 'MTN_1GB', duration: '1 Day', type: 'Daily', status: 'Active', price: 250, apiPrice: 225 },
+          { _id: '4', network: 'MTN', dataBundle: '2GB', dataPlan: 'MTN_2GB', duration: '3 Days', type: 'Weekly', status: 'Active', price: 500, apiPrice: 450 },
+          { _id: '5', network: 'MTN', dataBundle: '5GB', dataPlan: 'MTN_5GB', duration: '7 Days', type: 'Weekly', status: 'Active', price: 1000, apiPrice: 900 },
+          // Airtel Plans
+          { _id: '6', network: 'AIRTEL', dataBundle: '100MB', dataPlan: 'AIRTEL_100MB', duration: '1 Day', type: 'Daily', status: 'Active', price: 100, apiPrice: 90 },
+          { _id: '7', network: 'AIRTEL', dataBundle: '500MB', dataPlan: 'AIRTEL_500MB', duration: '1 Day', type: 'Daily', status: 'Active', price: 150, apiPrice: 135 },
+          { _id: '8', network: 'AIRTEL', dataBundle: '1GB', dataPlan: 'AIRTEL_1GB', duration: '1 Day', type: 'Daily', status: 'Active', price: 250, apiPrice: 225 },
+          { _id: '9', network: 'AIRTEL', dataBundle: '2GB', dataPlan: 'AIRTEL_2GB', duration: '3 Days', type: 'Weekly', status: 'Active', price: 500, apiPrice: 450 },
+          { _id: '10', network: 'AIRTEL', dataBundle: '5GB', dataPlan: 'AIRTEL_5GB', duration: '7 Days', type: 'Weekly', status: 'Active', price: 1000, apiPrice: 900 },
+        ];
+
+        const grouped = fallbackData.reduce((acc: any, plan: any) => {
           if (!acc[plan.network]) acc[plan.network] = [];
           acc[plan.network].push(plan);
           return acc;
@@ -62,8 +135,6 @@ export function DataModal({ isOpen, onClose, onSuccess }: DataModalProps) {
             BUNDLE: grouped[network],
           }))
         );
-      } catch (e) {
-        // fallback: do nothing
       }
       setFetching(false);
     }
@@ -76,6 +147,9 @@ export function DataModal({ isOpen, onClose, onSuccess }: DataModalProps) {
   })
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
+  const [successModalOpen, setSuccessModalOpen] = useState(false)
+  const [errorModalOpen, setErrorModalOpen] = useState(false)
+  const [transactionData, setTransactionData] = useState<any>(null)
   const { toast } = useToast()
 
   const selectedPlan =
@@ -122,22 +196,34 @@ export function DataModal({ isOpen, onClose, onSuccess }: DataModalProps) {
         throw new Error(data.error || "Data purchase failed")
       }
 
-      toast({
+      // Success - show success modal
+      setTransactionData({
         title: "Data Purchase Successful",
         description: `${selectedPlan.dataBundle} ${formData.network} data sent to ${formData.phone}`,
+        amount: selectedPlan.price,
+        service: `${formData.network} Data`,
+        transactionId: data.reference
       })
+      setSuccessModalOpen(true)
 
       onSuccess()
       onClose()
       setFormData({ network: "", phone: "", plan: "" })
     } catch (error) {
-      setError(error instanceof Error ? error.message : "Something went wrong")
+      // Error - show error modal
+      setTransactionData({
+        title: "Data Purchase Failed",
+        description: error instanceof Error ? error.message : "Something went wrong",
+        errorCode: "DATA_PURCHASE_ERROR"
+      })
+      setErrorModalOpen(true)
     } finally {
       setIsLoading(false)
     }
   }
 
   return (
+    <>
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md bg-white border border-gray-200 shadow-lg">
         <DialogHeader className="pb-4">
@@ -240,14 +326,6 @@ export function DataModal({ isOpen, onClose, onSuccess }: DataModalProps) {
 
               <div className="flex gap-3 pt-2">
                 <Button
-                  type="button"
-                  variant="outline"
-                  onClick={onClose}
-                  className="flex-1 rounded-xl border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 transition-all duration-200"
-                >
-                  Cancel
-                </Button>
-                <Button
                   type="submit"
                   disabled={isLoading || !formData.network || !formData.phone || !formData.plan}
                   className="flex-1 rounded-xl bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 text-white font-bold text-lg shadow-lg hover:shadow-teal-500/25 transition-all duration-200 border-0 disabled:opacity-50"
@@ -267,5 +345,36 @@ export function DataModal({ isOpen, onClose, onSuccess }: DataModalProps) {
         </form>
       </DialogContent>
     </Dialog>
+
+    {/* Success Modal */}
+    {transactionData && (
+      <SuccessModal
+        isOpen={successModalOpen}
+        onClose={() => {
+          setSuccessModalOpen(false)
+          setTransactionData(null)
+        }}
+        title={transactionData.title}
+        description={transactionData.description}
+        transactionId={transactionData.transactionId}
+        amount={transactionData.amount}
+        service={transactionData.service}
+      />
+    )}
+
+    {/* Error Modal */}
+    {transactionData && (
+      <ErrorModal
+        isOpen={errorModalOpen}
+        onClose={() => {
+          setErrorModalOpen(false)
+          setTransactionData(null)
+        }}
+        title={transactionData.title}
+        description={transactionData.description}
+        errorCode={transactionData.errorCode}
+      />
+    )}
+    </>
   )
 }
