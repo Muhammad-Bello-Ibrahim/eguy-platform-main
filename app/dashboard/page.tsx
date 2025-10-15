@@ -123,10 +123,14 @@ export default function DashboardPage() {
     const params = new URLSearchParams(window.location.search);
     const reference = params.get("reference") || params.get("trxref");
     if (reference) {
+      console.log("Processing Paystack callback with reference:", reference);
+
       fetch("/api/user")
         .then((res) => res.json())
         .then((data) => {
           if (data.user && data.user.id) {
+            console.log("Verifying payment for user:", data.user.id);
+
             fetch("/api/wallet/deposit/verify", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -134,12 +138,19 @@ export default function DashboardPage() {
             })
               .then((res) => res.json())
               .then((result) => {
+                console.log("Verification result:", result);
+
                 if (result.error) {
                   console.error("Deposit verification failed:", result.error);
+                  // Could show error toast here
                 } else {
                   console.log("Deposit verification successful:", result.message);
+                  // Refresh the page data to show updated balance
+                  setRefreshKey((prev) => prev + 1);
+                  fetchUserData();
                 }
-                setRefreshKey((prev) => prev + 1);
+
+                // Clean up URL parameters
                 const url = new URL(window.location.href);
                 url.searchParams.delete("reference");
                 url.searchParams.delete("trxref");
@@ -148,11 +159,15 @@ export default function DashboardPage() {
               .catch((error) => {
                 console.error("Deposit verification error:", error);
                 setRefreshKey((prev) => prev + 1);
+
+                // Clean up URL parameters even on error
                 const url = new URL(window.location.href);
                 url.searchParams.delete("reference");
                 url.searchParams.delete("trxref");
                 window.history.replaceState({}, document.title, url.pathname);
               });
+          } else {
+            console.error("No user found for verification");
           }
         })
         .catch((error) => {

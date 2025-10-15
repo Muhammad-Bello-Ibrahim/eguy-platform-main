@@ -21,6 +21,11 @@ export async function POST(request: NextRequest) {
         "Content-Type": "application/json",
       },
     });
+
+    if (!verifyRes.ok) {
+      return NextResponse.json({ error: "Failed to verify transaction with Paystack" }, { status: 500 });
+    }
+
     const verifyData = await verifyRes.json();
     if (!verifyData.status || verifyData.data.status !== "success") {
       return NextResponse.json({ error: "Payment not successful" }, { status: 400 });
@@ -52,20 +57,27 @@ export async function POST(request: NextRequest) {
       console.error(`Amount mismatch: expected ${expectedAmount}, got ${paystackAmount}`);
       return NextResponse.json({ error: "Amount verification failed" }, { status: 400 });
     }
-    // Show wallet balance before deposit
-    const userBefore = await Database.findUserById(userId);
-    console.log("Wallet balance before deposit:", userBefore?.walletBalance);
 
-    // Update transaction record to completed
+    // Credit user's wallet
+    await Database.updateUserWallet(userId, expectedAmount);
     await Database.updateTransactionStatus(reference, "completed");
 
-    // Credit user's wallet with the expected amount
-    await Database.updateUserWallet(userId, expectedAmount);
+    // Create success notification
+    await Database.createNotification({
+      userId,
+      type: "transaction",
+      title: "Deposit Successful",
+      message: `₦${expectedAmount.toLocaleString()} has been added to your wallet`,
+      amount: expectedAmount,
+      status: "success",
+      actionUrl: "/transactions"
+    });
 
-    // Show wallet balance after deposit
-    const userAfter = await Database.findUserById(userId);
-    console.log("Wallet balance after deposit:", userAfter?.walletBalance);
-    return NextResponse.json({ message: "Wallet credited successfully" });
+    return NextResponse.json({
+      message: "Wallet credited successfully",
+      amount: expectedAmount,
+      newBalance: (await Database.findUserById(userId))?.walletBalance
+    });
   } catch (error) {
     console.error("Paystack verify error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

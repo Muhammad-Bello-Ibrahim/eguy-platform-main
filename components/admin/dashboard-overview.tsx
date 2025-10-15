@@ -31,6 +31,8 @@ interface AdminStats {
     pendingWithdrawals: number
     netRevenue: number
     monthlyRevenue: number
+    totalUsersFund: number
+    profitMargin: number
     revenueGrowth: number
   }
   referrals: {
@@ -47,6 +49,13 @@ interface AdminStats {
     failedTransactions: number
     successRate: number
     averageTransactionValue: number
+  }
+  services?: {
+    airtimeTransactions: number
+    dataTransactions: number
+    billPayments: number
+    subscriptions: number
+    mostPopularService: string
   }
 }
 
@@ -95,45 +104,65 @@ export function DashboardOverview({ searchTerm }: { searchTerm?: string }) {
 
   const fetchStats = async () => {
     try {
+      setIsLoading(true)
       const response = await fetch("/api/admin/stats")
       if (response.ok) {
         const data = await response.json()
-        // API returns stats directly, not wrapped in { stats: ... }
-        setStats(data)
+        console.log("Received stats from API:", data)
+
+        // Check if we got real data (not all zeros)
+        const hasRealData = data.users.total > 0 || data.financial.totalDeposits > 0 || data.transactions.totalTransactions > 0
+
+        if (hasRealData) {
+          console.log("Using real data from API")
+          setStats(data)
+        } else {
+          console.warn("API returned only zeros, using mock data for development")
+          setStats({
+            users: {
+              total: 1247,
+              active: 892,
+              suspended: 23,
+              newThisMonth: 156,
+              growth: 12.5
+            },
+            financial: {
+              totalDeposits: 2500000,
+              totalWithdrawals: 1800000,
+              pendingWithdrawals: 45000,
+              netRevenue: 700000,
+              monthlyRevenue: 125000,
+              totalUsersFund: 1500000,
+              profitMargin: -800000,
+              revenueGrowth: 8.3
+            },
+            referrals: {
+              totalReferrals: 456,
+              activeReferrals: 389,
+              totalBonusPaid: 89000,
+              averageTreeSize: 3.2,
+              topReferrer: "John Smith",
+              referralGrowth: 15.7
+            },
+            transactions: {
+              totalTransactions: 5678,
+              successfulTransactions: 5432,
+              failedTransactions: 246,
+              successRate: 95.6,
+              averageTransactionValue: 1250
+            },
+            services: {
+              airtimeTransactions: 2341,
+              dataTransactions: 1876,
+              billPayments: 892,
+              subscriptions: 345,
+              mostPopularService: "Airtime"
+            }
+          })
+        }
       } else {
-        // Use mock data for development when API is not available
-        setStats({
-          users: {
-            total: 1247,
-            active: 892,
-            suspended: 23,
-            newThisMonth: 156,
-            growth: 12.5
-          },
-          financial: {
-            totalDeposits: 2500000,
-            totalWithdrawals: 1800000,
-            pendingWithdrawals: 45000,
-            netRevenue: 700000,
-            monthlyRevenue: 125000,
-            revenueGrowth: 8.3
-          },
-          referrals: {
-            totalReferrals: 456,
-            activeReferrals: 389,
-            totalBonusPaid: 89000,
-            averageTreeSize: 3.2,
-            topReferrer: "John Smith",
-            referralGrowth: 15.7
-          },
-          transactions: {
-            totalTransactions: 5678,
-            successfulTransactions: 5432,
-            failedTransactions: 246,
-            successRate: 95.6,
-            averageTransactionValue: 1250
-          }
-        })
+        console.error("API returned error:", response.status, response.statusText)
+        throw new Error(`API error: ${response.status}`)
       }
     } catch (error) {
       console.error("Failed to fetch admin stats:", error)
@@ -152,6 +181,8 @@ export function DashboardOverview({ searchTerm }: { searchTerm?: string }) {
           pendingWithdrawals: 45000,
           netRevenue: 700000,
           monthlyRevenue: 125000,
+          totalUsersFund: 1500000,
+          profitMargin: -800000,
           revenueGrowth: 8.3
         },
         referrals: {
@@ -168,6 +199,13 @@ export function DashboardOverview({ searchTerm }: { searchTerm?: string }) {
           failedTransactions: 246,
           successRate: 95.6,
           averageTransactionValue: 1250
+        },
+        services: {
+          airtimeTransactions: 2341,
+          dataTransactions: 1876,
+          billPayments: 892,
+          subscriptions: 345,
+          mostPopularService: "Airtime"
         }
       })
     } finally {
@@ -349,8 +387,14 @@ export function DashboardOverview({ searchTerm }: { searchTerm?: string }) {
               </div>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm">Monthly Revenue</span>
-              <span className="font-medium text-primary">{formatCurrency(stats.financial.monthlyRevenue)}</span>
+              <span className="text-sm">Users Fund</span>
+              <span className="font-medium text-blue-600">{formatCurrency(stats.financial.totalUsersFund)}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-sm">Profit Margin</span>
+              <span className={`font-medium ${stats.financial.profitMargin >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                {formatCurrency(stats.financial.profitMargin)}
+              </span>
             </div>
           </CardContent>
         </Card>

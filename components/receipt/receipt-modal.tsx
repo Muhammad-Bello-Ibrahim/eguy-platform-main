@@ -23,7 +23,7 @@ import {
   GraduationCap,
   ArrowDownLeft,
 } from "lucide-react";
-// import jsPDF from "jspdf";
+import jsPDF from "jspdf";
 
 interface Transaction {
   id: string;
@@ -133,55 +133,123 @@ export function ReceiptModal({ transaction, isOpen, onClose }: ReceiptModalProps
   const generatePDF = async () => {
     setIsGeneratingPDF(true);
     try {
-      // For now, we'll create a simple text-based receipt
-      // In a production app, you would use jsPDF or a similar library
-      const receiptContent = `
-eGuy Transaction Receipt
+      const response = await fetch("/api/receipt", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          transactionId: transaction.id,
+          action: "generate"
+        }),
+      });
 
-Transaction ID: ${transaction.id}
-Date & Time: ${formatDate(transaction.createdAt)}
-Type: ${transaction.type.replace("_", " ").toUpperCase()}
-Description: ${transaction.description}
-Amount: ${formatCurrency(transaction.amount)}
-Status: ${transaction.status.toUpperCase()}
-${transaction.reference ? `Reference: ${transaction.reference}` : ''}
-${transaction.provider ? `Provider: ${transaction.provider}` : ''}
-${transaction.recipient ? `Recipient: ${transaction.recipient}` : ''}
-${transaction.category ? `Category: ${transaction.category}` : ''}
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to generate PDF receipt");
+      }
 
-Thank you for using eGuy!
-For support, contact us at support@eguy.app
-      `.trim();
-
-      // Create a blob and download it
-      const blob = new Blob([receiptContent], { type: 'text/plain' });
+      // Create blob from response and download
+      const blob = await response.blob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `receipt-${transaction.id}.txt`;
+      a.download = `eGuy-Digital-Wallet-receipt-${transaction.id}.pdf`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error("Error generating receipt:", error);
-      alert("Failed to generate receipt. Please try again.");
+
+    } catch (error: any) {
+      console.error("Error generating PDF receipt:", error);
+      alert(error.message || "Failed to generate PDF receipt. Please try again.");
     } finally {
       setIsGeneratingPDF(false);
+    }
+  };
+
+  const getTransactionIconColor = (type: string) => {
+    switch (type) {
+      case "deposit":
+      case "referral_bonus":
+        return "#10B981"; // Green
+      case "withdrawal":
+        return "#EF4444"; // Red
+      case "transfer":
+        return "#3B82F6"; // Blue
+      case "payment":
+        return "#F59E0B"; // Orange
+      case "airtime":
+      case "data":
+        return "#06B6D4"; // Cyan
+      case "electricity":
+        return "#EAB308"; // Yellow
+      case "cable":
+        return "#EC4899"; // Pink
+      default:
+        return "#6B7280"; // Gray
+    }
+  };
+
+  const getTransactionIconText = (type: string) => {
+    switch (type) {
+      case "deposit":
+      case "referral_bonus":
+        return "+";
+      case "withdrawal":
+        return "-";
+      case "transfer":
+        return "→";
+      case "payment":
+        return "💳";
+      case "airtime":
+        return "📱";
+      case "data":
+        return "📶";
+      case "electricity":
+        return "⚡";
+      case "cable":
+        return "📺";
+      default:
+        return "?";
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "completed":
+        return "#10B981"; // Green
+      case "pending":
+        return "#F59E0B"; // Yellow
+      case "failed":
+        return "#EF4444"; // Red
+      case "cancelled":
+        return "#6B7280"; // Gray
+      default:
+        return "#6B7280"; // Gray
     }
   };
 
   const sendReceiptEmail = async () => {
     setIsSendingEmail(true);
     try {
-      // In a real implementation, this would call an API endpoint
-      // For now, we'll simulate the email sending
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const response = await fetch("/api/receipt", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          transactionId: transaction.id,
+          action: "email"
+        }),
+      });
 
-      alert("Receipt sent to your email successfully!");
-    } catch (error) {
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to send receipt email");
+      }
+
+      const result = await response.json();
+      alert(result.message || "Receipt sent to your email successfully!");
+    } catch (error: any) {
       console.error("Error sending email:", error);
-      alert("Failed to send receipt email. Please try again.");
+      alert(error.message || "Failed to send receipt email. Please try again.");
     } finally {
       setIsSendingEmail(false);
     }

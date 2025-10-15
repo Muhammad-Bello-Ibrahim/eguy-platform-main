@@ -50,8 +50,9 @@ export interface Referral {
 
 import mongoose from "mongoose"
 import { MongoClient, ObjectId } from "mongodb"
+import Notification from "./models/Notification"
 
-const uri = process.env.DATABASE_URL || ""
+const uri = process.env.MONGODB_URI || "mongodb://localhost:27017/eguy"
 const client = new MongoClient(uri)
 const dbName = uri.split("/").pop()?.split("?")[0] || "eguy"
 let db: any
@@ -59,8 +60,14 @@ let mongooseConnected = false
 
 async function getDb() {
   if (!db) {
-    await client.connect()
-    db = client.db(dbName)
+    try {
+      await client.connect()
+      db = client.db(dbName)
+      console.log("Database connected successfully")
+    } catch (error) {
+      console.error("Database connection failed:", error)
+      throw new Error("Database connection failed")
+    }
   }
   return db
 }
@@ -100,10 +107,10 @@ export class Database {
       id: user._id.toString(),
     };
   }
-  static async updateUserByEmail(email: string, updates: Partial<Omit<DatabaseUser, "id" | "createdAt" | "updatedAt" | "email" | "passwordHash">>): Promise<DatabaseUser | null> {
+  static async updateUserById(userId: string, updates: Partial<Omit<DatabaseUser, "id" | "createdAt" | "updatedAt">>): Promise<DatabaseUser | null> {
     const db = await getDb()
     const result = await db.collection("users").updateOne(
-      { email },
+      { _id: new ObjectId(userId) },
       {
         $set: {
           ...updates,
@@ -117,7 +124,7 @@ export class Database {
     }
 
     // Return the updated user
-    const updatedUser = await db.collection("users").findOne({ email })
+    const updatedUser = await db.collection("users").findOne({ _id: new ObjectId(userId) })
     return {
       ...updatedUser,
       id: updatedUser._id.toString(),
@@ -162,7 +169,7 @@ export class Database {
   static async findUserById(id: string): Promise<DatabaseUser | null> {
     const db = await getDb()
     const user = await db.collection("users").findOne({ _id: new ObjectId(id) })
-    if (!user) return null
+    if (!user) return null;
     return {
       ...user,
       id: user._id.toString(),
@@ -198,10 +205,14 @@ export class Database {
     return transactions.map((t: any) => ({ ...t, id: t._id.toString() }))
   }
 
-  static async getAllTransactions(): Promise<Transaction[]> {
+  static async findTransactionById(id: string): Promise<Transaction | null> {
     const db = await getDb()
-    const transactions = await db.collection("transactions").find({}).toArray()
-    return transactions.map((t: any) => ({ ...t, id: t._id.toString() }))
+    const transaction = await db.collection("transactions").findOne({ _id: new ObjectId(id) })
+    if (!transaction) return null
+    return {
+      ...transaction,
+      id: transaction._id.toString(),
+    }
   }
 
   static async updateTransactionStatus(reference: string, status: "pending" | "completed" | "failed" | "cancelled"): Promise<void> {
@@ -232,13 +243,425 @@ export class Database {
     return referrals.map((r: any) => ({ ...r, id: r._id.toString() }))
   }
 
-  static async findTransactionByReference(reference: string): Promise<Transaction | null> {
-    const db = await getDb()
-    const transaction = await db.collection("transactions").findOne({ reference })
-    if (!transaction) return null
-    return {
-      ...transaction,
-      id: transaction._id.toString(),
+  static async createNotification(notificationData: {
+    userId: string;
+    type: "transaction" | "referral" | "security" | "system" | "promotion";
+    title: string;
+    message: string;
+    amount?: number;
+    status?: "success" | "error" | "warning" | "info";
+    actionUrl?: string;
+    metadata?: Record<string, any>;
+  }): Promise<void> {
+    await this.connectMongoose();
+    await Notification.create({
+      userId: new ObjectId(notificationData.userId),
+      type: notificationData.type,
+      title: notificationData.title,
+      message: notificationData.message,
+      amount: notificationData.amount,
+      status: notificationData.status || "info",
+      actionUrl: notificationData.actionUrl,
+      metadata: notificationData.metadata,
+    });
+  }
+
+  static async getUserNotifications(
+    userId: string,
+    options: {
+      type?: string;
+      limit?: number;
+      offset?: number;
+      unreadOnly?: boolean;
+    } = {}
+  ): Promise<any[]> {
+    await this.connectMongoose();
+    const { type, limit = 20, offset = 0, unreadOnly = false } = options;
+
+    let query: any = { userId: new ObjectId(userId) };
+
+    if (type && type !== "all") {
+      if (type === "unread") {
+        query.read = false;
+      } else {
+        query.type = type;
+      }
+    }
+
+    if (unreadOnly) {
+      query.read = false;
+    }
+
+    const notifications = await Notification
+      .find(query)
+      .sort({ createdAt: -1 })
+      .skip(offset)
+      .limit(limit)
+      .lean();
+
+    return notifications.map((n: any) => ({
+      id: n._id.toString(),
+      type: n.type,
+      title: n.title,
+      message: n.message,
+      amount: n.amount,
+      status: n.status,
+      read: n.read,
+      createdAt: n.createdAt,
+      actionUrl: n.actionUrl,
+      metadata: n.metadata,
+    }));
+  }
+
+  static async markNotificationsAsRead(userId: string, notificationIds: string[]): Promise<void> {
+    await this.connectMongoose();
+    await Notification.updateMany(
+      {
+        userId: new ObjectId(userId),
+        _id: { $in: notificationIds.map(id => new ObjectId(id)) }
+      },
+      { read: true }
+    );
+  }
+
+  static async deleteNotification(userId: string, notificationId: string): Promise<void> {
+    await this.connectMongoose();
+    await Notification.findOneAndDelete({
+      _id: new ObjectId(notificationId),
+      userId: new ObjectId(userId)
+    });
+  }
+
+  static async getUnreadNotificationCount(userId: string): Promise<number> {
+    await this.connectMongoose();
+    return await Notification.countDocuments({
+      userId: new ObjectId(userId),
+      read: false
+    });
+  }
+
+  static async getUserCount(): Promise<number> {
+    try {
+      await this.connectMongoose();
+      const db = await getDb();
+      const count = await db.collection("users").countDocuments({ role: "user" });
+      console.log("User count:", count);
+      return count || 0;
+    } catch (error) {
+      console.error("Error getting user count:", error);
+      // Return 0 if database is not available (for development/testing)
+      return 0;
+    }
+  }
+
+  static async getTotalDeposits(): Promise<number> {
+    try {
+      await this.connectMongoose();
+      const db = await getDb();
+
+      // Check if there are any transactions first
+      const transactionCount = await db.collection("transactions").countDocuments({ type: "deposit", status: "completed" });
+
+      if (transactionCount === 0) {
+        console.log("No completed deposit transactions found");
+        return 0;
+      }
+
+      const result = await db.collection("transactions").aggregate([
+        { $match: { type: "deposit", status: "completed" } },
+        { $group: { _id: null, total: { $sum: { $ifNull: ["$amount", 0] } } } }
+      ]).toArray();
+
+      console.log("Total deposits aggregation result:", result);
+      return result.length > 0 ? Number(result[0].total) || 0 : 0;
+    } catch (error) {
+      console.error("Error calculating total deposits:", error);
+      return 0;
+    }
+  }
+
+  static async getTotalWithdrawals(): Promise<number> {
+    try {
+      await this.connectMongoose();
+      const db = await getDb();
+
+      // Check if there are any withdrawal transactions first
+      const transactionCount = await db.collection("transactions").countDocuments({ type: "withdrawal", status: "completed" });
+
+      if (transactionCount === 0) {
+        console.log("No completed withdrawal transactions found");
+        return 0;
+      }
+
+      const result = await db.collection("transactions").aggregate([
+        { $match: { type: "withdrawal", status: "completed" } },
+        { $group: { _id: null, total: { $sum: { $ifNull: ["$amount", 0] } } } }
+      ]).toArray();
+
+      console.log("Total withdrawals aggregation result:", result);
+      return result.length > 0 ? Number(result[0].total) || 0 : 0;
+    } catch (error) {
+      console.error("Error calculating total withdrawals:", error);
+      return 0;
+    }
+  }
+
+  static async getPendingWithdrawals(): Promise<number> {
+    try {
+      await this.connectMongoose();
+      const db = await getDb();
+
+      // Check if there are any pending withdrawal transactions first
+      const transactionCount = await db.collection("transactions").countDocuments({ type: "withdrawal", status: "pending" });
+
+      if (transactionCount === 0) {
+        console.log("No pending withdrawal transactions found");
+        return 0;
+      }
+
+      const result = await db.collection("transactions").aggregate([
+        { $match: { type: "withdrawal", status: "pending" } },
+        { $group: { _id: null, total: { $sum: { $ifNull: ["$amount", 0] } } } }
+      ]).toArray();
+
+      console.log("Pending withdrawals aggregation result:", result);
+      return result.length > 0 ? Number(result[0].total) || 0 : 0;
+    } catch (error) {
+      console.error("Error calculating pending withdrawals:", error);
+      return 0;
+    }
+  }
+
+  static async getMonthlyRevenue(): Promise<number> {
+    try {
+      await this.connectMongoose();
+      const db = await getDb();
+      const startOfMonth = new Date();
+      startOfMonth.setDate(1);
+      startOfMonth.setHours(0, 0, 0, 0);
+
+      // Check if there are any monthly transactions first
+      const monthlyCount = await db.collection("transactions").countDocuments({
+        type: "deposit",
+        status: "completed",
+        createdAt: { $gte: startOfMonth }
+      });
+
+      if (monthlyCount === 0) {
+        console.log("No completed deposit transactions found for this month");
+        return 0;
+      }
+
+      const result = await db.collection("transactions").aggregate([
+        {
+          $match: {
+            type: "deposit",
+            status: "completed",
+            createdAt: { $gte: startOfMonth }
+          }
+        },
+        { $group: { _id: null, total: { $sum: { $ifNull: ["$amount", 0] } } } }
+      ]).toArray();
+
+      console.log("Monthly revenue aggregation result:", result);
+      return result.length > 0 ? Number(result[0].total) || 0 : 0;
+    } catch (error) {
+      console.error("Error calculating monthly revenue:", error);
+      return 0;
+    }
+  }
+
+  static async getTransactionCount(): Promise<number> {
+    try {
+      await this.connectMongoose();
+      const db = await getDb();
+      const count = await db.collection("transactions").countDocuments({});
+      console.log("Total transaction count:", count);
+      return count || 0;
+    } catch (error) {
+      console.error("Error getting transaction count:", error);
+      return 0;
+    }
+  }
+
+  static async getSuccessfulTransactionCount(): Promise<number> {
+    try {
+      await this.connectMongoose();
+      const db = await getDb();
+      const count = await db.collection("transactions").countDocuments({ status: "completed" });
+      console.log("Successful transaction count:", count);
+      return count || 0;
+    } catch (error) {
+      console.error("Error getting successful transaction count:", error);
+      return 0;
+    }
+  }
+
+  static async getTotalUsersFund(): Promise<number> {
+    try {
+      await this.connectMongoose();
+      const db = await getDb();
+
+      // First check if there are any users
+      const userCount = await db.collection("users").countDocuments({ role: "user" });
+
+      if (userCount === 0) {
+        console.log("No users found in database");
+        return 0;
+      }
+
+      // Check if walletBalance field exists by looking at a sample document
+      const sampleUser = await db.collection("users").findOne({ role: "user" }, { walletBalance: 1 });
+
+      if (!sampleUser || sampleUser.walletBalance === undefined) {
+        console.log("walletBalance field not found in users collection");
+        return 0;
+      }
+
+      const result = await db.collection("users").aggregate([
+        { $match: { role: "user" } },
+        { $group: { _id: null, total: { $sum: { $ifNull: ["$walletBalance", 0] } } } }
+      ]).toArray();
+
+      console.log("Users fund aggregation result:", result);
+      const total = result.length > 0 ? Number(result[0].total) || 0 : 0;
+      console.log("Calculated total users fund:", total);
+      return total;
+    } catch (error) {
+      console.error("Error calculating users fund:", error);
+      return 0;
+    }
+  }
+
+  static async getReferralStats(): Promise<{
+    totalReferrals: number;
+    activeReferrals: number;
+    totalBonusPaid: number;
+    averageTreeSize: number;
+    topReferrer: string;
+  }> {
+    try {
+      await this.connectMongoose();
+      const db = await getDb();
+
+      // Get total referrals count
+      const totalReferrals = await db.collection("referrals").countDocuments({});
+
+      // Get active referrals (referrals with status "active")
+      const activeReferrals = await db.collection("referrals").countDocuments({ status: "active" });
+
+      // Get total bonus paid from referral_bonus transactions
+      const bonusResult = await db.collection("transactions").aggregate([
+        { $match: { type: "referral_bonus", status: "completed" } },
+        { $group: { _id: null, total: { $sum: { $ifNull: ["$amount", 0] } } } }
+      ]).toArray();
+
+      const totalBonusPaid = bonusResult.length > 0 ? Number(bonusResult[0].total) || 0 : 0;
+
+      // Calculate average tree size (average referrals per referrer)
+      const treeSizeResult = await db.collection("referrals").aggregate([
+        { $group: { _id: "$referrerId", count: { $sum: 1 } } },
+        { $group: { _id: null, avgSize: { $avg: "$count" } } }
+      ]).toArray();
+
+      const averageTreeSize = treeSizeResult.length > 0 ? Number(treeSizeResult[0].avgSize) || 0 : 0;
+
+      // Find top referrer (user with most referrals)
+      const topReferrerResult = await db.collection("referrals").aggregate([
+        { $group: { _id: "$referrerId", count: { $sum: 1 } } },
+        { $sort: { count: -1 } },
+        { $limit: 1 }
+      ]).toArray();
+
+      let topReferrer = "No referrals yet";
+      if (topReferrerResult.length > 0) {
+        const topReferrerId = topReferrerResult[0]._id;
+        if (ObjectId.isValid(topReferrerId)) {
+          const topReferrerUser = await db.collection("users").findOne({ _id: new ObjectId(topReferrerId) });
+          topReferrer = topReferrerUser ? topReferrerUser.fullName : "Unknown User";
+        }
+      }
+
+      return {
+        totalReferrals,
+        activeReferrals,
+        totalBonusPaid,
+        averageTreeSize: Math.round(averageTreeSize * 100) / 100,
+        topReferrer
+      };
+    } catch (error) {
+      console.error("Error getting referral stats:", error);
+      return {
+        totalReferrals: 0,
+        activeReferrals: 0,
+        totalBonusPaid: 0,
+        averageTreeSize: 0,
+        topReferrer: "Unknown"
+      };
+    }
+  }
+
+  static async getServiceUsageStats(): Promise<{
+    airtimeTransactions: number;
+    dataTransactions: number;
+    billPayments: number;
+    subscriptions: number;
+    mostPopularService: string;
+  }> {
+    try {
+      await this.connectMongoose();
+      const db = await getDb();
+
+      // Count transactions by type (excluding deposits, withdrawals, and referral_bonus)
+      const airtimeTransactions = await db.collection("transactions").countDocuments({
+        type: "payment",
+        description: { $regex: "airtime|airtel|mtn|glo|9mobile", $options: "i" }
+      });
+
+      const dataTransactions = await db.collection("transactions").countDocuments({
+        type: "payment",
+        description: { $regex: "data|internet|bundle", $options: "i" }
+      });
+
+      const billPayments = await db.collection("transactions").countDocuments({
+        type: "payment",
+        description: { $regex: "electricity|dstv|gotv|startimes|water", $options: "i" }
+      });
+
+      // For subscriptions, we'll count transactions that mention "subscription"
+      const subscriptions = await db.collection("transactions").countDocuments({
+        type: "payment",
+        description: { $regex: "subscription|subscribe", $options: "i" }
+      });
+
+      // Determine most popular service
+      const serviceCounts = [
+        { name: "Airtime", count: airtimeTransactions },
+        { name: "Data", count: dataTransactions },
+        { name: "Bills", count: billPayments },
+        { name: "Subscriptions", count: subscriptions }
+      ];
+
+      const mostPopularService = serviceCounts.reduce((prev, current) =>
+        (prev.count > current.count) ? prev : current
+      ).name;
+
+      return {
+        airtimeTransactions,
+        dataTransactions,
+        billPayments,
+        subscriptions,
+        mostPopularService: mostPopularService || "Airtime"
+      };
+    } catch (error) {
+      console.error("Error getting service usage stats:", error);
+      return {
+        airtimeTransactions: 0,
+        dataTransactions: 0,
+        billPayments: 0,
+        subscriptions: 0,
+        mostPopularService: "Airtime"
+      };
     }
   }
 }

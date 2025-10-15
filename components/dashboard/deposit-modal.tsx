@@ -42,17 +42,19 @@ export function DepositModal({ isOpen, onClose, onSuccess }: DepositModalProps) 
         body: JSON.stringify({ amount: depositAmount }),
         headers: { "Content-Type": "application/json" },
       })
-      if (!response.ok) throw new Error("Deposit failed")
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || "Deposit failed")
+      }
+
       const data = await response.json();
       if (data.authorization_url) {
+        // Redirect to Paystack
         window.location.href = data.authorization_url;
       } else {
-        setError("Could not get payment link.");
+        throw new Error("Could not get payment link.");
       }
-      setIsLoading(false)
-      onSuccess()
-      toast({ title: "Deposit initiated", description: "Redirecting to Paystack..." })
-      onClose()
     } catch (err: any) {
       setError(err.message || "Deposit failed")
       setIsLoading(false)
