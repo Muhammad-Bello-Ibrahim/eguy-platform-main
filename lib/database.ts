@@ -664,4 +664,22 @@ export class Database {
       };
     }
   }
+
+  static async getAllUsers(): Promise<DatabaseUser[]> {
+    try {
+      await this.connectMongoose();
+      const db = await getDb();
+
+      // Get all users with role "user"
+      const users = await db.collection("users").find({ role: "user" }).toArray();
+
+      return users.map((user: any) => ({
+        ...user,
+        id: user._id.toString(),
+      }));
+    } catch (error) {
+      console.error("Error getting all users:", error);
+      return [];
+    }
+  }
 }
