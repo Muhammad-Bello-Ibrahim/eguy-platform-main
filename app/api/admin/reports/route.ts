@@ -1,3 +1,7 @@
+export const dynamic = "force-dynamic"; // ensure no static optimization
+export const revalidate = 0; // disable ISR
+// export const runtime = "nodejs"; // optional if you need Node APIs
+
 import { NextResponse } from "next/server"
 import { getSession } from "@/lib/auth"
 
