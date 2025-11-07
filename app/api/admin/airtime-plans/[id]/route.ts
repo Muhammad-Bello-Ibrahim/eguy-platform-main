@@ -1,36 +1,24 @@
+// app/api/admin/airtime-plans/[id]/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import AirtimePlan from "@/lib/models/AirtimePlan";
 import { Database } from "@/lib/database";
+import { ObjectId } from "mongodb";
 
 export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
-  try {
-    await Database.connectMongoose();
-    const body = await req.json();
-    const plan = await AirtimePlan.findByIdAndUpdate(params.id, body, { new: true });
+  const db = await Database.getDb();
+  const data = await req.json();
+  const now = new Date();
 
-    if (!plan) {
-      return NextResponse.json({ error: "Plan not found" }, { status: 404 });
-    }
+  await db.collection("airtime_plans").updateOne(
+    { _id: new ObjectId(params.id) },
+    { $set: { ...data, updatedAt: now } }
+  );
 
-    return NextResponse.json(plan);
-  } catch (error) {
-    console.error("Error updating airtime plan:", error);
-    return NextResponse.json({ error: "Failed to update plan" }, { status: 500 });
-  }
+  const updated = await db.collection("airtime_plans").findOne({ _id: new ObjectId(params.id) });
+  return NextResponse.json(updated);
 }
 
 export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
-  try {
-    await Database.connectMongoose();
-    const plan = await AirtimePlan.findByIdAndDelete(params.id);
-
-    if (!plan) {
-      return NextResponse.json({ error: "Plan not found" }, { status: 404 });
-    }
-
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error("Error deleting airtime plan:", error);
-    return NextResponse.json({ error: "Failed to delete plan" }, { status: 500 });
-  }
+  const db = await Database.getDb();
+  await db.collection("airtime_plans").deleteOne({ _id: new ObjectId(params.id) });
+  return NextResponse.json({ success: true });
 }
