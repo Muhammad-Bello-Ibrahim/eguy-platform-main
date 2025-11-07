@@ -1,7 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getSession } from "@/lib/auth"
 import { Database } from "@/lib/database"
-import PaystackPop from '@paystack/inline-js'
 
 export async function POST(request: NextRequest) {
   try {
@@ -25,6 +24,10 @@ export async function POST(request: NextRequest) {
     const reference = `DEP_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`
     const email = session.user.email
 
+    // Build absolute callback URL
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
+    const callbackUrl = `${baseUrl}/dashboard`
+
     // Initialize Paystack transaction
     const response = await fetch("https://api.paystack.co/transaction/initialize", {
       method: "POST",
@@ -36,7 +39,7 @@ export async function POST(request: NextRequest) {
         email,
         amount: Number(amount) * 100, // Paystack expects amount in kobo
         reference,
-        callback_url: `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/dashboard` // Redirect to dashboard after payment
+        callback_url: callbackUrl
       }),
     })
 

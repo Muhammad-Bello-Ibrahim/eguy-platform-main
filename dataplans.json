@@ -1,0 +1,2272 @@
+[
+    {
+        "NETWORK": "MTN",
+        "BUNDLE": [
+            {
+                "dataBundle": "500MB",
+                "dataPlan": "135",
+                "duration": "(1 Day)",
+                "type": "SME2",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "344",
+                        "basic_user": "343",
+                        "value": "342",
+                        "premium_user": "342",
+                        "diamond_user": "341",
+                        "gold_user": "341",
+                        "api_user": "341"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "1GB",
+                "dataPlan": "1",
+                "duration": "(30 Days)",
+                "type": "SME2",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "654",
+                        "basic_user": "652",
+                        "value": "650",
+                        "premium_user": "648",
+                        "diamond_user": "620",
+                        "gold_user": "620",
+                        "api_user": "620"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "2GB",
+                "dataPlan": "2",
+                "duration": "(30 Days)",
+                "type": "SME2",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "1295",
+                        "basic_user": "1294",
+                        "value": "1293",
+                        "premium_user": "1292",
+                        "diamond_user": "1130",
+                        "gold_user": "1130",
+                        "api_user": "1130"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "3GB",
+                "dataPlan": "3",
+                "duration": "(30 Days)",
+                "type": "SME2",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "1850",
+                        "basic_user": "1848",
+                        "value": "1846",
+                        "premium_user": "1845",
+                        "diamond_user": "1640",
+                        "gold_user": "1640",
+                        "api_user": "1640"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "5GB",
+                "dataPlan": "4",
+                "duration": "(30 Days)",
+                "type": "SME2",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "2700",
+                        "basic_user": "2695",
+                        "value": "2690",
+                        "premium_user": "2685",
+                        "diamond_user": "2250",
+                        "gold_user": "2250",
+                        "api_user": "2250"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "500MB",
+                "dataPlan": "137",
+                "duration": "(30 Days)",
+                "type": "CORPORATE GIFTING",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "415",
+                        "basic_user": "414",
+                        "value": "413",
+                        "premium_user": "412",
+                        "diamond_user": "409",
+                        "gold_user": "409",
+                        "api_user": "409"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "1GB",
+                "dataPlan": "138",
+                "duration": "(7 Days)",
+                "type": "CORPORATE GIFTING",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "540",
+                        "basic_user": "538",
+                        "value": "536",
+                        "premium_user": "534",
+                        "diamond_user": "530",
+                        "gold_user": "530",
+                        "api_user": "530"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "2GB",
+                "dataPlan": "6",
+                "duration": "(30 Days)",
+                "type": "CORPORATE GIFTING",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "1350",
+                        "basic_user": "1348",
+                        "value": "1346",
+                        "premium_user": "1344",
+                        "diamond_user": "1336",
+                        "gold_user": "1336",
+                        "api_user": "1336"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "3GB",
+                "dataPlan": "7",
+                "duration": "(30 Days)",
+                "type": "CORPORATE GIFTING",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "1997",
+                        "basic_user": "1995",
+                        "value": "1994",
+                        "premium_user": "1992",
+                        "diamond_user": "1984",
+                        "gold_user": "1984",
+                        "api_user": "1984"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "5GB",
+                "dataPlan": "8",
+                "duration": "(30 Days)",
+                "type": "CORPORATE GIFTING",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "2800",
+                        "basic_user": "2795",
+                        "value": "2790",
+                        "premium_user": "2785",
+                        "diamond_user": "2760",
+                        "gold_user": "2760",
+                        "api_user": "2760"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "500MB",
+                "dataPlan": "9",
+                "duration": "(7 Days)",
+                "type": "SME",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "487",
+                        "basic_user": "486",
+                        "value": "485",
+                        "premium_user": "485",
+                        "diamond_user": "485",
+                        "gold_user": "485",
+                        "api_user": "485"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "1GB",
+                "dataPlan": "10",
+                "duration": "(7 Days)",
+                "type": "SME",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "778",
+                        "basic_user": "777",
+                        "value": "777",
+                        "premium_user": "777",
+                        "diamond_user": "776",
+                        "gold_user": "776",
+                        "api_user": "776"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "2GB",
+                "dataPlan": "11",
+                "duration": "(30 Days)",
+                "type": "SME",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "1465",
+                        "basic_user": "1464",
+                        "value": "1463",
+                        "premium_user": "1462",
+                        "diamond_user": "1458",
+                        "gold_user": "1458",
+                        "api_user": "1458"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "3GB",
+                "dataPlan": "12",
+                "duration": "(30 Days)",
+                "type": "SME",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "1930",
+                        "basic_user": "1928",
+                        "value": "1926",
+                        "premium_user": "1924",
+                        "diamond_user": "1915",
+                        "gold_user": "1915",
+                        "api_user": "1915"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "3.5GB",
+                "dataPlan": "13",
+                "duration": "(30 Days)",
+                "type": "SME",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "2430",
+                        "basic_user": "2429",
+                        "value": "2428",
+                        "premium_user": "2427",
+                        "diamond_user": "2420",
+                        "gold_user": "2420",
+                        "api_user": "2420"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "5GB",
+                "dataPlan": "14",
+                "duration": "(30 Days)",
+                "type": "SME",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "2550",
+                        "basic_user": "2545",
+                        "value": "2540",
+                        "premium_user": "2535",
+                        "diamond_user": "2530",
+                        "gold_user": "2530",
+                        "api_user": "2530"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "10GB",
+                "dataPlan": "15",
+                "duration": "(30 Days)",
+                "type": "SME",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "4380",
+                        "basic_user": "4377",
+                        "value": "4375",
+                        "premium_user": "4373",
+                        "diamond_user": "4355",
+                        "gold_user": "4355",
+                        "api_user": "4355"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "2GB",
+                "dataPlan": "25",
+                "duration": "(30 Days)",
+                "type": "GIFTING",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "1465",
+                        "basic_user": "1464",
+                        "value": "1463",
+                        "premium_user": "1462",
+                        "diamond_user": "1458",
+                        "gold_user": "1458",
+                        "api_user": "1458"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "500MB",
+                "dataPlan": "43",
+                "duration": "(30 Days)",
+                "type": "CORPORATE GIFTING",
+                "status": "Inactive",
+                "price": [
+                    {
+                        "free_user": "434",
+                        "basic_user": "433",
+                        "value": "432",
+                        "premium_user": "431",
+                        "diamond_user": "428",
+                        "gold_user": "428",
+                        "api_user": "428"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "1.12GB",
+                "dataPlan": "44",
+                "duration": "(30 Days)+N335 free airtime",
+                "type": "DATA AWOOF",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "1465",
+                        "basic_user": "1464",
+                        "value": "1463",
+                        "premium_user": "1462",
+                        "diamond_user": "1458",
+                        "gold_user": "1458",
+                        "api_user": "1458"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "2.5GB",
+                "dataPlan": "45",
+                "duration": "(1 Day)",
+                "type": "DATA AWOOF",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "745",
+                        "basic_user": "744",
+                        "value": "743",
+                        "premium_user": "742",
+                        "diamond_user": "739",
+                        "gold_user": "739",
+                        "api_user": "739"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "1GB",
+                "dataPlan": "85",
+                "duration": "(1 Day)",
+                "type": "DATA AWOOF",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "487",
+                        "basic_user": "486",
+                        "value": "485",
+                        "premium_user": "485",
+                        "diamond_user": "485",
+                        "gold_user": "485",
+                        "api_user": "485"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "1.5GB",
+                "dataPlan": "86",
+                "duration": "(2 Days)",
+                "type": "DATA AWOOF",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "585",
+                        "basic_user": "584",
+                        "value": "583",
+                        "premium_user": "582",
+                        "diamond_user": "582",
+                        "gold_user": "582",
+                        "api_user": "582"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "3.2GB",
+                "dataPlan": "87",
+                "duration": "(2 Days)",
+                "type": "DATA AWOOF",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "972",
+                        "basic_user": "971",
+                        "value": "971",
+                        "premium_user": "970",
+                        "diamond_user": "969",
+                        "gold_user": "969",
+                        "api_user": "969"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "75MB",
+                "dataPlan": "88",
+                "duration": "(1 Day)",
+                "type": "GIFTING",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "80",
+                        "basic_user": "79",
+                        "value": "78",
+                        "premium_user": "77",
+                        "diamond_user": "75",
+                        "gold_user": "75",
+                        "api_user": "75"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "110MB",
+                "dataPlan": "89",
+                "duration": "(1 Day)",
+                "type": "GIFTING",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "105",
+                        "basic_user": "104",
+                        "value": "103",
+                        "premium_user": "102",
+                        "diamond_user": "99",
+                        "gold_user": "99",
+                        "api_user": "99"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "230MB",
+                "dataPlan": "90",
+                "duration": "(1 Day)",
+                "type": "GIFTING",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "200",
+                        "basic_user": "199",
+                        "value": "198",
+                        "premium_user": "198",
+                        "diamond_user": "196",
+                        "gold_user": "196",
+                        "api_user": "196"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "36GB",
+                "dataPlan": "91",
+                "duration": "(30 Days)",
+                "type": "GIFTING",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "10655",
+                        "basic_user": "10645",
+                        "value": "10635",
+                        "premium_user": "10625",
+                        "diamond_user": "10585",
+                        "gold_user": "10585",
+                        "api_user": "10585"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "750MB",
+                "dataPlan": "92",
+                "duration": "(3 Days)",
+                "type": "GIFTING",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "440",
+                        "basic_user": "439",
+                        "value": "438",
+                        "premium_user": "437",
+                        "diamond_user": "437",
+                        "gold_user": "437",
+                        "api_user": "437"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "1.5GB",
+                "dataPlan": "93",
+                "duration": "(2 Days)",
+                "type": "GIFTING",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "585",
+                        "basic_user": "584",
+                        "value": "583",
+                        "premium_user": "582",
+                        "diamond_user": "582",
+                        "gold_user": "582",
+                        "api_user": "582"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "2.5GB",
+                "dataPlan": "94",
+                "duration": "(2 Days)",
+                "type": "GIFTING",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "873",
+                        "basic_user": "872",
+                        "value": "872",
+                        "premium_user": "872",
+                        "diamond_user": "871",
+                        "gold_user": "871",
+                        "api_user": "871"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "1.5GB",
+                "dataPlan": "95",
+                "duration": "(7 Days)",
+                "type": "GIFTING",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "970",
+                        "basic_user": "969",
+                        "value": "969",
+                        "premium_user": "969",
+                        "diamond_user": "968",
+                        "gold_user": "968",
+                        "api_user": "968"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "2GB",
+                "dataPlan": "96",
+                "duration": "(2 Days)",
+                "type": "GIFTING",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "731",
+                        "basic_user": "730",
+                        "value": "729",
+                        "premium_user": "728",
+                        "diamond_user": "727",
+                        "gold_user": "727",
+                        "api_user": "727"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "2.7GB",
+                "dataPlan": "97",
+                "duration": "(30 Days)",
+                "type": "GIFTING",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "1943",
+                        "basic_user": "1942",
+                        "value": "1941",
+                        "premium_user": "1940",
+                        "diamond_user": "1934",
+                        "gold_user": "1934",
+                        "api_user": "1934"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "25GB",
+                "dataPlan": "98",
+                "duration": "(30 Days)",
+                "type": "GIFTING",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "8695",
+                        "basic_user": "8693",
+                        "value": "8692",
+                        "premium_user": "8692",
+                        "diamond_user": "8690",
+                        "gold_user": "8690",
+                        "api_user": "8690"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "1.2GB",
+                "dataPlan": "99",
+                "duration": "(7 Days)",
+                "type": "GIFTING",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "731",
+                        "basic_user": "730",
+                        "value": "729",
+                        "premium_user": "728",
+                        "diamond_user": "727",
+                        "gold_user": "727",
+                        "api_user": "727"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "12.5GB",
+                "dataPlan": "100",
+                "duration": "(30 Days)",
+                "type": "GIFTING",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "5320",
+                        "basic_user": "5318",
+                        "value": "5318",
+                        "premium_user": "5314",
+                        "diamond_user": "5313",
+                        "gold_user": "5313",
+                        "api_user": "5313"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "20GB",
+                "dataPlan": "101",
+                "duration": "(30 Days)",
+                "type": "GIFTING",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "7260",
+                        "basic_user": "7258",
+                        "value": "7256",
+                        "premium_user": "7254",
+                        "diamond_user": "7250",
+                        "gold_user": "7250",
+                        "api_user": "7250"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "16.5GB",
+                "dataPlan": "102",
+                "duration": "(30 Days)",
+                "type": "GIFTING",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "6300",
+                        "basic_user": "6295",
+                        "value": "6290",
+                        "premium_user": "6285",
+                        "diamond_user": "6279",
+                        "gold_user": "6279",
+                        "api_user": "6279"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "20GB",
+                "dataPlan": "118",
+                "duration": "(7 Days)",
+                "type": "DATA AWOOF",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "4945",
+                        "basic_user": "4943",
+                        "value": "4942",
+                        "premium_user": "4940",
+                        "diamond_user": "4927",
+                        "gold_user": "4927",
+                        "api_user": "4927"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "7GB",
+                "dataPlan": "119",
+                "duration": "(30 Days)",
+                "type": "DATA AWOOF",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "3390",
+                        "basic_user": "3388",
+                        "value": "3386",
+                        "premium_user": "3384",
+                        "diamond_user": "3382",
+                        "gold_user": "3382",
+                        "api_user": "3382"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "5GB",
+                "dataPlan": "136",
+                "duration": "(30 Days)+N868 free airtime",
+                "type": "DATA AWOOF",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "2909",
+                        "basic_user": "2908",
+                        "value": "2907",
+                        "premium_user": "2906",
+                        "diamond_user": "2900",
+                        "gold_user": "2900",
+                        "api_user": "2900"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "6GB",
+                "dataPlan": "122",
+                "duration": "(7 Days)",
+                "type": "GIFTING",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "2420",
+                        "basic_user": "2420",
+                        "value": "2419",
+                        "premium_user": "2419",
+                        "diamond_user": "2417",
+                        "gold_user": "2417",
+                        "api_user": "2417"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "3.5GB",
+                "dataPlan": "123",
+                "duration": "(7 Days)",
+                "type": "GIFTING",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "1465",
+                        "basic_user": "1464",
+                        "value": "1463",
+                        "premium_user": "1462",
+                        "diamond_user": "1458",
+                        "gold_user": "1458",
+                        "api_user": "1458"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "11GB",
+                "dataPlan": "129",
+                "duration": "(7 Days)",
+                "type": "GIFTING",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "3390",
+                        "basic_user": "3388",
+                        "value": "3387",
+                        "premium_user": "3386",
+                        "diamond_user": "3384",
+                        "gold_user": "3384",
+                        "api_user": "3384"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "75GB",
+                "dataPlan": "130",
+                "duration": "(30 Days)",
+                "type": "GIFTING",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "17410",
+                        "basic_user": "17407",
+                        "value": "17404",
+                        "premium_user": "17400",
+                        "diamond_user": "17385",
+                        "gold_user": "17385",
+                        "api_user": "17385"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "165GB",
+                "dataPlan": "131",
+                "duration": "(30 Days)",
+                "type": "GIFTING",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "33850",
+                        "basic_user": "33848",
+                        "value": "33846",
+                        "premium_user": "33844",
+                        "diamond_user": "33810",
+                        "gold_user": "33810",
+                        "api_user": "33810"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "250GB",
+                "dataPlan": "132",
+                "duration": "(30 Days)",
+                "type": "GIFTING",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "53150",
+                        "basic_user": "53145",
+                        "value": "53140",
+                        "premium_user": "53135",
+                        "diamond_user": "53105",
+                        "gold_user": "53105",
+                        "api_user": "53105"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "150GB",
+                "dataPlan": "133",
+                "duration": "(60 Days)",
+                "type": "GIFTING",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "38700",
+                        "basic_user": "38698",
+                        "value": "38695",
+                        "premium_user": "38690",
+                        "diamond_user": "38650",
+                        "gold_user": "38650",
+                        "api_user": "38650"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "480GB",
+                "dataPlan": "134",
+                "duration": "(90 Days)",
+                "type": "GIFTING",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "86960",
+                        "basic_user": "86950",
+                        "value": "86940",
+                        "premium_user": "86935",
+                        "diamond_user": "86910",
+                        "gold_user": "86910",
+                        "api_user": "86910"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "NETWORK": "AIRTEL",
+        "BUNDLE": [
+            {
+                "dataBundle": "100.0MB",
+                "dataPlan": "16",
+                "duration": "(7 Days)",
+                "type": "SME",
+                "status": "Inactive",
+                "price": [
+                    {
+                        "free_user": "109",
+                        "basic_user": "108",
+                        "value": "107",
+                        "premium_user": "106",
+                        "diamond_user": "103",
+                        "gold_user": "103",
+                        "api_user": "103"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "300.0MB",
+                "dataPlan": "17",
+                "duration": "(7 Days)",
+                "type": "SME",
+                "status": "Inactive",
+                "price": [
+                    {
+                        "free_user": "310",
+                        "basic_user": "309",
+                        "value": "308",
+                        "premium_user": "307",
+                        "diamond_user": "303",
+                        "gold_user": "303",
+                        "api_user": "303"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "500.0MB",
+                "dataPlan": "18",
+                "duration": "(30 Days)",
+                "type": "SME",
+                "status": "Inactive",
+                "price": [
+                    {
+                        "free_user": "507",
+                        "basic_user": "506",
+                        "value": "505",
+                        "premium_user": "504",
+                        "diamond_user": "500",
+                        "gold_user": "500",
+                        "api_user": "500"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "1.0GB",
+                "dataPlan": "19",
+                "duration": "(30 Days)",
+                "type": "SME",
+                "status": "Inactive",
+                "price": [
+                    {
+                        "free_user": "1000",
+                        "basic_user": "999",
+                        "value": "998",
+                        "premium_user": "997",
+                        "diamond_user": "994",
+                        "gold_user": "994",
+                        "api_user": "994"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "2.0GB",
+                "dataPlan": "20",
+                "duration": "(30 Days)",
+                "type": "SME",
+                "status": "Inactive",
+                "price": [
+                    {
+                        "free_user": "1240",
+                        "basic_user": "1236",
+                        "value": "1234",
+                        "premium_user": "1232",
+                        "diamond_user": "1226",
+                        "gold_user": "1224",
+                        "api_user": "1224"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "5.0GB",
+                "dataPlan": "21",
+                "duration": "(30 Days)",
+                "type": "SME",
+                "status": "Inactive",
+                "price": [
+                    {
+                        "free_user": "3100",
+                        "basic_user": "3090",
+                        "value": "3085",
+                        "premium_user": "3080",
+                        "diamond_user": "3065",
+                        "gold_user": "3060",
+                        "api_user": "3060"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "10.0GB",
+                "dataPlan": "22",
+                "duration": "(30 Days)",
+                "type": "SME",
+                "status": "Inactive",
+                "price": [
+                    {
+                        "free_user": "6200",
+                        "basic_user": "6180",
+                        "value": "6170",
+                        "premium_user": "6160",
+                        "diamond_user": "6130",
+                        "gold_user": "6120",
+                        "api_user": "6120"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "15.0GB",
+                "dataPlan": "23",
+                "duration": "(30 Days)",
+                "type": "SME",
+                "status": "Inactive",
+                "price": [
+                    {
+                        "free_user": "9300",
+                        "basic_user": "9270",
+                        "value": "9255",
+                        "premium_user": "9240",
+                        "diamond_user": "9195",
+                        "gold_user": "9180",
+                        "api_user": "9180"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "20.0GB",
+                "dataPlan": "24",
+                "duration": "(30 Days)",
+                "type": "SME",
+                "status": "Inactive",
+                "price": [
+                    {
+                        "free_user": "12400",
+                        "basic_user": "12360",
+                        "value": "12340",
+                        "premium_user": "12320",
+                        "diamond_user": "12260",
+                        "gold_user": "12240",
+                        "api_user": "12240"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "100MB",
+                "dataPlan": "26",
+                "duration": "(7 Days)",
+                "type": "CORPORATE GIFTING",
+                "status": "Inactive",
+                "price": [
+                    {
+                        "free_user": "115",
+                        "basic_user": "114",
+                        "value": "113",
+                        "premium_user": "112",
+                        "diamond_user": "109",
+                        "gold_user": "109",
+                        "api_user": "109"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "300MB",
+                "dataPlan": "27",
+                "duration": "(7 Days)",
+                "type": "CORPORATE GIFTING",
+                "status": "Inactive",
+                "price": [
+                    {
+                        "free_user": "298",
+                        "basic_user": "297",
+                        "value": "296",
+                        "premium_user": "295",
+                        "diamond_user": "291",
+                        "gold_user": "291",
+                        "api_user": "291"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "500MB",
+                "dataPlan": "28",
+                "duration": "(30 Days)",
+                "type": "CORPORATE GIFTING",
+                "status": "Inactive",
+                "price": [
+                    {
+                        "free_user": "478",
+                        "basic_user": "477",
+                        "value": "476",
+                        "premium_user": "475",
+                        "diamond_user": "470",
+                        "gold_user": "470",
+                        "api_user": "470"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "1GB",
+                "dataPlan": "29",
+                "duration": "(30 Days)",
+                "type": "CORPORATE GIFTING",
+                "status": "Inactive",
+                "price": [
+                    {
+                        "free_user": "978",
+                        "basic_user": "977",
+                        "value": "976",
+                        "premium_user": "975",
+                        "diamond_user": "971",
+                        "gold_user": "971",
+                        "api_user": "971"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "2GB",
+                "dataPlan": "30",
+                "duration": "(30 Days)",
+                "type": "CORPORATE GIFTING",
+                "status": "Inactive",
+                "price": [
+                    {
+                        "free_user": "1956",
+                        "basic_user": "1954",
+                        "value": "1952",
+                        "premium_user": "1950",
+                        "diamond_user": "1942",
+                        "gold_user": "1942",
+                        "api_user": "1942"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "5GB",
+                "dataPlan": "31",
+                "duration": "(30 Days)",
+                "type": "CORPORATE GIFTING",
+                "status": "Inactive",
+                "price": [
+                    {
+                        "free_user": "4890",
+                        "basic_user": "4885",
+                        "value": "4880",
+                        "premium_user": "4875",
+                        "diamond_user": "4855",
+                        "gold_user": "4855",
+                        "api_user": "4855"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "15GB",
+                "dataPlan": "32",
+                "duration": "(MONTHLY)",
+                "type": "CORPORATE GIFTING",
+                "status": "Inactive",
+                "price": [
+                    {
+                        "free_user": "11955",
+                        "basic_user": "11940",
+                        "value": "11925",
+                        "premium_user": "11910",
+                        "diamond_user": "11850",
+                        "gold_user": "11850",
+                        "api_user": "11850"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "20GB",
+                "dataPlan": "33",
+                "duration": "(MONTHLY)",
+                "type": "CORPORATE GIFTING",
+                "status": "Inactive",
+                "price": [
+                    {
+                        "free_user": "15360",
+                        "basic_user": "15340",
+                        "value": "15320",
+                        "premium_user": "15300",
+                        "diamond_user": "15220",
+                        "gold_user": "15220",
+                        "api_user": "15220"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "10GB",
+                "dataPlan": "54",
+                "duration": "(30 Days)",
+                "type": "CORPORATE GIFTING",
+                "status": "Inactive",
+                "price": [
+                    {
+                        "free_user": "9780",
+                        "basic_user": "9770",
+                        "value": "9760",
+                        "premium_user": "9750",
+                        "diamond_user": "9710",
+                        "gold_user": "9710",
+                        "api_user": "9710"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "500MB",
+                "dataPlan": "65",
+                "duration": "(7 Days)",
+                "type": "GIFTING",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "500",
+                        "basic_user": "499",
+                        "value": "498",
+                        "premium_user": "497",
+                        "diamond_user": "495",
+                        "gold_user": "495",
+                        "api_user": "495"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "1.5GB",
+                "dataPlan": "66",
+                "duration": "(7 Days)",
+                "type": "GIFTING",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "985",
+                        "basic_user": "984",
+                        "value": "983",
+                        "premium_user": "982",
+                        "diamond_user": "977",
+                        "gold_user": "977",
+                        "api_user": "977"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "3.5GB",
+                "dataPlan": "67",
+                "duration": "(7 Days)",
+                "type": "GIFTING",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "1479",
+                        "basic_user": "1478",
+                        "value": "1477",
+                        "premium_user": "1476",
+                        "diamond_user": "1470",
+                        "gold_user": "1470",
+                        "api_user": "1470"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "3GB",
+                "dataPlan": "68",
+                "duration": "(30 Days)",
+                "type": "GIFTING",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "1955",
+                        "basic_user": "1954",
+                        "value": "1953",
+                        "premium_user": "1952",
+                        "diamond_user": "1949",
+                        "gold_user": "1949",
+                        "api_user": "1949"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "4GB",
+                "dataPlan": "69",
+                "duration": "(30 Days)",
+                "type": "GIFTING",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "2455",
+                        "basic_user": "2454",
+                        "value": "2453",
+                        "premium_user": "2452",
+                        "diamond_user": "2445",
+                        "gold_user": "2445",
+                        "api_user": "2445"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "8GB",
+                "dataPlan": "70",
+                "duration": "(30 Days)",
+                "type": "GIFTING",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "2945",
+                        "basic_user": "2944",
+                        "value": "2943",
+                        "premium_user": "2942",
+                        "diamond_user": "2935",
+                        "gold_user": "2935",
+                        "api_user": "2935"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "10GB",
+                "dataPlan": "71",
+                "duration": "(30 Days)",
+                "type": "GIFTING",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "3900",
+                        "basic_user": "3899",
+                        "value": "3898",
+                        "premium_user": "3897",
+                        "diamond_user": "3894",
+                        "gold_user": "3894",
+                        "api_user": "3894"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "18GB",
+                "dataPlan": "72",
+                "duration": "(30 Days)",
+                "type": "GIFTING",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "5815",
+                        "basic_user": "5814",
+                        "value": "5813",
+                        "premium_user": "5812",
+                        "diamond_user": "5800",
+                        "gold_user": "5800",
+                        "api_user": "5800"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "40GB",
+                "dataPlan": "73",
+                "duration": "(30 Days)",
+                "type": "GIFTING",
+                "status": "Inactive",
+                "price": [
+                    {
+                        "free_user": "9865",
+                        "basic_user": "9864",
+                        "value": "9863",
+                        "premium_user": "9862",
+                        "diamond_user": "9857",
+                        "gold_user": "9857",
+                        "api_user": "9857"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "6GB",
+                "dataPlan": "74",
+                "duration": "(7 Days)",
+                "type": "GIFTING",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "2450",
+                        "basic_user": "2449",
+                        "value": "2448",
+                        "premium_user": "2447",
+                        "diamond_user": "2444",
+                        "gold_user": "2444",
+                        "api_user": "2444"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "1GB",
+                "dataPlan": "75",
+                "duration": "(7 Days)",
+                "type": "GIFTING",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "788",
+                        "basic_user": "787",
+                        "value": "786",
+                        "premium_user": "785",
+                        "diamond_user": "782",
+                        "gold_user": "782",
+                        "api_user": "782"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "150MB",
+                "dataPlan": "103",
+                "duration": "(2 Days)",
+                "type": "AWOOF GIFTING",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "73",
+                        "basic_user": "72",
+                        "value": "71",
+                        "premium_user": "70",
+                        "diamond_user": "68",
+                        "gold_user": "67",
+                        "api_user": "67"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "300MB",
+                "dataPlan": "104",
+                "duration": "(2 Days)",
+                "type": "AWOOF GIFTING",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "132",
+                        "basic_user": "131",
+                        "value": "130",
+                        "premium_user": "129",
+                        "diamond_user": "125",
+                        "gold_user": "125",
+                        "api_user": "125"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "1GB",
+                "dataPlan": "105",
+                "duration": "(7 Days)",
+                "type": "AWOOF GIFTING",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "850",
+                        "basic_user": "849",
+                        "value": "848",
+                        "premium_user": "847",
+                        "diamond_user": "843",
+                        "gold_user": "843",
+                        "api_user": "843"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "1.5GB",
+                "dataPlan": "107",
+                "duration": "(2 Days)",
+                "type": "AWOOF GIFTING",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "525",
+                        "basic_user": "524",
+                        "value": "523",
+                        "premium_user": "522",
+                        "diamond_user": "518",
+                        "gold_user": "518",
+                        "api_user": "518"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "600MB",
+                "dataPlan": "108",
+                "duration": "(1 Day)",
+                "type": "AWOOF GIFTING",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "265",
+                        "basic_user": "264",
+                        "value": "263",
+                        "premium_user": "262",
+                        "diamond_user": "258",
+                        "gold_user": "258",
+                        "api_user": "258"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "1GB",
+                "dataPlan": "109",
+                "duration": "(1 Day)",
+                "type": "AWOOF GIFTING",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "350",
+                        "basic_user": "349",
+                        "value": "348",
+                        "premium_user": "347",
+                        "diamond_user": "343",
+                        "gold_user": "343",
+                        "api_user": "343"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "1.5GB",
+                "dataPlan": "110",
+                "duration": "(1 Day)",
+                "type": "AWOOF GIFTING",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "420",
+                        "basic_user": "419",
+                        "value": "418",
+                        "premium_user": "417",
+                        "diamond_user": "415",
+                        "gold_user": "415",
+                        "api_user": "415"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "3GB",
+                "dataPlan": "111",
+                "duration": "(2 Days)",
+                "type": "AWOOF GIFTING",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "800",
+                        "basic_user": "798",
+                        "value": "796",
+                        "premium_user": "794",
+                        "diamond_user": "785",
+                        "gold_user": "785",
+                        "api_user": "785"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "3.5GB",
+                "dataPlan": "106",
+                "duration": "(7 Days)",
+                "type": "AWOOF GIFTING",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "1530",
+                        "basic_user": "1529",
+                        "value": "1528",
+                        "premium_user": "1526",
+                        "diamond_user": "1515",
+                        "gold_user": "1515",
+                        "api_user": "1515"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "7GB",
+                "dataPlan": "112",
+                "duration": "(7 Days)",
+                "type": "AWOOF GIFTING",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "2150",
+                        "basic_user": "2145",
+                        "value": "2140",
+                        "premium_user": "2135",
+                        "diamond_user": "2100",
+                        "gold_user": "2100",
+                        "api_user": "2100"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "10GB",
+                "dataPlan": "113",
+                "duration": "(30 Days)",
+                "type": "AWOOF GIFTING",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "3150",
+                        "basic_user": "3145",
+                        "value": "3140",
+                        "premium_user": "3135",
+                        "diamond_user": "3105",
+                        "gold_user": "3105",
+                        "api_user": "3105"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "10GB",
+                "dataPlan": "120",
+                "duration": "(7 Days)",
+                "type": "GIFTING",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "2940",
+                        "basic_user": "2939",
+                        "value": "2938",
+                        "premium_user": "2937",
+                        "diamond_user": "2932",
+                        "gold_user": "2932",
+                        "api_user": "2932"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "18.0GB",
+                "dataPlan": "121",
+                "duration": "(7 Days)",
+                "type": "GIFTING",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "4895",
+                        "basic_user": "4894",
+                        "value": "4893",
+                        "premium_user": "4892",
+                        "diamond_user": "4885",
+                        "gold_user": "4885",
+                        "api_user": "4885"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "2GB",
+                "dataPlan": "124",
+                "duration": "(30 Days)",
+                "type": "GIFTING",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "1470",
+                        "basic_user": "1469",
+                        "value": "1468",
+                        "premium_user": "1467",
+                        "diamond_user": "1464",
+                        "gold_user": "1464",
+                        "api_user": "1464"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "13GB",
+                "dataPlan": "125",
+                "duration": "(30 Days)",
+                "type": "GIFTING",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "4900",
+                        "basic_user": "4898",
+                        "value": "4896",
+                        "premium_user": "4894",
+                        "diamond_user": "4887",
+                        "gold_user": "4887",
+                        "api_user": "4887"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "25GB",
+                "dataPlan": "126",
+                "duration": "(30 Days)",
+                "type": "GIFTING",
+                "status": "Inactive",
+                "price": [
+                    {
+                        "free_user": "7850",
+                        "basic_user": "7848",
+                        "value": "7846",
+                        "premium_user": "7844",
+                        "diamond_user": "7830",
+                        "gold_user": "7830",
+                        "api_user": "7830"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "35GB",
+                "dataPlan": "127",
+                "duration": "(30 Days)",
+                "type": "GIFTING",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "9850",
+                        "basic_user": "9845",
+                        "value": "9840",
+                        "premium_user": "9835",
+                        "diamond_user": "9800",
+                        "gold_user": "9800",
+                        "api_user": "9800"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "60GB",
+                "dataPlan": "128",
+                "duration": "(30 Days)",
+                "type": "GIFTING",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "14740",
+                        "basic_user": "14735",
+                        "value": "14730",
+                        "premium_user": "14725",
+                        "diamond_user": "14680",
+                        "gold_user": "14680",
+                        "api_user": "14680"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "NETWORK": "9MOBILE",
+        "BUNDLE": [
+            {
+                "dataBundle": "500MB",
+                "dataPlan": "34",
+                "duration": "(7 Days)",
+                "type": "GIFTING",
+                "status": "Inactive",
+                "price": [
+                    {
+                        "free_user": "180",
+                        "basic_user": "179",
+                        "value": "178",
+                        "premium_user": "176",
+                        "diamond_user": "171",
+                        "gold_user": "171",
+                        "api_user": "171"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "1.5GB",
+                "dataPlan": "35",
+                "duration": "(30 Days)",
+                "type": "GIFTING",
+                "status": "Inactive",
+                "price": [
+                    {
+                        "free_user": "920",
+                        "basic_user": "910",
+                        "value": "900",
+                        "premium_user": "895",
+                        "diamond_user": "890",
+                        "gold_user": "885",
+                        "api_user": "885"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "2GB",
+                "dataPlan": "36",
+                "duration": "(30 Days)",
+                "type": "GIFTING",
+                "status": "Inactive",
+                "price": [
+                    {
+                        "free_user": "1110",
+                        "basic_user": "1100",
+                        "value": "1095",
+                        "premium_user": "1090",
+                        "diamond_user": "1080",
+                        "gold_user": "1075",
+                        "api_user": "1075"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "3GB",
+                "dataPlan": "37",
+                "duration": "(30 Days)",
+                "type": "GIFTING",
+                "status": "Inactive",
+                "price": [
+                    {
+                        "free_user": "1310",
+                        "basic_user": "1305",
+                        "value": "1300",
+                        "premium_user": "1295",
+                        "diamond_user": "1290",
+                        "gold_user": "1285",
+                        "api_user": "1285"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "4.5GB",
+                "dataPlan": "38",
+                "duration": "(30 Days)",
+                "type": "GIFTING",
+                "status": "Inactive",
+                "price": [
+                    {
+                        "free_user": "1800",
+                        "basic_user": "1790",
+                        "value": "1780",
+                        "premium_user": "1775",
+                        "diamond_user": "1770",
+                        "gold_user": "1760",
+                        "api_user": "1760"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "1GB",
+                "dataPlan": "39",
+                "duration": "(30 Days)",
+                "type": "CORPORATE GIFTING",
+                "status": "Inactive",
+                "price": [
+                    {
+                        "free_user": "350",
+                        "basic_user": "349",
+                        "value": "348",
+                        "premium_user": "347",
+                        "diamond_user": "340",
+                        "gold_user": "340",
+                        "api_user": "340"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "5GB",
+                "dataPlan": "40",
+                "duration": "(30 Days)",
+                "type": "CORPORATE GIFTING",
+                "status": "Inactive",
+                "price": [
+                    {
+                        "free_user": "1750",
+                        "basic_user": "1745",
+                        "value": "1740",
+                        "premium_user": "1735",
+                        "diamond_user": "1700",
+                        "gold_user": "1700",
+                        "api_user": "1700"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "1.5GB",
+                "dataPlan": "41",
+                "duration": "(30 Days)",
+                "type": "CORPORATE GIFTING",
+                "status": "Inactive",
+                "price": [
+                    {
+                        "free_user": "525",
+                        "basic_user": "524",
+                        "value": "523",
+                        "premium_user": "522",
+                        "diamond_user": "515",
+                        "gold_user": "515",
+                        "api_user": "515"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "2GB",
+                "dataPlan": "42",
+                "duration": "(30 Days)",
+                "type": "CORPORATE GIFTING",
+                "status": "Inactive",
+                "price": [
+                    {
+                        "free_user": "700",
+                        "basic_user": "698",
+                        "value": "696",
+                        "premium_user": "694",
+                        "diamond_user": "680",
+                        "gold_user": "680",
+                        "api_user": "680"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "3.0GB",
+                "dataPlan": "62",
+                "duration": "(30 Days)",
+                "type": "CORPORATE GIFTING",
+                "status": "Inactive",
+                "price": [
+                    {
+                        "free_user": "1050",
+                        "basic_user": "1047",
+                        "value": "1044",
+                        "premium_user": "1041",
+                        "diamond_user": "1020",
+                        "gold_user": "1020",
+                        "api_user": "1020"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "10.0GB",
+                "dataPlan": "63",
+                "duration": "(30 Days)",
+                "type": "CORPORATE GIFTING",
+                "status": "Inactive",
+                "price": [
+                    {
+                        "free_user": "3500",
+                        "basic_user": "3490",
+                        "value": "3480",
+                        "premium_user": "3470",
+                        "diamond_user": "3440",
+                        "gold_user": "3440",
+                        "api_user": "3440"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "500.0MB",
+                "dataPlan": "64",
+                "duration": "(30 Days)",
+                "type": "CORPORATE GIFTING",
+                "status": "Inactive",
+                "price": [
+                    {
+                        "free_user": "180",
+                        "basic_user": "179",
+                        "value": "178",
+                        "premium_user": "177",
+                        "diamond_user": "171",
+                        "gold_user": "171",
+                        "api_user": "171"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "NETWORK": "GLO",
+        "BUNDLE": [
+            {
+                "dataBundle": "200MB",
+                "dataPlan": "55",
+                "duration": "(14 Days)",
+                "type": "CORPORATE GIFTING",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "109",
+                        "basic_user": "108",
+                        "value": "107",
+                        "premium_user": "106",
+                        "diamond_user": "104",
+                        "gold_user": "104",
+                        "api_user": "104"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "500MB",
+                "dataPlan": "56",
+                "duration": "(30 Days)",
+                "type": "CORPORATE GIFTING",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "208",
+                        "basic_user": "207",
+                        "value": "206",
+                        "premium_user": "205",
+                        "diamond_user": "202",
+                        "gold_user": "202",
+                        "api_user": "202"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "1GB",
+                "dataPlan": "57",
+                "duration": "(30 Days)",
+                "type": "CORPORATE GIFTING",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "405",
+                        "basic_user": "404",
+                        "value": "403",
+                        "premium_user": "402",
+                        "diamond_user": "399",
+                        "gold_user": "399",
+                        "api_user": "399"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "2GB",
+                "dataPlan": "58",
+                "duration": "(30 Days)",
+                "type": "CORPORATE GIFTING",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "810",
+                        "basic_user": "808",
+                        "value": "806",
+                        "premium_user": "804",
+                        "diamond_user": "798",
+                        "gold_user": "798",
+                        "api_user": "798"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "3GB",
+                "dataPlan": "59",
+                "duration": "(30 Days)",
+                "type": "CORPORATE GIFTING",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "1215",
+                        "basic_user": "1212",
+                        "value": "1209",
+                        "premium_user": "1206",
+                        "diamond_user": "1197",
+                        "gold_user": "1197",
+                        "api_user": "1197"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "5GB",
+                "dataPlan": "60",
+                "duration": "(30 Days)",
+                "type": "CORPORATE GIFTING",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "2025",
+                        "basic_user": "2020",
+                        "value": "2015",
+                        "premium_user": "2010",
+                        "diamond_user": "1995",
+                        "gold_user": "1995",
+                        "api_user": "1995"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "10GB",
+                "dataPlan": "61",
+                "duration": "(30 Days)",
+                "type": "CORPORATE GIFTING",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "4050",
+                        "basic_user": "4040",
+                        "value": "4030",
+                        "premium_user": "4020",
+                        "diamond_user": "3990",
+                        "gold_user": "3990",
+                        "api_user": "3990"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "750MB",
+                "dataPlan": "114",
+                "duration": "(1 Day)",
+                "type": "SME",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "200",
+                        "basic_user": "199",
+                        "value": "198",
+                        "premium_user": "197",
+                        "diamond_user": "194",
+                        "gold_user": "194",
+                        "api_user": "194"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "1.5GB",
+                "dataPlan": "115",
+                "duration": "(1 Day)",
+                "type": "SME",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "293",
+                        "basic_user": "292",
+                        "value": "291",
+                        "premium_user": "290",
+                        "diamond_user": "288",
+                        "gold_user": "288",
+                        "api_user": "288"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "2.5GB",
+                "dataPlan": "116",
+                "duration": "(2 Days)",
+                "type": "SME",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "485",
+                        "basic_user": "484",
+                        "value": "483",
+                        "premium_user": "482",
+                        "diamond_user": "479",
+                        "gold_user": "479",
+                        "api_user": "479"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "10.0GB",
+                "dataPlan": "117",
+                "duration": "(7 Days)",
+                "type": "SME",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "1883",
+                        "basic_user": "1881",
+                        "value": "1880",
+                        "premium_user": "1878",
+                        "diamond_user": "1870",
+                        "gold_user": "1870",
+                        "api_user": "1870"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "1GB",
+                "dataPlan": "138",
+                "duration": "(3 Days)",
+                "type": "SME",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "290",
+                        "basic_user": "289",
+                        "value": "288",
+                        "premium_user": "287",
+                        "diamond_user": "283",
+                        "gold_user": "283",
+                        "api_user": "283"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "1GB",
+                "dataPlan": "139",
+                "duration": "(7 Days)",
+                "type": "SME",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "336",
+                        "basic_user": "335",
+                        "value": "334",
+                        "premium_user": "333",
+                        "diamond_user": "328",
+                        "gold_user": "328",
+                        "api_user": "328"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "3GB",
+                "dataPlan": "140",
+                "duration": "(3 Days)",
+                "type": "SME",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "845",
+                        "basic_user": "844",
+                        "value": "843",
+                        "premium_user": "842",
+                        "diamond_user": "837",
+                        "gold_user": "837",
+                        "api_user": "837"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "3GB",
+                "dataPlan": "141",
+                "duration": "(7 Days)",
+                "type": "SME",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "975",
+                        "basic_user": "974",
+                        "value": "973",
+                        "premium_user": "972",
+                        "diamond_user": "968",
+                        "gold_user": "968",
+                        "api_user": "968"
+                    }
+                ]
+            },
+            {
+                "dataBundle": "5GB",
+                "dataPlan": "142",
+                "duration": "(7 Days)",
+                "type": "SME",
+                "status": "Active",
+                "price": [
+                    {
+                        "free_user": "1650",
+                        "basic_user": "1645",
+                        "value": "1643",
+                        "premium_user": "1640",
+                        "diamond_user": "1630",
+                        "gold_user": "1630",
+                        "api_user": "1630"
+                    }
+                ]
+            }
+        ]
+    }
+]

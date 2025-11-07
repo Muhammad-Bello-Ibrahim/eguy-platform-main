@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Bell, Shield, Palette, Globe, HelpCircle, LogOut, User, Moon, Sun } from "lucide-react";
+import { ArrowLeft, Bell, Shield, Palette, Globe, HelpCircle, LogOut, User, Moon, Sun, MessageCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -249,8 +249,12 @@ export default function SettingsPage() {
               <Button
                 variant="ghost"
                 className="w-full justify-between text-gray-700 hover:bg-gray-50"
+                onClick={() => window.open('https://wa.me/+2349076073008', '_blank')}
               >
-                <span>Help & Support</span>
+                <span className="flex items-center gap-2">
+                  <MessageCircle className="w-4 h-4" />
+                  Chat with Support
+                </span>
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
