@@ -64,36 +64,36 @@ export function SignupForm() {
   };
 
   return (
-    <Card className="w-full rounded-3xl border-0 bg-white/80 backdrop-blur-sm shadow-2xl p-8 animate-fade-in-up">
-      <CardHeader className="pb-6">
-        <CardTitle className="text-2xl font-bold text-center text-foreground">
+    <Card className="w-full bg-white border border-gray-200 shadow-sm">
+      <CardHeader className="pb-4">
+        <CardTitle className="text-xl font-semibold text-gray-900 text-center">
           Create Your Account
         </CardTitle>
-        <CardDescription className="text-center text-muted-foreground">
+        <CardDescription className="text-center text-gray-600">
           Join thousands of users and start your financial journey today
         </CardDescription>
       </CardHeader>
 
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
-            <Alert variant="destructive" className="rounded-2xl">
-              <AlertDescription className="font-medium">{error}</AlertDescription>
+            <Alert variant="destructive" className="rounded-lg border-red-200 bg-red-50">
+              <AlertDescription className="font-medium text-red-800">{error}</AlertDescription>
             </Alert>
           )}
           {success && (
-            <Alert className="rounded-2xl">
-              <AlertDescription className="font-medium">{success}</AlertDescription>
+            <Alert className="rounded-lg border-green-200 bg-green-50">
+              <AlertDescription className="font-medium text-green-800">{success}</AlertDescription>
             </Alert>
           )}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="fullName" className="text-sm font-semibold text-foreground">
+              <Label htmlFor="fullName" className="text-sm font-medium text-gray-700">
                 Full Name
               </Label>
               <div className="relative group">
-                <User className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground w-5 h-5 group-focus-within:text-primary transition-colors duration-300" />
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 group-focus-within:text-blue-600 transition-colors duration-200" />
                 <Input
                   id="fullName"
                   name="fullName"
@@ -102,17 +102,17 @@ export function SignupForm() {
                   value={formData.fullName}
                   onChange={handleChange}
                   placeholder="Enter your full name"
-                  className="w-full rounded-2xl border border-primary/20 bg-white/50 backdrop-blur-sm px-12 py-4 text-base font-medium text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-300"
+                  className="w-full rounded-lg border border-gray-300 bg-white px-10 py-2.5 text-sm text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-gray-400 transition-all duration-200"
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="phone" className="text-sm font-semibold text-foreground">
+              <Label htmlFor="phone" className="text-sm font-medium text-gray-700">
                 Phone Number
               </Label>
               <div className="relative group">
-                <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground w-5 h-5 group-focus-within:text-primary transition-colors duration-300" />
+                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 group-focus-within:text-blue-600 transition-colors duration-200" />
                 <Input
                   id="phone"
                   name="phone"
@@ -121,18 +121,18 @@ export function SignupForm() {
                   value={formData.phone}
                   onChange={handleChange}
                   placeholder="Enter your phone number"
-                  className="w-full rounded-2xl border border-primary/20 bg-white/50 backdrop-blur-sm px-12 py-4 text-base font-medium text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-300"
+                  className="w-full rounded-lg border border-gray-300 bg-white px-10 py-2.5 text-sm text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-gray-400 transition-all duration-200"
                 />
               </div>
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="email" className="text-sm font-semibold text-foreground">
+            <Label htmlFor="email" className="text-sm font-medium text-gray-700">
               Email Address
             </Label>
             <div className="relative group">
-              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground w-5 h-5 group-focus-within:text-primary transition-colors duration-300" />
+              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 group-focus-within:text-blue-600 transition-colors duration-200" />
               <Input
                 id="email"
                 name="email"
@@ -141,17 +141,17 @@ export function SignupForm() {
                 value={formData.email}
                 onChange={handleChange}
                 placeholder="Enter your email address"
-                className="w-full rounded-2xl border border-primary/20 bg-white/50 backdrop-blur-sm px-12 py-4 text-base font-medium text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-300"
+                className="w-full rounded-lg border border-gray-300 bg-white px-10 py-2.5 text-sm text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-gray-400 transition-all duration-200"
               />
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password" className="text-sm font-semibold text-foreground">
+            <Label htmlFor="password" className="text-sm font-medium text-gray-700">
               Password
             </Label>
             <div className="relative group">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground w-5 h-5 group-focus-within:text-primary transition-colors duration-300" />
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 group-focus-within:text-blue-600 transition-colors duration-200" />
               <Input
                 id="password"
                 name="password"
@@ -160,26 +160,26 @@ export function SignupForm() {
                 value={formData.password}
                 onChange={handleChange}
                 placeholder="Create a strong password"
-                className="w-full rounded-2xl border border-primary/20 bg-white/50 backdrop-blur-sm px-12 py-4 text-base font-medium text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-300 pr-12"
+                className="w-full rounded-lg border border-gray-300 bg-white px-10 py-2.5 text-sm text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-gray-400 transition-all duration-200 pr-10"
               />
               <button
                 type="button"
                 aria-label={showPassword ? "Hide password" : "Show password"}
                 onClick={() => setShowPassword((v) => !v)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary focus:outline-none transition-colors duration-300"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-600 focus:outline-none transition-colors duration-200"
                 tabIndex={0}
               >
-                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="confirmPassword" className="text-sm font-semibold text-foreground">
+            <Label htmlFor="confirmPassword" className="text-sm font-medium text-gray-700">
               Confirm Password
             </Label>
             <div className="relative group">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground w-5 h-5 group-focus-within:text-primary transition-colors duration-300" />
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 group-focus-within:text-blue-600 transition-colors duration-200" />
               <Input
                 id="confirmPassword"
                 name="confirmPassword"
@@ -188,26 +188,26 @@ export function SignupForm() {
                 value={formData.confirmPassword}
                 onChange={handleChange}
                 placeholder="Confirm your password"
-                className="w-full rounded-2xl border border-primary/20 bg-white/50 backdrop-blur-sm px-12 py-4 text-base font-medium text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-300 pr-12"
+                className="w-full rounded-lg border border-gray-300 bg-white px-10 py-2.5 text-sm text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-gray-400 transition-all duration-200 pr-10"
               />
               <button
                 type="button"
                 aria-label={showConfirmPassword ? "Hide password" : "Show password"}
                 onClick={() => setShowConfirmPassword((v) => !v)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary focus:outline-none transition-colors duration-300"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-600 focus:outline-none transition-colors duration-200"
                 tabIndex={0}
               >
-                {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="referralCode" className="text-sm font-semibold text-foreground">
-              Referral Code <span className="text-muted-foreground font-normal">(Optional)</span>
+            <Label htmlFor="referralCode" className="text-sm font-medium text-gray-700">
+              Referral Code <span className="text-gray-500 font-normal">(Optional)</span>
             </Label>
             <div className="relative group">
-              <Gift className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground w-5 h-5 group-focus-within:text-primary transition-colors duration-300" />
+              <Gift className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 group-focus-within:text-blue-600 transition-colors duration-200" />
               <Input
                 id="referralCode"
                 name="referralCode"
@@ -215,29 +215,40 @@ export function SignupForm() {
                 value={formData.referralCode}
                 onChange={handleChange}
                 placeholder="Enter referral code if you have one"
-                className="w-full rounded-2xl border border-primary/20 bg-white/50 backdrop-blur-sm px-12 py-4 text-base font-medium text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-300"
+                className="w-full rounded-lg border border-gray-300 bg-white px-10 py-2.5 text-sm text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-gray-400 transition-all duration-200"
               />
             </div>
           </div>
 
           <Button
             type="submit"
-            className="w-full py-4 rounded-2xl bg-gradient-to-r from-secondary to-secondary/80 hover:from-secondary/90 hover:to-secondary/70 text-secondary-foreground font-bold text-lg shadow-xl hover:shadow-secondary/25 transition-all duration-500 hover:scale-[1.02] border-0"
+            className="w-full py-2.5 rounded-lg bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-medium text-sm shadow-sm hover:shadow-purple-500/25 transition-all duration-200 border-0"
             disabled={isLoading}
           >
             {isLoading ? (
               <>
-                <Loader2 className="mr-3 h-5 w-5 animate-spin" />
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Creating Account...
               </>
             ) : (
               <>
                 <span className="mr-2">Create Account</span>
-                <span className="group-hover:translate-x-1 transition-transform duration-300">→</span>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
               </>
             )}
           </Button>
         </form>
+
+        <div className="mt-6 text-center">
+          <p className="text-gray-600 text-sm">
+            Already have an account?{" "}
+            <Link href="/signin" className="text-purple-600 hover:text-purple-700 font-medium transition-colors duration-200">
+              Sign in here
+            </Link>
+          </p>
+        </div>
       </CardContent>
     </Card>
   );

@@ -21,19 +21,29 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Insufficient wallet balance" }, { status: 400 })
     }
 
-    // Integrate with SubAndGain API for data purchase (GET request)
-    const username = process.env.username;
+    // Check SubAndGain API credentials
+    const username = process.env.SUBANDGAIN_API_USERNAME;
     const apiKey = process.env.SUBANDGAIN_API_KEY;
+
+    if (!username || !apiKey) {
+      console.error("SubAndGain credentials not configured");
+      return NextResponse.json({ error: "Payment service not configured" }, { status: 500 });
+    }
+
+    // Integrate with SubAndGain API for data purchase (GET request)
     const networkUC = network.toUpperCase();
     const url = `https://subandgain.com/api/data.php?username=${username}&apiKey=${apiKey}&network=${networkUC}&dataPlan=${plan}&phoneNumber=${phone}`;
+    console.log("SubAndGain Data API URL:", url); // Debug log
     const subaRes = await fetch(url);
     let subaData;
     try {
       subaData = await subaRes.json();
     } catch (e) {
       const text = await subaRes.text();
+      console.error("SubAndGain API Response (Data):", text); // Debug log
       return NextResponse.json({ error: "Invalid response from SubAndGain", raw: text }, { status: 400 });
     }
+    console.log("SubAndGain API Response (Data):", subaData); // Debug log
     if (!subaRes.ok || subaData.error) {
       return NextResponse.json({ error: subaData.description || "Data purchase failed" }, { status: 400 });
     }

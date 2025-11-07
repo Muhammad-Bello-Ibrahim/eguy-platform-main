@@ -12,6 +12,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/signin", request.url))
   }
 
+  // Redirect admin users to admin panel when accessing dashboard
+  if (isDashboard && session && session.user.email === "oraotechnologiesltd@gmail.com" && session.user.role === "admin") {
+    return NextResponse.redirect(new URL("/admin", request.url))
+  }
+
   // Restrict access for unverified users, but allow access to signin/signup
   if ((isDashboard || isAdmin) && session && session.user.kycStatus !== "verified" && !isAuthPage) {
     return NextResponse.redirect(new URL(`/verify-prompt?email=${encodeURIComponent(session.user.email)}`, request.url))

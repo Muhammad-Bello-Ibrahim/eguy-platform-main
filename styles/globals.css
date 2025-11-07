@@ -125,5 +125,17 @@
   body {
     @apply bg-background text-foreground;
     font-family: 'Ubuntu', 'Roboto', sans-serif;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  /* Fix for dropdown menu scroll issues */
+  [data-radix-popper-content-wrapper] {
+    z-index: 9999 !important;
+  }
+
+  /* Ensure page doesn't lose scroll when dropdowns open */
+  html {
+    overflow-y: auto !important;
   }
 }

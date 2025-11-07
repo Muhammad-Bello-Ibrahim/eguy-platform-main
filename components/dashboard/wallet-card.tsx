@@ -10,12 +10,17 @@ interface WalletCardProps {
   onDeposit: () => void
   onWithdraw: () => void
   onTransfer: () => void
+  refreshTrigger?: number // Add refresh trigger prop
 }
 
-export function WalletCard({ onDeposit, onWithdraw, onTransfer }: WalletCardProps) {
+export function WalletCard({ onDeposit, onWithdraw, onTransfer, refreshTrigger }: WalletCardProps) {
   const [balance, setBalance] = useState(0)
   const [isBalanceVisible, setIsBalanceVisible] = useState(true)
   const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    fetchBalance()
+  }, [refreshTrigger]) // Refresh when refreshTrigger changes
 
   useEffect(() => {
     fetchBalance()
@@ -94,7 +99,7 @@ export function WalletCard({ onDeposit, onWithdraw, onTransfer }: WalletCardProp
             className="flex-1 bg-white/20 hover:bg-white/30 text-white border border-white/30 rounded-xl py-3 font-semibold transition-all duration-200 hover:scale-105"
           >
             <ArrowUpRight className="w-4 h-4 mr-2" />
-            Transfer
+            Withdraw
           </Button>
         </div>
       </div>
