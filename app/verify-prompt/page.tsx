@@ -4,9 +4,26 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
-import React, { useState, useEffect, useRef } from "react";
+import React, { Suspense, useState, useEffect, useRef } from "react";
 
 export default function VerifyPromptPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="space-y-4 w-full max-w-md">
+          <Skeleton className="h-10 w-2/3 rounded-xl" />
+          <Skeleton className="h-8 w-full rounded-xl" />
+          <Skeleton className="h-8 w-full rounded-xl" />
+          <Skeleton className="h-8 w-1/2 rounded-xl" />
+        </div>
+      </div>
+    }>
+      <VerifyPromptContent />
+    </Suspense>
+  );
+}
+
+function VerifyPromptContent() {
   const params = useSearchParams();
   const router = useRouter();
   const email = params.get("email") || "";
@@ -16,6 +33,7 @@ export default function VerifyPromptPage() {
   const [cooldown, setCooldown] = useState(0);
   const [polling, setPolling] = useState(true);
   const cooldownRef = useRef<NodeJS.Timeout | null>(null);
+
   // Poll verification status every 3 seconds
   useEffect(() => {
     if (!email || !polling) return;
@@ -111,7 +129,7 @@ export default function VerifyPromptPage() {
         >
           {isLoading ? "Resending..." : cooldown > 0 ? `Resend in ${cooldown}s` : "Resend Verification Link"}
         </Button>
-  <Button type="button" className="w-full" onClick={() => router.push("/signin")}>Login</Button>
+        <Button type="button" className="w-full" onClick={() => router.push("/signin")}>Login</Button>
       </div>
     </Card>
   );

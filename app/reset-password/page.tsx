@@ -4,9 +4,18 @@ import { ResetPasswordForm } from "@/components/auth/reset-password-form"
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { ArrowLeft, TrendingUp, TrendingDown, Activity, DollarSign, Users, Wallet, BarChart3, Shield, Lock, AlertTriangle } from "lucide-react"
-import { useState, useEffect } from "react"
+import { Suspense, useState, useEffect } from "react"
 
+// Wrap the content in Suspense so useSearchParams is allowed
 export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading…</div>}>
+      <ResetPasswordContent />
+    </Suspense>
+  )
+}
+
+function ResetPasswordContent() {
   const params = useSearchParams()
   const token = params.get("token") || ""
 
@@ -25,7 +34,6 @@ export default function ResetPasswordPage() {
         change: (Math.random() * 20) - 10
       })))
     }, 5000)
-
     return () => clearInterval(interval)
   }, [])
 
