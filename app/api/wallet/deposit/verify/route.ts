@@ -46,7 +46,13 @@ export async function POST(request: NextRequest) {
 
     if (tx.status === "completed") {
       console.log("Deposit verification: Transaction already completed, skipping credit.");
-      return NextResponse.json({ message: "Already credited" });
+      // Return the current balance without crediting again
+      const user = await Database.findUserById(userId);
+      return NextResponse.json({ 
+        message: "Already credited",
+        amount: tx.amount,
+        newBalance: user?.walletBalance 
+      });
     }
 
     // Verify the amount matches
@@ -58,9 +64,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Amount verification failed" }, { status: 400 });
     }
 
-    // Credit user's wallet
+    // Use atomic operation to prevent race conditions
+    // First mark transaction as completed, then credit wallet only if status was pending
+    const updateResult = await Database.updateTransactionStatusAtomic(reference, "pending", "completed");
+    
+    if (!updateResult) {
+      console.log("Deposit verification: Transaction already processed by another request");
+      const user = await Database.findUserById(userId);
+      return NextResponse.json({ 
+        message: "Already credited",
+        amount: expectedAmount,
+        newBalance: user?.walletBalance 
+      });
+    }
+
+    // Credit user's wallet only if transaction status was successfully updated
     await Database.updateUserWallet(userId, expectedAmount);
-    await Database.updateTransactionStatus(reference, "completed");
 
     // Create success notification
     await Database.createNotification({

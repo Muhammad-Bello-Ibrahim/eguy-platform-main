@@ -1,43 +1,56 @@
 import { NextRequest, NextResponse } from "next/server"
 import { Database } from "@/lib/database"
-import { ObjectId } from "mongodb"
 
 export async function POST(request: NextRequest) {
-  const { token } = await request.json()
-  if (!token) {
-    return NextResponse.json({ error: "Token required" }, { status: 400 })
-  }
-  const db = await Database.getDb()
-  const tokenDoc = await db.collection("verification_tokens").findOne({ token, used: false })
-  if (!tokenDoc || tokenDoc.expires < Date.now()) {
-    return NextResponse.json({ error: "Invalid or expired token" }, { status: 400 })
-  }
-  // Update user status
-  await db.collection("users").updateOne(
-    { _id: new ObjectId(tokenDoc.userId) },
-    { $set: { kycStatus: "verified" } }
-  )
-  // Mark token as used
-  await db.collection("verification_tokens").updateOne(
-    { token },
-    { $set: { used: true } }
-  )
-  // Fetch latest user data
-  const user = await db.collection("users").findOne({ _id: new ObjectId(tokenDoc.userId) })
-  // Refresh session with updated user data
-  if (user) {
+  try {
+    const { token } = await request.json()
+    
+    if (!token) {
+      return NextResponse.json({ error: "Token required" }, { status: 400 })
+    }
+
+    // Get verification token
+    const tokenDoc = await Database.getVerificationToken(token)
+    
+    if (!tokenDoc) {
+      return NextResponse.json({ error: "Invalid or expired token" }, { status: 400 })
+    }
+
+    // Check if token has expired
+    if (tokenDoc.expires < new Date()) {
+      return NextResponse.json({ error: "Invalid or expired token" }, { status: 400 })
+    }
+
+    // Update user KYC status to verified
+    const updatedUser = await Database.updateUserById(tokenDoc.userId, { 
+      kycStatus: "verified" 
+    })
+
+    if (!updatedUser) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 })
+    }
+
+    // Mark token as used
+    await Database.markTokenAsUsed(token)
+
+    // Refresh session with updated user data
     const { createSession } = await import("@/lib/auth")
     await createSession({
-      id: user._id.toString(),
-      fullName: user.fullName,
-      email: user.email,
-      phone: user.phone,
-      walletBalance: user.walletBalance,
-      referralCode: user.referralCode,
-      referredBy: user.referredBy,
-      kycStatus: user.kycStatus,
-      status: user.status,
+      id: updatedUser.id,
+      fullName: updatedUser.fullName,
+      email: updatedUser.email,
+      phone: updatedUser.phone,
+      walletBalance: updatedUser.walletBalance,
+      referralCode: updatedUser.referralCode,
+      referredBy: updatedUser.referredBy,
+      kycStatus: updatedUser.kycStatus,
+      status: updatedUser.status,
+      role: updatedUser.role,
     })
+
+    return NextResponse.json({ message: "Email verified successfully" })
+  } catch (error) {
+    console.error("Email verification error:", error)
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
-  return NextResponse.json({ message: "Email verified successfully" })
 }

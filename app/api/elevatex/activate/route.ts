@@ -21,11 +21,15 @@ export async function POST(request: NextRequest) {
   if (user.elevatexActivated) {
     return NextResponse.json({ error: "Already activated" }, { status: 400 });
   }
+  
+  // Generate referral code if not exists
+  const referralCode = user.referralCode || generateReferralCode(user.id);
+  
   // Deduct ₦1000 and activate Elevatex
-  await Database.updateUserByEmail(session.user.email, {
+  await Database.updateUserById(user.id, {
     walletBalance: user.walletBalance - 1000,
     elevatexActivated: true,
-    referralCode: user.referralCode || generateReferralCode(user.id)
+    referralCode: referralCode
   });
 
   // Record ElevateX activation transaction
@@ -62,5 +66,5 @@ export async function POST(request: NextRequest) {
     currentUser = referrer;
   }
 
-  return NextResponse.json({ success: true, referralCode: user.referralCode || generateReferralCode(user.id) });
+  return NextResponse.json({ success: true, referralCode });
 }
