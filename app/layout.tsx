@@ -10,6 +10,7 @@ export const metadata: Metadata = {
 }
 
 import { usePathname } from "next/navigation";
+import MobileNavWrapper from "@/components/ui/mobile-nav-wrapper";
 
 export default function RootLayout({
   children,
@@ -30,6 +31,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           {children}
+          <MobileNavWrapper />
         </ThemeProvider>
         <Analytics />
       </body>

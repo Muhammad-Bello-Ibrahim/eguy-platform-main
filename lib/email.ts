@@ -10,7 +10,13 @@ export async function sendVerificationEmail(email: string, token: string) {
   })
 
   // Use environment variable if available, fallback to localhost for development
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
+  // Determine base URL with fallback
+  const baseUrl =
+    process.env.APP_URL ||
+    (process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : 'http://localhost:3000')
+
   const verifyUrl = `${baseUrl}/verify-email?token=${token}`
 
   await transporter.sendMail({
@@ -51,7 +57,13 @@ export async function sendResetEmail(email: string, token: string) {
   })
 
   // Use environment variable if available, fallback to localhost for development
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
+  // Determine base URL with fallback
+  const baseUrl =
+    process.env.APP_URL ||
+    (process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : 'http://localhost:3000')
+
   const resetUrl = `${baseUrl}/reset-password?token=${token}`
 
   await transporter.sendMail({
