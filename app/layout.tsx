@@ -1,16 +1,12 @@
 import type { Metadata } from 'next'
-
-import { GeistSans } from 'geist/font/sans'
-import { GeistMono } from 'geist/font/mono'
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
-import MobileNavWrapper from "@/components/ui/mobile-nav-wrapper";
 import { ThemeProvider } from "@/components/theme-provider";
 
 export const metadata: Metadata = {
-  title: 'v0 App',
-  description: 'Created with v0',
-  generator: 'v0.app',
+  title: 'eGuy - Simple & Secure Financial Services',
+  description: 'Send money, pay bills, and manage your finances with ease. Built for Nigerians, by Nigerians.',
+  generator: 'eGuy',
 }
 
 import { usePathname } from "next/navigation";
@@ -22,15 +18,18 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
+      <head>
+        <link rel="preconnect" href="https://fonts.bunny.net" />
+        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+      </head>
+      <body className="font-sans antialiased bg-white text-gray-900">
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
-          enableSystem
+          defaultTheme="light"
+          enableSystem={false}
           disableTransitionOnChange
         >
           {children}
-          <MobileNavWrapper />
         </ThemeProvider>
         <Analytics />
       </body>

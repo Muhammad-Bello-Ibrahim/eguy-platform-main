@@ -130,6 +130,30 @@ export class Database {
       id: updatedUser._id.toString(),
     }
   }
+
+  static async updateUserByEmail(email: string, updates: Partial<Omit<DatabaseUser, "id" | "createdAt" | "updatedAt">>): Promise<DatabaseUser | null> {
+    const db = await getDb()
+    const result = await db.collection("users").updateOne(
+      { email },
+      {
+        $set: {
+          ...updates,
+          updatedAt: new Date()
+        }
+      }
+    )
+
+    if (result.matchedCount === 0) {
+      return null
+    }
+
+    // Return the updated user
+    const updatedUser = await db.collection("users").findOne({ email })
+    return {
+      ...updatedUser,
+      id: updatedUser._id.toString(),
+    }
+  }
   static async createUser(userData: Omit<DatabaseUser, "id" | "createdAt" | "updatedAt">): Promise<DatabaseUser> {
     const db = await getDb();
     const now = new Date();
@@ -215,12 +239,36 @@ export class Database {
     }
   }
 
+  static async findTransactionByReference(reference: string): Promise<Transaction | null> {
+    const db = await getDb()
+    const transaction = await db.collection("transactions").findOne({ reference })
+    if (!transaction) return null
+    return {
+      ...transaction,
+      id: transaction._id.toString(),
+    }
+  }
+
   static async updateTransactionStatus(reference: string, status: "pending" | "completed" | "failed" | "cancelled"): Promise<void> {
     const db = await getDb()
     await db.collection("transactions").updateOne(
       { reference },
       { $set: { status, updatedAt: new Date() } }
     )
+  }
+
+  static async updateTransactionStatusAtomic(
+    reference: string, 
+    expectedStatus: "pending" | "completed" | "failed" | "cancelled",
+    newStatus: "pending" | "completed" | "failed" | "cancelled"
+  ): Promise<boolean> {
+    const db = await getDb()
+    const result = await db.collection("transactions").updateOne(
+      { reference, status: expectedStatus },
+      { $set: { status: newStatus, updatedAt: new Date() } }
+    )
+    // Returns true only if a document was actually modified
+    return result.modifiedCount > 0
   }
 
   static async createReferral(referralData: Omit<Referral, "id" | "createdAt">): Promise<Referral> {
@@ -681,5 +729,53 @@ export class Database {
       console.error("Error getting all users:", error);
       return [];
     }
+  }
+
+  static async saveVerificationToken(userId: string, token: string, expires: number): Promise<void> {
+    const db = await getDb();
+    await db.collection("verification_tokens").insertOne({
+      userId,
+      token,
+      expires: new Date(expires),
+      used: false,
+      createdAt: new Date(),
+    });
+  }
+
+  static async getVerificationToken(token: string): Promise<any | null> {
+    const db = await getDb();
+    return await db.collection("verification_tokens").findOne({ token, used: false });
+  }
+
+  static async markTokenAsUsed(token: string): Promise<void> {
+    const db = await getDb();
+    await db.collection("verification_tokens").updateOne(
+      { token },
+      { $set: { used: true, updatedAt: new Date() } }
+    );
+  }
+
+  static async savePasswordResetToken(userId: string, token: string, expires: number): Promise<void> {
+    const db = await getDb();
+    await db.collection("password_reset_tokens").insertOne({
+      userId,
+      token,
+      expires: new Date(expires),
+      used: false,
+      createdAt: new Date(),
+    });
+  }
+
+  static async getPasswordResetToken(token: string): Promise<any | null> {
+    const db = await getDb();
+    return await db.collection("password_reset_tokens").findOne({ token, used: false });
+  }
+
+  static async markPasswordResetTokenAsUsed(token: string): Promise<void> {
+    const db = await getDb();
+    await db.collection("password_reset_tokens").updateOne(
+      { token },
+      { $set: { used: true, updatedAt: new Date() } }
+    );
   }
 }

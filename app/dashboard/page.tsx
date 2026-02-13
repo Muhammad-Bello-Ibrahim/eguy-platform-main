@@ -120,9 +120,13 @@ export default function DashboardPage() {
 
   // Paystack verification logic
   useEffect(() => {
+    let isVerifying = false; // Prevent duplicate calls
+    
     const params = new URLSearchParams(window.location.search);
     const reference = params.get("reference") || params.get("trxref");
-    if (reference) {
+    
+    if (reference && !isVerifying) {
+      isVerifying = true;
       console.log("Processing Paystack callback with reference:", reference);
 
       fetch("/api/user")
@@ -165,9 +169,13 @@ export default function DashboardPage() {
                 url.searchParams.delete("reference");
                 url.searchParams.delete("trxref");
                 window.history.replaceState({}, document.title, url.pathname);
+              })
+              .finally(() => {
+                isVerifying = false;
               });
           } else {
             console.error("No user found for verification");
+            isVerifying = false;
           }
         })
         .catch((error) => {
