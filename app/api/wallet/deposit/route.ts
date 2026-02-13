@@ -25,7 +25,11 @@ export async function POST(request: NextRequest) {
     const email = session.user.email
 
     // Build absolute callback URL
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
+    const baseUrl =
+      process.env.APP_URL ||
+      (process.env.VERCEL_URL
+        ? `https://${process.env.VERCEL_URL}`
+        : 'http://localhost:3000')
     const callbackUrl = `${baseUrl}/dashboard`
 
     // Initialize Paystack transaction
