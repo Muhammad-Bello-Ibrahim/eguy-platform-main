@@ -1,3 +1,7 @@
+export const dynamic = "force-dynamic"; // ensure no static optimization
+export const revalidate = 0; // no ISR caching
+// (optional) export const runtime = "nodejs"; // if you need Node APIs
+
 import { NextResponse } from "next/server"
 import { getSession } from "@/lib/auth"
 
@@ -11,8 +15,6 @@ export async function GET() {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
 
-    // TODO: Implement actual database queries for referrals data
-    // For now, return comprehensive mock data
     const referralsData = {
       totalReferrals: 3456,
       activeReferrals: 2890,

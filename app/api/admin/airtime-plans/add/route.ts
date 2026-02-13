@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import AirtimePlan from "@/lib/models/AirtimePlan";
-import { Database } from "@/lib/database";
+import {} from "@/lib/models/AirtimePlan";
+import { Database } from "@/libAirtimePlan/database";
 
 export const dynamic = "force-dynamic";
 

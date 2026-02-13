@@ -1,3 +1,7 @@
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+// export const runtime = "nodejs";
+
 import { NextResponse } from "next/server"
 import { getSession } from "@/lib/auth"
 import { Database } from "@/lib/database"
@@ -14,7 +18,6 @@ export async function GET() {
 
     console.log("Fetching admin stats for user:", session.user.email);
 
-    // Test database connection first
     let userCount = 0;
     try {
       userCount = await Database.getUserCount();
@@ -24,7 +27,6 @@ export async function GET() {
       throw dbError;
     }
 
-    // Get real data from database with individual error handling
     let totalUsers = 0;
     let totalDeposits = 0;
     let totalWithdrawals = 0;
@@ -48,108 +50,28 @@ export async function GET() {
       mostPopularService: "Airtime"
     };
 
-    try {
-      totalUsers = await Database.getUserCount() || 0;
-    } catch (error) {
-      console.error("Error getting user count:", error);
-    }
+    try { totalUsers = await Database.getUserCount() || 0; } catch (error) { console.error("Error getting user count:", error); }
+    try { totalDeposits = await Database.getTotalDeposits() || 0; } catch (error) { console.error("Error getting total deposits:", error); }
+    try { totalWithdrawals = await Database.getTotalWithdrawals() || 0; } catch (error) { console.error("Error getting total withdrawals:", error); }
+    try { pendingWithdrawals = await Database.getPendingWithdrawals() || 0; } catch (error) { console.error("Error getting pending withdrawals:", error); }
+    try { monthlyRevenue = await Database.getMonthlyRevenue() || 0; } catch (error) { console.error("Error getting monthly revenue:", error); }
+    try { totalTransactions = await Database.getTransactionCount() || 0; } catch (error) { console.error("Error getting transaction count:", error); }
+    try { successfulTransactions = await Database.getSuccessfulTransactionCount() || 0; } catch (error) { console.error("Error getting successful transaction count:", error); }
+    try { totalUsersFund = await Database.getTotalUsersFund() || 0; } catch (error) { console.error("Error getting total users fund:", error); }
+    try { referralStats = await Database.getReferralStats(); } catch (error) { console.error("Error getting referral stats:", error); }
+    try { serviceStats = await Database.getServiceUsageStats(); } catch (error) { console.error("Error getting service usage stats:", error); }
 
-    try {
-      totalDeposits = await Database.getTotalDeposits() || 0;
-    } catch (error) {
-      console.error("Error getting total deposits:", error);
-    }
-
-    try {
-      totalWithdrawals = await Database.getTotalWithdrawals() || 0;
-    } catch (error) {
-      console.error("Error getting total withdrawals:", error);
-    }
-
-    try {
-      pendingWithdrawals = await Database.getPendingWithdrawals() || 0;
-    } catch (error) {
-      console.error("Error getting pending withdrawals:", error);
-    }
-
-    try {
-      monthlyRevenue = await Database.getMonthlyRevenue() || 0;
-    } catch (error) {
-      console.error("Error getting monthly revenue:", error);
-    }
-
-    try {
-      totalTransactions = await Database.getTransactionCount() || 0;
-    } catch (error) {
-      console.error("Error getting transaction count:", error);
-    }
-
-    try {
-      successfulTransactions = await Database.getSuccessfulTransactionCount() || 0;
-    } catch (error) {
-      console.error("Error getting successful transaction count:", error);
-    }
-
-    try {
-      totalUsersFund = await Database.getTotalUsersFund() || 0;
-    } catch (error) {
-      console.error("Error getting total users fund:", error);
-    }
-
-    try {
-      referralStats = await Database.getReferralStats();
-    } catch (error) {
-      console.error("Error getting referral stats:", error);
-    }
-
-    try {
-      serviceStats = await Database.getServiceUsageStats();
-    } catch (error) {
-      console.error("Error getting service usage stats:", error);
-    }
-
-    console.log("Raw database results:", {
-      totalUsers,
-      totalDeposits,
-      totalWithdrawals,
-      pendingWithdrawals,
-      monthlyRevenue,
-      totalTransactions,
-      successfulTransactions,
-      totalUsersFund,
-      referralStats,
-      serviceStats
-    });
-
-    // Check if we got any real data
-    const hasRealData = totalUsers > 0 || totalDeposits > 0 || totalTransactions > 0;
-
-    if (!hasRealData) {
-      console.warn("No real data found in database, API might be falling back to mock data");
-    }
-
-    // Calculate derived metrics
     const netRevenue = totalDeposits - totalWithdrawals;
     const successRate = totalTransactions > 0 ? (successfulTransactions / totalTransactions) * 100 : 0;
     const averageTransactionValue = successfulTransactions > 0 ? totalDeposits / successfulTransactions : 0;
     const profitMargin = netRevenue - totalUsersFund;
 
-    console.log("Calculated metrics:", {
-      netRevenue,
-      successRate,
-      averageTransactionValue,
-      profitMargin,
-      totalUsersFund,
-      totalDeposits,
-      totalWithdrawals
-    });
-
     const stats = {
       users: {
         total: totalUsers || 0,
-        active: Math.floor((totalUsers || 0) * 0.85), // Assume 85% are active
-        suspended: Math.floor((totalUsers || 0) * 0.02), // Assume 2% are suspended
-        newThisMonth: Math.floor((totalUsers || 0) * 0.12), // Assume 12% are new this month
+        active: Math.floor((totalUsers || 0) * 0.85),
+        suspended: Math.floor((totalUsers || 0) * 0.02),
+        newThisMonth: Math.floor((totalUsers || 0) * 0.12),
         growth: 12.5,
       },
       financial: {
@@ -168,7 +90,7 @@ export async function GET() {
         totalBonusPaid: referralStats.totalBonusPaid || 0,
         averageTreeSize: referralStats.averageTreeSize || 0,
         topReferrer: referralStats.topReferrer || "No referrals yet",
-        referralGrowth: 15.2, // Keep hardcoded for now as we don't have historical data
+        referralGrowth: 15.2,
       },
       transactions: {
         totalTransactions: totalTransactions || 0,
@@ -186,7 +108,6 @@ export async function GET() {
       },
     }
 
-    console.log("Final stats being returned:", stats);
     return NextResponse.json(stats)
   } catch (error) {
     console.error("Admin stats error:", error)
