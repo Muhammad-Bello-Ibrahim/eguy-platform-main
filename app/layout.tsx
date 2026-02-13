@@ -7,7 +7,12 @@ export const metadata: Metadata = {
   title: 'eGuy - Simple & Secure Financial Services',
   description: 'Send money, pay bills, and manage your finances with ease. Built for Nigerians, by Nigerians.',
   generator: 'eGuy',
+  manifest: "/manifest.json",
 }
+
+export const viewport = {
+  themeColor: "#ffffff",
+};
 
 import { usePathname } from "next/navigation";
 import MobileNavWrapper from "@/components/ui/mobile-nav-wrapper";

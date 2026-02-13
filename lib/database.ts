@@ -58,21 +58,21 @@ const dbName = uri.split("/").pop()?.split("?")[0] || "eguy"
 let db: any
 let mongooseConnected = false
 
-async function getDb() {
-  if (!db) {
-    try {
-      await client.connect()
-      db = client.db(dbName)
-      console.log("Database connected successfully")
-    } catch (error) {
-      console.error("Database connection failed:", error)
-      throw new Error("Database connection failed")
-    }
-  }
-  return db
-}
-
 export class Database {
+  static async getDb() {
+    if (!db) {
+      try {
+        await client.connect()
+        db = client.db(dbName)
+        console.log("Database connected successfully")
+      } catch (error) {
+        console.error("Database connection failed:", error)
+        throw new Error("Database connection failed")
+      }
+    }
+    return db
+  }
+
   static async connectMongoose() {
     if (!mongooseConnected && uri) {
       try {
@@ -86,7 +86,7 @@ export class Database {
     }
   }
   static async findUserByReferralCode(referralCode: string): Promise<DatabaseUser | null> {
-    const db = await getDb();
+    const db = await Database.getDb();
     const user = await db.collection("users").findOne({ referralCode });
     if (!user) return null;
     return {
@@ -95,7 +95,7 @@ export class Database {
     };
   }
   static async updateUserPayoutAccount(email: string, payoutAccount: { bank: string; accountNumber: string; accountName: string }): Promise<DatabaseUser | null> {
-    const db = await getDb();
+    const db = await Database.getDb();
     await db.collection("users").updateOne(
       { email },
       { $set: { payoutAccount, updatedAt: new Date() } }
@@ -108,7 +108,7 @@ export class Database {
     };
   }
   static async updateUserById(userId: string, updates: Partial<Omit<DatabaseUser, "id" | "createdAt" | "updatedAt">>): Promise<DatabaseUser | null> {
-    const db = await getDb()
+    const db = await Database.getDb()
     const result = await db.collection("users").updateOne(
       { _id: new ObjectId(userId) },
       {
@@ -132,7 +132,7 @@ export class Database {
   }
 
   static async updateUserByEmail(email: string, updates: Partial<Omit<DatabaseUser, "id" | "createdAt" | "updatedAt">>): Promise<DatabaseUser | null> {
-    const db = await getDb()
+    const db = await Database.getDb()
     const result = await db.collection("users").updateOne(
       { email },
       {
@@ -155,7 +155,7 @@ export class Database {
     }
   }
   static async createUser(userData: Omit<DatabaseUser, "id" | "createdAt" | "updatedAt">): Promise<DatabaseUser> {
-    const db = await getDb();
+    const db = await Database.getDb();
     const now = new Date();
     const result = await db.collection("users").insertOne({
       ...userData,
@@ -171,7 +171,7 @@ export class Database {
   }
 
   static async findUserByEmail(email: string): Promise<DatabaseUser | null> {
-    const db = await getDb()
+    const db = await Database.getDb()
     const user = await db.collection("users").findOne({ email })
     if (!user) return null
     return {
@@ -181,7 +181,7 @@ export class Database {
   }
 
   static async findUserByPhone(phone: string): Promise<DatabaseUser | null> {
-    const db = await getDb()
+    const db = await Database.getDb()
     const user = await db.collection("users").findOne({ phone })
     if (!user) return null
     return {
@@ -191,7 +191,7 @@ export class Database {
   }
 
   static async findUserById(id: string): Promise<DatabaseUser | null> {
-    const db = await getDb()
+    const db = await Database.getDb()
     const user = await db.collection("users").findOne({ _id: new ObjectId(id) })
     if (!user) return null;
     return {
@@ -201,7 +201,7 @@ export class Database {
   }
 
   static async updateUserWallet(userId: string, amount: number): Promise<void> {
-    const db = await getDb()
+    const db = await Database.getDb()
     await db.collection("users").updateOne(
       { _id: new ObjectId(userId) },
       { $inc: { walletBalance: amount }, $set: { updatedAt: new Date() } }
@@ -209,7 +209,7 @@ export class Database {
   }
 
   static async createTransaction(transactionData: Omit<Transaction, "id" | "createdAt" | "updatedAt">): Promise<Transaction> {
-    const db = await getDb()
+    const db = await Database.getDb()
     const now = new Date()
     const result = await db.collection("transactions").insertOne({
       ...transactionData,
@@ -224,13 +224,13 @@ export class Database {
   }
 
   static async getUserTransactions(userId: string): Promise<Transaction[]> {
-    const db = await getDb()
+    const db = await Database.getDb()
     const transactions = await db.collection("transactions").find({ userId }).toArray()
     return transactions.map((t: any) => ({ ...t, id: t._id.toString() }))
   }
 
   static async findTransactionById(id: string): Promise<Transaction | null> {
-    const db = await getDb()
+    const db = await Database.getDb()
     const transaction = await db.collection("transactions").findOne({ _id: new ObjectId(id) })
     if (!transaction) return null
     return {
@@ -240,7 +240,7 @@ export class Database {
   }
 
   static async findTransactionByReference(reference: string): Promise<Transaction | null> {
-    const db = await getDb()
+    const db = await Database.getDb()
     const transaction = await db.collection("transactions").findOne({ reference })
     if (!transaction) return null
     return {
@@ -250,7 +250,7 @@ export class Database {
   }
 
   static async updateTransactionStatus(reference: string, status: "pending" | "completed" | "failed" | "cancelled"): Promise<void> {
-    const db = await getDb()
+    const db = await Database.getDb()
     await db.collection("transactions").updateOne(
       { reference },
       { $set: { status, updatedAt: new Date() } }
@@ -258,11 +258,11 @@ export class Database {
   }
 
   static async updateTransactionStatusAtomic(
-    reference: string, 
+    reference: string,
     expectedStatus: "pending" | "completed" | "failed" | "cancelled",
     newStatus: "pending" | "completed" | "failed" | "cancelled"
   ): Promise<boolean> {
-    const db = await getDb()
+    const db = await Database.getDb()
     const result = await db.collection("transactions").updateOne(
       { reference, status: expectedStatus },
       { $set: { status: newStatus, updatedAt: new Date() } }
@@ -272,7 +272,7 @@ export class Database {
   }
 
   static async createReferral(referralData: Omit<Referral, "id" | "createdAt">): Promise<Referral> {
-    const db = await getDb()
+    const db = await Database.getDb()
     const now = new Date()
     const result = await db.collection("referrals").insertOne({
       ...referralData,
@@ -286,7 +286,7 @@ export class Database {
   }
 
   static async getUserReferrals(userId: string): Promise<Referral[]> {
-    const db = await getDb()
+    const db = await Database.getDb()
     const referrals = await db.collection("referrals").find({ referrerId: userId }).toArray()
     return referrals.map((r: any) => ({ ...r, id: r._id.toString() }))
   }
@@ -391,7 +391,7 @@ export class Database {
   static async getUserCount(): Promise<number> {
     try {
       await this.connectMongoose();
-      const db = await getDb();
+      const db = await Database.getDb();
       const count = await db.collection("users").countDocuments({ role: "user" });
       console.log("User count:", count);
       return count || 0;
@@ -405,7 +405,7 @@ export class Database {
   static async getTotalDeposits(): Promise<number> {
     try {
       await this.connectMongoose();
-      const db = await getDb();
+      const db = await Database.getDb();
 
       // Check if there are any transactions first
       const transactionCount = await db.collection("transactions").countDocuments({ type: "deposit", status: "completed" });
@@ -431,7 +431,7 @@ export class Database {
   static async getTotalWithdrawals(): Promise<number> {
     try {
       await this.connectMongoose();
-      const db = await getDb();
+      const db = await Database.getDb();
 
       // Check if there are any withdrawal transactions first
       const transactionCount = await db.collection("transactions").countDocuments({ type: "withdrawal", status: "completed" });
@@ -457,7 +457,7 @@ export class Database {
   static async getPendingWithdrawals(): Promise<number> {
     try {
       await this.connectMongoose();
-      const db = await getDb();
+      const db = await Database.getDb();
 
       // Check if there are any pending withdrawal transactions first
       const transactionCount = await db.collection("transactions").countDocuments({ type: "withdrawal", status: "pending" });
@@ -483,7 +483,7 @@ export class Database {
   static async getMonthlyRevenue(): Promise<number> {
     try {
       await this.connectMongoose();
-      const db = await getDb();
+      const db = await Database.getDb();
       const startOfMonth = new Date();
       startOfMonth.setDate(1);
       startOfMonth.setHours(0, 0, 0, 0);
@@ -522,7 +522,7 @@ export class Database {
   static async getTransactionCount(): Promise<number> {
     try {
       await this.connectMongoose();
-      const db = await getDb();
+      const db = await Database.getDb();
       const count = await db.collection("transactions").countDocuments({});
       console.log("Total transaction count:", count);
       return count || 0;
@@ -535,7 +535,7 @@ export class Database {
   static async getSuccessfulTransactionCount(): Promise<number> {
     try {
       await this.connectMongoose();
-      const db = await getDb();
+      const db = await Database.getDb();
       const count = await db.collection("transactions").countDocuments({ status: "completed" });
       console.log("Successful transaction count:", count);
       return count || 0;
@@ -548,7 +548,7 @@ export class Database {
   static async getTotalUsersFund(): Promise<number> {
     try {
       await this.connectMongoose();
-      const db = await getDb();
+      const db = await Database.getDb();
 
       // First check if there are any users
       const userCount = await db.collection("users").countDocuments({ role: "user" });
@@ -590,7 +590,7 @@ export class Database {
   }> {
     try {
       await this.connectMongoose();
-      const db = await getDb();
+      const db = await Database.getDb();
 
       // Get total referrals count
       const totalReferrals = await db.collection("referrals").countDocuments({});
@@ -658,7 +658,7 @@ export class Database {
   }> {
     try {
       await this.connectMongoose();
-      const db = await getDb();
+      const db = await Database.getDb();
 
       // Count transactions by type (excluding deposits, withdrawals, and referral_bonus)
       const airtimeTransactions = await db.collection("transactions").countDocuments({
@@ -716,7 +716,7 @@ export class Database {
   static async getAllUsers(): Promise<DatabaseUser[]> {
     try {
       await this.connectMongoose();
-      const db = await getDb();
+      const db = await Database.getDb();
 
       // Get all users with role "user"
       const users = await db.collection("users").find({ role: "user" }).toArray();
@@ -732,7 +732,7 @@ export class Database {
   }
 
   static async saveVerificationToken(userId: string, token: string, expires: number): Promise<void> {
-    const db = await getDb();
+    const db = await Database.getDb();
     await db.collection("verification_tokens").insertOne({
       userId,
       token,
@@ -743,12 +743,12 @@ export class Database {
   }
 
   static async getVerificationToken(token: string): Promise<any | null> {
-    const db = await getDb();
+    const db = await Database.getDb();
     return await db.collection("verification_tokens").findOne({ token, used: false });
   }
 
   static async markTokenAsUsed(token: string): Promise<void> {
-    const db = await getDb();
+    const db = await Database.getDb();
     await db.collection("verification_tokens").updateOne(
       { token },
       { $set: { used: true, updatedAt: new Date() } }
@@ -756,7 +756,7 @@ export class Database {
   }
 
   static async savePasswordResetToken(userId: string, token: string, expires: number): Promise<void> {
-    const db = await getDb();
+    const db = await Database.getDb();
     await db.collection("password_reset_tokens").insertOne({
       userId,
       token,
@@ -767,12 +767,12 @@ export class Database {
   }
 
   static async getPasswordResetToken(token: string): Promise<any | null> {
-    const db = await getDb();
+    const db = await Database.getDb();
     return await db.collection("password_reset_tokens").findOne({ token, used: false });
   }
 
   static async markPasswordResetTokenAsUsed(token: string): Promise<void> {
-    const db = await getDb();
+    const db = await Database.getDb();
     await db.collection("password_reset_tokens").updateOne(
       { token },
       { $set: { used: true, updatedAt: new Date() } }
