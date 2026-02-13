@@ -1,3 +1,6 @@
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 import { NextResponse, NextRequest } from "next/server"
 import { getSession } from "@/lib/auth"
 import { Database, Transaction } from "@/lib/database"
