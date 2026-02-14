@@ -1,23 +1,32 @@
 import { NextRequest, NextResponse } from "next/server"
-import { OAuth2Client } from "google-auth-library"
 import { Database } from "@/lib/database"
 import { createSession, generateReferralCode } from "@/lib/auth"
 
-const client = new OAuth2Client(process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID)
-
 export async function POST(request: NextRequest) {
     try {
-        const { credential } = await request.json()
+        const { accessToken } = await request.json()
 
-        // Verify the Google token
-        const ticket = await client.verifyIdToken({
-            idToken: credential,
-            audience: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+        if (!accessToken) {
+            return NextResponse.json({ error: "Access token is required" }, { status: 400 })
+        }
+
+        // Verify the Google token by fetching user info
+        // Since we are using an access token from the frontend (implicit flow),
+        // we need to call the UserInfo endpoint instead of verifying an ID token.
+        const userInfoResponse = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+            },
         })
-        const payload = ticket.getPayload()
+
+        if (!userInfoResponse.ok) {
+            return NextResponse.json({ error: "Failed to fetch user info from Google" }, { status: 401 })
+        }
+
+        const payload = await userInfoResponse.json()
 
         if (!payload || !payload.email) {
-            return NextResponse.json({ error: "Invalid Google token" }, { status: 400 })
+            return NextResponse.json({ error: "Invalid Google token or missing email" }, { status: 400 })
         }
 
         const { email, name, picture, sub: googleId } = payload
