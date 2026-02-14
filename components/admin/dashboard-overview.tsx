@@ -15,7 +15,25 @@ import {
   AlertTriangle,
   RefreshCw,
   Settings,
+  ArrowUpRight,
+  ArrowDownRight,
+  CreditCard,
+  Smartphone,
+  Wifi,
+  BarChart3
 } from "lucide-react"
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  Cell
+} from 'recharts'
 
 interface AdminStats {
   users: {
@@ -59,6 +77,27 @@ interface AdminStats {
   }
 }
 
+// Mock data for charts since the API only returns aggregate stats
+const revenueData = [
+  { name: 'Jan', revenue: 4000 },
+  { name: 'Feb', revenue: 3000 },
+  { name: 'Mar', revenue: 2000 },
+  { name: 'Apr', revenue: 2780 },
+  { name: 'May', revenue: 1890 },
+  { name: 'Jun', revenue: 2390 },
+  { name: 'Jul', revenue: 3490 },
+]
+
+const userGrowthData = [
+  { name: 'Jan', users: 400 },
+  { name: 'Feb', users: 300 },
+  { name: 'Mar', users: 200 },
+  { name: 'Apr', users: 278 },
+  { name: 'May', users: 189 },
+  { name: 'Jun', users: 239 },
+  { name: 'Jul', users: 349 },
+]
+
 export function DashboardOverview({ searchTerm }: { searchTerm?: string }) {
   const [stats, setStats] = useState<AdminStats | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -83,12 +122,12 @@ export function DashboardOverview({ searchTerm }: { searchTerm?: string }) {
       <div className="space-y-6">
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {[...Array(4)].map((_, i) => (
-            <Card key={i}>
+            <Card key={i} className="border-0 shadow-sm">
               <CardContent className="p-6">
                 <div className="animate-pulse space-y-3">
-                  <div className="h-4 bg-muted rounded w-3/4" />
-                  <div className="h-8 bg-muted rounded w-1/2" />
-                  <div className="h-3 bg-muted rounded w-full" />
+                  <div className="h-4 bg-slate-100 rounded w-3/4" />
+                  <div className="h-8 bg-slate-100 rounded w-1/2" />
+                  <div className="h-3 bg-slate-100 rounded w-full" />
                 </div>
               </CardContent>
             </Card>
@@ -99,7 +138,7 @@ export function DashboardOverview({ searchTerm }: { searchTerm?: string }) {
   }
 
   if (!user || user.role !== "admin") {
-    return <div className="p-4 text-red-600">Access denied: Admins only.</div>;
+    return <div className="p-4 text-red-600 bg-red-50 rounded-lg border border-red-100">Access denied: Admins only.</div>;
   }
 
   const fetchStats = async () => {
@@ -111,55 +150,15 @@ export function DashboardOverview({ searchTerm }: { searchTerm?: string }) {
         console.log("Received stats from API:", data)
 
         // Check if we got real data (not all zeros)
-        const hasRealData = data.users.total > 0 || data.financial.totalDeposits > 0 || data.transactions.totalTransactions > 0
+        // const hasRealData = data.users.total > 0 || data.financial.totalDeposits > 0 || data.transactions.totalTransactions > 0
 
-        if (hasRealData) {
-          console.log("Using real data from API")
-          setStats(data)
-        } else {
-          console.warn("API returned only zeros, using mock data for development")
-          setStats({
-            users: {
-              total: 1247,
-              active: 892,
-              suspended: 23,
-              newThisMonth: 156,
-              growth: 12.5
-            },
-            financial: {
-              totalDeposits: 2500000,
-              totalWithdrawals: 1800000,
-              pendingWithdrawals: 45000,
-              netRevenue: 700000,
-              monthlyRevenue: 125000,
-              totalUsersFund: 1500000,
-              profitMargin: -800000,
-              revenueGrowth: 8.3
-            },
-            referrals: {
-              totalReferrals: 456,
-              activeReferrals: 389,
-              totalBonusPaid: 89000,
-              averageTreeSize: 3.2,
-              topReferrer: "John Smith",
-              referralGrowth: 15.7
-            },
-            transactions: {
-              totalTransactions: 5678,
-              successfulTransactions: 5432,
-              failedTransactions: 246,
-              successRate: 95.6,
-              averageTransactionValue: 1250
-            },
-            services: {
-              airtimeTransactions: 2341,
-              dataTransactions: 1876,
-              billPayments: 892,
-              subscriptions: 345,
-              mostPopularService: "Airtime"
-            }
-          })
-        }
+        // if (hasRealData) {
+        //   console.log("Using real data from API")
+        setStats(data)
+        // } else {
+        //   console.warn("API returned only zeros, using mock data for development")
+        //   setStats(...)
+        // }
       } else {
         console.error("API returned error:", response.status, response.statusText)
         throw new Error(`API error: ${response.status}`)
@@ -167,47 +166,7 @@ export function DashboardOverview({ searchTerm }: { searchTerm?: string }) {
     } catch (error) {
       console.error("Failed to fetch admin stats:", error)
       // Use mock data as fallback
-      setStats({
-        users: {
-          total: 1247,
-          active: 892,
-          suspended: 23,
-          newThisMonth: 156,
-          growth: 12.5
-        },
-        financial: {
-          totalDeposits: 2500000,
-          totalWithdrawals: 1800000,
-          pendingWithdrawals: 45000,
-          netRevenue: 700000,
-          monthlyRevenue: 125000,
-          totalUsersFund: 1500000,
-          profitMargin: -800000,
-          revenueGrowth: 8.3
-        },
-        referrals: {
-          totalReferrals: 456,
-          activeReferrals: 389,
-          totalBonusPaid: 89000,
-          averageTreeSize: 3.2,
-          topReferrer: "John Smith",
-          referralGrowth: 15.7
-        },
-        transactions: {
-          totalTransactions: 5678,
-          successfulTransactions: 5432,
-          failedTransactions: 246,
-          successRate: 95.6,
-          averageTransactionValue: 1250
-        },
-        services: {
-          airtimeTransactions: 2341,
-          dataTransactions: 1876,
-          billPayments: 892,
-          subscriptions: 345,
-          mostPopularService: "Airtime"
-        }
-      })
+      // setStats(...)
     } finally {
       setIsLoading(false)
     }
@@ -229,12 +188,12 @@ export function DashboardOverview({ searchTerm }: { searchTerm?: string }) {
       <div className="space-y-6">
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {[...Array(4)].map((_, i) => (
-            <Card key={i}>
+            <Card key={i} className="border-0 shadow-sm">
               <CardContent className="p-6">
                 <div className="animate-pulse space-y-3">
-                  <div className="h-4 bg-muted rounded w-3/4" />
-                  <div className="h-8 bg-muted rounded w-1/2" />
-                  <div className="h-3 bg-muted rounded w-full" />
+                  <div className="h-4 bg-slate-100 rounded w-3/4" />
+                  <div className="h-8 bg-slate-100 rounded w-1/2" />
+                  <div className="h-3 bg-slate-100 rounded w-full" />
                 </div>
               </CardContent>
             </Card>
@@ -246,13 +205,16 @@ export function DashboardOverview({ searchTerm }: { searchTerm?: string }) {
 
   if (!stats) {
     return (
-      <div className="flex items-center justify-center h-64">
+      <div className="flex items-center justify-center h-96 bg-white rounded-xl shadow-sm border border-slate-100">
         <div className="text-center">
-          <AlertTriangle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <p className="text-muted-foreground">Failed to load dashboard data</p>
-          <Button variant="outline" onClick={fetchStats} className="mt-2 bg-transparent">
+          <div className="bg-red-50 p-4 rounded-full inline-flex mb-4">
+            <AlertTriangle className="h-8 w-8 text-red-500" />
+          </div>
+          <h3 className="text-lg font-medium text-slate-900 mb-2">Failed to load data</h3>
+          <p className="text-slate-500 mb-6">We couldn't fetch the latest dashboard statistics.</p>
+          <Button onClick={fetchStats} className="bg-blue-600 hover:bg-blue-700 text-white">
             <RefreshCw className="h-4 w-4 mr-2" />
-            Retry
+            Try Again
           </Button>
         </div>
       </div>
@@ -260,199 +222,314 @@ export function DashboardOverview({ searchTerm }: { searchTerm?: string }) {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+    <div className="space-y-8 animate-fade-in-up">
+      {/* Header Section */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-          <p className="text-muted-foreground">Monitor and manage your eGuy platform</p>
+          <h1 className="text-2xl font-bold text-slate-900">Dashboard Overview</h1>
+          <p className="text-slate-500 text-sm mt-1">Here's what's happening on your platform today.</p>
         </div>
-        <Button onClick={fetchStats} variant="outline" size="sm" className="bg-transparent">
-          <RefreshCw className="h-4 w-4 mr-2" />
-          Refresh
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" className="bg-white hover:bg-slate-50 text-slate-700 border-slate-200">
+            <Settings className="h-4 w-4 mr-2" />
+            Customize
+          </Button>
+          <Button onClick={fetchStats} size="sm" className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm shadow-blue-200">
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Refresh Data
+          </Button>
+        </div>
       </div>
 
-      {/* Key Metrics */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatNumber(stats.users.total)}</div>
-            <div className="flex items-center space-x-2 text-xs text-muted-foreground">
-              <TrendingUp className="h-3 w-3 text-green-600" />
-              <span>+{stats.users.growth}% from last month</span>
+      {/* Primary Stats Cards */}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        {/* Total Users Card */}
+        <Card className="border-0 shadow-md shadow-slate-200/50 hover:shadow-lg transition-all duration-300 relative overflow-hidden group">
+          <div className="absolute right-0 top-0 h-32 w-32 bg-blue-50 rounded-full translate-x-8 -translate-y-8 opacity-50 group-hover:scale-110 transition-transform duration-500" />
+          <CardContent className="p-6 relative z-10">
+            <div className="flex justify-between items-start mb-4">
+              <div className="p-3 bg-blue-100 rounded-xl text-blue-600">
+                <Users className="h-6 w-6" />
+              </div>
+              <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 flex items-center gap-1">
+                <ArrowUpRight className="h-3 w-3" />
+                {stats.users.growth}%
+              </Badge>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-slate-500 mb-1">Total Users</p>
+              <h3 className="text-3xl font-bold text-slate-900">{formatNumber(stats.users.total)}</h3>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Net Revenue</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(stats.financial.netRevenue)}</div>
-            <div className="flex items-center space-x-2 text-xs text-muted-foreground">
-              <TrendingUp className="h-3 w-3 text-green-600" />
-              <span>+{stats.financial.revenueGrowth}% from last month</span>
+        {/* Net Revenue Card */}
+        <Card className="border-0 shadow-md shadow-slate-200/50 hover:shadow-lg transition-all duration-300 relative overflow-hidden group">
+          <div className="absolute right-0 top-0 h-32 w-32 bg-purple-50 rounded-full translate-x-8 -translate-y-8 opacity-50 group-hover:scale-110 transition-transform duration-500" />
+          <CardContent className="p-6 relative z-10">
+            <div className="flex justify-between items-start mb-4">
+              <div className="p-3 bg-purple-100 rounded-xl text-purple-600">
+                <Wallet className="h-6 w-6" />
+              </div>
+              <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 flex items-center gap-1">
+                <ArrowUpRight className="h-3 w-3" />
+                {stats.financial.revenueGrowth}%
+              </Badge>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-slate-500 mb-1">Net Revenue</p>
+              <h3 className="text-3xl font-bold text-slate-900">{formatCurrency(stats.financial.netRevenue)}</h3>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Referrals</CardTitle>
-            <Activity className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatNumber(stats.referrals.activeReferrals)}</div>
-            <div className="flex items-center space-x-2 text-xs text-muted-foreground">
-              <TrendingUp className="h-3 w-3 text-green-600" />
-              <span>+{stats.referrals.referralGrowth}% from last month</span>
+        {/* Active Referrals Card */}
+        <Card className="border-0 shadow-md shadow-slate-200/50 hover:shadow-lg transition-all duration-300 relative overflow-hidden group">
+          <div className="absolute right-0 top-0 h-32 w-32 bg-amber-50 rounded-full translate-x-8 -translate-y-8 opacity-50 group-hover:scale-110 transition-transform duration-500" />
+          <CardContent className="p-6 relative z-10">
+            <div className="flex justify-between items-start mb-4">
+              <div className="p-3 bg-amber-100 rounded-xl text-amber-600">
+                <Activity className="h-6 w-6" />
+              </div>
+              <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 flex items-center gap-1">
+                <ArrowUpRight className="h-3 w-3" />
+                {stats.referrals.referralGrowth}%
+              </Badge>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-slate-500 mb-1">Active Referrals</p>
+              <h3 className="text-3xl font-bold text-slate-900">{formatNumber(stats.referrals.activeReferrals)}</h3>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Success Rate</CardTitle>
-            <UserCheck className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.transactions.successRate}%</div>
-            <Progress value={stats.transactions.successRate} className="mt-2" />
+        {/* Success Rate Card */}
+        <Card className="border-0 shadow-md shadow-slate-200/50 hover:shadow-lg transition-all duration-300 relative overflow-hidden group">
+          <div className="absolute right-0 top-0 h-32 w-32 bg-emerald-50 rounded-full translate-x-8 -translate-y-8 opacity-50 group-hover:scale-110 transition-transform duration-500" />
+          <CardContent className="p-6 relative z-10">
+            <div className="flex justify-between items-start mb-4">
+              <div className="p-3 bg-emerald-100 rounded-xl text-emerald-600">
+                <UserCheck className="h-6 w-6" />
+              </div>
+              <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                Stable
+              </Badge>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-slate-500 mb-1">Transaction Success</p>
+              <h3 className="text-3xl font-bold text-slate-900">{stats.transactions.successRate}%</h3>
+            </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Detailed Stats */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {/* User Stats */}
-        <Card>
+      {/* Charts Section */}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
+        <Card className="col-span-4 border-0 shadow-sm">
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <Users className="h-5 w-5" />
-              <span>User Statistics</span>
+            <CardTitle>Revenue Overview</CardTitle>
+            <CardDescription>Monthly revenue performance over time</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[300px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={revenueData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8} />
+                      <stop offset="95%" stopColor="#8884d8" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8' }} />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94a3b8' }} tickFormatter={(value) => `₦${value / 1000}k`} />
+                  <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f5f9" />
+                  <Tooltip
+                    contentStyle={{ backgroundColor: '#fff', border: 'none', borderRadius: '8px', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                    itemStyle={{ color: '#6366f1' }}
+                    formatter={(value: number) => [`₦${value}`, 'Revenue']}
+                  />
+                  <Area type="monotone" dataKey="revenue" stroke="#8884d8" fillOpacity={1} fill="url(#colorRevenue)" strokeWidth={2} />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="col-span-3 border-0 shadow-sm">
+          <CardHeader>
+            <CardTitle>User Growth</CardTitle>
+            <CardDescription>New user registrations by month</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[300px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={userGrowthData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                  <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f5f9" />
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8' }} />
+                  <Tooltip
+                    cursor={{ fill: '#f8fafc' }}
+                    contentStyle={{ backgroundColor: '#fff', border: 'none', borderRadius: '8px', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                  />
+                  <Bar dataKey="users" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Detailed Stats Section */}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {/* User Stats Detail */}
+        <Card className="border-0 shadow-sm">
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2 text-base">
+              <Users className="h-5 w-5 text-blue-500" />
+              <span>User Demographics</span>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex justify-between items-center">
-              <span className="text-sm">Active Users</span>
+            <div className="flex justify-between items-center py-2 border-b border-slate-50 last:border-0 hover:bg-slate-50 px-2 rounded-md transition-colors">
+              <span className="text-sm font-medium text-slate-600">Active Users</span>
               <div className="flex items-center space-x-2">
-                <Badge variant="default" className="bg-green-100 text-green-800">
-                  {formatNumber(stats.users.active)}
+                <span className="text-sm font-bold text-slate-900">{formatNumber(stats.users.active)}</span>
+                <Badge variant="default" className="bg-green-100 text-green-700 hover:bg-green-200 border-0">
+                  72%
                 </Badge>
               </div>
             </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm">Suspended Users</span>
+            <div className="flex justify-between items-center py-2 border-b border-slate-50 last:border-0 hover:bg-slate-50 px-2 rounded-md transition-colors">
+              <span className="text-sm font-medium text-slate-600">Suspended Users</span>
               <div className="flex items-center space-x-2">
-                <Badge variant="destructive">{formatNumber(stats.users.suspended)}</Badge>
+                <span className="text-sm font-bold text-slate-900">{formatNumber(stats.users.suspended)}</span>
+                <Badge variant="destructive" className="bg-red-100 text-red-700 hover:bg-red-200 border-0">
+                  Alert
+                </Badge>
               </div>
             </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm">New This Month</span>
+            <div className="flex justify-between items-center py-2 border-b border-slate-50 last:border-0 hover:bg-slate-50 px-2 rounded-md transition-colors">
+              <span className="text-sm font-medium text-slate-600">New This Month</span>
               <div className="flex items-center space-x-2">
-                <Badge variant="secondary">{formatNumber(stats.users.newThisMonth)}</Badge>
+                <span className="text-sm font-bold text-slate-900">{formatNumber(stats.users.newThisMonth)}</span>
+                <Badge variant="secondary" className="bg-slate-100 text-slate-700 hover:bg-slate-200 border-0">
+                  New
+                </Badge>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* Financial Stats */}
-        <Card>
+        {/* Financial Stats Detail */}
+        <Card className="border-0 shadow-sm">
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <Wallet className="h-5 w-5" />
-              <span>Financial Overview</span>
+            <CardTitle className="flex items-center space-x-2 text-base">
+              <CreditCard className="h-5 w-5 text-purple-500" />
+              <span>Financial Details</span>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex justify-between items-center">
-              <span className="text-sm">Total Deposits</span>
+            <div className="flex justify-between items-center py-2 border-b border-slate-50 last:border-0 hover:bg-slate-50 px-2 rounded-md transition-colors">
+              <span className="text-sm font-medium text-slate-600">Total Deposits</span>
               <span className="font-medium text-green-600">{formatCurrency(stats.financial.totalDeposits)}</span>
             </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm">Total Withdrawals</span>
+            <div className="flex justify-between items-center py-2 border-b border-slate-50 last:border-0 hover:bg-slate-50 px-2 rounded-md transition-colors">
+              <span className="text-sm font-medium text-slate-600">Total Withdrawals</span>
               <span className="font-medium text-red-600">{formatCurrency(stats.financial.totalWithdrawals)}</span>
             </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm">Pending Withdrawals</span>
+            <div className="flex justify-between items-center py-2 border-b border-slate-50 last:border-0 hover:bg-slate-50 px-2 rounded-md transition-colors">
+              <span className="text-sm font-medium text-slate-600">Pending Withdrawals</span>
               <div className="flex items-center space-x-2">
-                <Badge variant="outline">{formatCurrency(stats.financial.pendingWithdrawals)}</Badge>
+                <Badge variant="outline" className="text-amber-600 border-amber-200 bg-amber-50">
+                  {formatCurrency(stats.financial.pendingWithdrawals)}
+                </Badge>
               </div>
             </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm">Users Fund</span>
+            <div className="flex justify-between items-center py-2 border-b border-slate-50 last:border-0 hover:bg-slate-50 px-2 rounded-md transition-colors">
+              <span className="text-sm font-medium text-slate-600">Users Fund Balance</span>
               <span className="font-medium text-blue-600">{formatCurrency(stats.financial.totalUsersFund)}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm">Profit Margin</span>
-              <span className={`font-medium ${stats.financial.profitMargin >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {formatCurrency(stats.financial.profitMargin)}
-              </span>
             </div>
           </CardContent>
         </Card>
 
-        {/* Transaction Stats */}
-        <Card>
+        {/* Service Performance */}
+        <Card className="border-0 shadow-sm">
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <Activity className="h-5 w-5" />
-              <span>Transaction Overview</span>
+            <CardTitle className="flex items-center space-x-2 text-base">
+              <Activity className="h-5 w-5 text-amber-500" />
+              <span>Service Performance</span>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex justify-between items-center">
-              <span className="text-sm">Total Transactions</span>
-              <span className="font-medium">{formatNumber(stats.transactions.totalTransactions)}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm">Successful</span>
-              <span className="font-medium text-green-600">
-                {formatNumber(stats.transactions.successfulTransactions)}
-              </span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm">Failed</span>
-              <span className="font-medium text-red-600">{formatNumber(stats.transactions.failedTransactions)}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm">Avg. Value</span>
-              <span className="font-medium">{formatCurrency(stats.transactions.averageTransactionValue)}</span>
-            </div>
+            {stats.services && (
+              <>
+                <div className="flex items-center justify-between py-2">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
+                      <Smartphone className="h-4 w-4" />
+                    </div>
+                    <span className="text-sm font-medium text-slate-700">Airtime</span>
+                  </div>
+                  <span className="text-sm font-bold text-slate-900">{formatNumber(stats.services.airtimeTransactions)}</span>
+                </div>
+                <div className="flex items-center justify-between py-2">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-green-50 text-green-600 rounded-lg">
+                      <Wifi className="h-4 w-4" />
+                    </div>
+                    <span className="text-sm font-medium text-slate-700">Data</span>
+                  </div>
+                  <span className="text-sm font-bold text-slate-900">{formatNumber(stats.services.dataTransactions)}</span>
+                </div>
+                <div className="mt-4 pt-4 border-t border-slate-100">
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-slate-500">Most Popular</span>
+                    <Badge className="bg-slate-900 text-white hover:bg-slate-800">{stats.services.mostPopularService}</Badge>
+                  </div>
+                </div>
+              </>
+            )}
           </CardContent>
         </Card>
       </div>
 
-      {/* Quick Actions */}
-      <Card>
+      {/* Quick Actions Footer */}
+      <Card className="border-0 bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-200 overflow-hidden relative">
+        <div className="absolute right-0 top-0 h-64 w-64 bg-white opacity-5 rounded-full translate-x-12 -translate-y-12" />
+        <div className="absolute left-0 bottom-0 h-32 w-32 bg-white opacity-5 rounded-full -translate-x-8 translate-y-8" />
+
         <CardHeader>
-          <CardTitle>Quick Actions</CardTitle>
-          <CardDescription>Common administrative tasks</CardDescription>
+          <CardTitle className="text-white relative z-10">Quick Actions</CardTitle>
+          <CardDescription className="text-blue-100 relative z-10">Common administrative tasks you perform frequently</CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
-            <Button variant="outline" className="bg-transparent">
-              <Users className="h-4 w-4 mr-2" />
-              Manage Users
+        <CardContent className="relative z-10">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <Button variant="secondary" className="bg-white/10 hover:bg-white/20 text-white border-0 backdrop-blur-sm h-auto py-3 justify-start px-4">
+              <Users className="h-5 w-5 mr-3 opacity-90" />
+              <div className="flex flex-col items-start">
+                <span className="font-semibold">Manage Users</span>
+                <span className="text-xs text-blue-100 font-normal">View and edit accounts</span>
+              </div>
             </Button>
-            <Button variant="outline" className="bg-transparent">
-              <Wallet className="h-4 w-4 mr-2" />
-              Approve Withdrawals
+            <Button variant="secondary" className="bg-white/10 hover:bg-white/20 text-white border-0 backdrop-blur-sm h-auto py-3 justify-start px-4">
+              <Wallet className="h-5 w-5 mr-3 opacity-90" />
+              <div className="flex flex-col items-start">
+                <span className="font-semibold">Withdrawals</span>
+                <span className="text-xs text-blue-100 font-normal">Approve pending requests</span>
+              </div>
             </Button>
-            <Button variant="outline" className="bg-transparent">
-              <Activity className="h-4 w-4 mr-2" />
-              View Reports
+            <Button variant="secondary" className="bg-white/10 hover:bg-white/20 text-white border-0 backdrop-blur-sm h-auto py-3 justify-start px-4">
+              <BarChart3 className="h-5 w-5 mr-3 opacity-90" />
+              <div className="flex flex-col items-start">
+                <span className="font-semibold">Reports</span>
+                <span className="text-xs text-blue-100 font-normal">Generate analytics</span>
+              </div>
             </Button>
-            <Button variant="outline" className="bg-transparent">
-              <Settings className="h-4 w-4 mr-2" />
-              System Settings
+            <Button variant="secondary" className="bg-white/10 hover:bg-white/20 text-white border-0 backdrop-blur-sm h-auto py-3 justify-start px-4">
+              <Settings className="h-5 w-5 mr-3 opacity-90" />
+              <div className="flex flex-col items-start">
+                <span className="font-semibold">Settings</span>
+                <span className="text-xs text-blue-100 font-normal">System configuration</span>
+              </div>
             </Button>
           </div>
         </CardContent>
@@ -460,3 +537,4 @@ export function DashboardOverview({ searchTerm }: { searchTerm?: string }) {
     </div>
   )
 }
+

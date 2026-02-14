@@ -7,11 +7,13 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Search, Download, ArrowUpRight, ArrowDownLeft, Plus, Minus, Users, CreditCard, Eye, MoreVertical, RefreshCw, AlertCircle } from "lucide-react"
+import { Search, Download, ArrowUpRight, ArrowDownLeft, Plus, Minus, Users, CreditCard, Eye, MoreVertical, RefreshCw, AlertCircle, Filter, FileText, CheckCircle2, XCircle, Clock } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 
 interface Transaction {
   id: string
@@ -37,23 +39,8 @@ export function TransactionsManagement({ searchTerm: initialSearchTerm }: { sear
   const [isActionLoading, setIsActionLoading] = useState(false)
   const [statusFilter, setStatusFilter] = useState("all")
   const [typeFilter, setTypeFilter] = useState("all")
-  const [openDropdownId, setOpenDropdownId] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState(initialSearchTerm || "")
   const { toast } = useToast()
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (openDropdownId && !(event.target as Element).closest('.relative')) {
-        setOpenDropdownId(null)
-      }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-    }
-  }, [openDropdownId])
 
   // Prevent hydration mismatch by only checking session after client-side mount
   React.useEffect(() => {
@@ -69,31 +56,10 @@ export function TransactionsManagement({ searchTerm: initialSearchTerm }: { sear
     }
   }, [isClient])
 
-  if (!isClient) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Transactions Management</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="flex items-center space-x-4 animate-pulse">
-                <div className="w-10 h-10 bg-muted rounded-full" />
-                <div className="flex-1 space-y-2">
-                  <div className="h-4 bg-muted rounded w-3/4" />
-                  <div className="h-3 bg-muted rounded w-1/2" />
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-    )
-  }
+  if (!isClient) return null;
 
   if (!user || user.role !== "admin") {
-    return <div className="p-4 text-red-600">Access denied: Admins only.</div>;
+    return <div className="p-4 text-red-600 bg-red-50 rounded-lg border border-red-100">Access denied: Admins only.</div>;
   }
 
   const fetchTransactions = async () => {
@@ -264,17 +230,17 @@ export function TransactionsManagement({ searchTerm: initialSearchTerm }: { sear
   const getTransactionIcon = (type: string) => {
     switch (type) {
       case "deposit":
-        return <Plus className="h-4 w-4 text-green-600" />
+        return <ArrowDownLeft className="h-4 w-4 text-green-600" />
       case "withdrawal":
-        return <Minus className="h-4 w-4 text-red-600" />
+        return <ArrowUpRight className="h-4 w-4 text-red-600" />
       case "transfer":
-        return <ArrowUpRight className="h-4 w-4 text-blue-600" />
+        return <RefreshCw className="h-4 w-4 text-blue-600" />
       case "payment":
-        return <CreditCard className="h-4 w-4 text-orange-600" />
+        return <CreditCard className="h-4 w-4 text-purple-600" />
       case "referral_bonus":
-        return <Users className="h-4 w-4 text-purple-600" />
+        return <Users className="h-4 w-4 text-amber-600" />
       default:
-        return <ArrowDownLeft className="h-4 w-4 text-gray-600" />
+        return <FileText className="h-4 w-4 text-slate-600" />
     }
   }
 
@@ -282,16 +248,32 @@ export function TransactionsManagement({ searchTerm: initialSearchTerm }: { sear
     switch (status) {
       case "completed":
         return (
-          <Badge variant="default" className="bg-green-100 text-green-800">
+          <Badge variant="default" className="bg-green-100 text-green-700 hover:bg-green-100 border-0">
+            <CheckCircle2 className="w-3 h-3 mr-1" />
             Completed
           </Badge>
         )
       case "pending":
-        return <Badge variant="secondary">Pending</Badge>
+        return (
+          <Badge variant="secondary" className="bg-amber-100 text-amber-700 hover:bg-amber-100 border-0">
+            <Clock className="w-3 h-3 mr-1" />
+            Pending
+          </Badge>
+        )
       case "failed":
-        return <Badge variant="destructive">Failed</Badge>
+        return (
+          <Badge variant="destructive" className="bg-red-50 text-red-600 hover:bg-red-50 border-red-100">
+            <AlertCircle className="w-3 h-3 mr-1" />
+            Failed
+          </Badge>
+        )
       case "cancelled":
-        return <Badge variant="outline">Cancelled</Badge>
+        return (
+          <Badge variant="outline" className="text-slate-500">
+            <XCircle className="w-3 h-3 mr-1" />
+            Cancelled
+          </Badge>
+        )
       default:
         return <Badge variant="secondary">{status}</Badge>
     }
@@ -305,187 +287,221 @@ export function TransactionsManagement({ searchTerm: initialSearchTerm }: { sear
       payment: "Payment",
       referral_bonus: "Referral Bonus",
     }
+    const label = typeLabels[type as keyof typeof typeLabels] || type
 
-    return <Badge variant="outline">{typeLabels[type as keyof typeof typeLabels] || type}</Badge>
+    // Add colors based on type
+    let className = "bg-slate-100 text-slate-700 hover:bg-slate-100 border-0"
+    if (type === 'deposit') className = "bg-green-50 text-green-700 hover:bg-green-50 border-green-100"
+    if (type === 'withdrawal') className = "bg-red-50 text-red-700 hover:bg-red-50 border-red-100"
+    if (type === 'referral_bonus') className = "bg-amber-50 text-amber-700 hover:bg-amber-50 border-amber-100"
+
+    return <Badge variant="outline" className={className}>{label}</Badge>
   }
 
   if (isLoading) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Transactions Management</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="flex items-center space-x-4 animate-pulse">
-                <div className="w-10 h-10 bg-muted rounded-full" />
-                <div className="flex-1 space-y-2">
-                  <div className="h-4 bg-muted rounded w-3/4" />
-                  <div className="h-3 bg-muted rounded w-1/2" />
-                </div>
-              </div>
-            ))}
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold">Transactions</h1>
+            <p className="text-slate-500">Monitor platform activity</p>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+        <Card className="border-0 shadow-sm">
+          <CardContent className="p-6">
+            <div className="space-y-4">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="flex items-center space-x-4 animate-pulse">
+                  <div className="w-10 h-10 bg-slate-100 rounded-full" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 bg-slate-100 rounded w-3/4" />
+                    <div className="h-3 bg-slate-100 rounded w-1/2" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     )
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-6 animate-fade-in-up">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Transactions Management</h1>
-          <p className="text-muted-foreground">Monitor and manage all platform transactions</p>
+          <h1 className="text-2xl font-bold text-slate-900">Transactions</h1>
+          <p className="text-slate-500 text-sm">Monitor and manage all financial transactions.</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" className="bg-white border-slate-200 text-slate-700">
+            <Download className="w-4 h-4 mr-2" />
+            Export CSV
+          </Button>
+          <Button variant="ghost" size="icon" onClick={fetchTransactions} className="text-slate-500 hover:text-blue-600">
+            <RefreshCw className="w-4 h-4" />
+          </Button>
         </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>All Transactions</CardTitle>
-          <CardDescription>View and manage all financial transactions</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center space-x-2 mb-6">
-            <div className="relative flex-1 max-w-sm">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+      {/* Modern Filter Toolbar */}
+      <Card className="border-0 shadow-sm bg-white overflow-visible">
+        <CardContent className="p-4">
+          <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+            <div className="relative w-full md:w-96">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-4 w-4" />
               <Input
-                placeholder="Search transactions..."
+                placeholder="Search by ref, user, description..."
                 value={searchTerm || ""}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="pl-10 bg-slate-50 border-slate-200 focus:bg-white transition-all"
               />
             </div>
 
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-32">
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="completed">Completed</SelectItem>
-                <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="failed">Failed</SelectItem>
-                <SelectItem value="cancelled">Cancelled</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="flex flex-wrap gap-2 w-full md:w-auto">
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-[140px] bg-slate-50 border-slate-200">
+                  <div className="flex items-center gap-2">
+                    <Filter className="w-3.5 h-3.5 text-slate-500" />
+                    <SelectValue placeholder="Status" />
+                  </div>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="completed">Completed</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="failed">Failed</SelectItem>
+                  <SelectItem value="cancelled">Cancelled</SelectItem>
+                </SelectContent>
+              </Select>
 
-            <Select value={typeFilter} onValueChange={setTypeFilter}>
-              <SelectTrigger className="w-32">
-                <SelectValue placeholder="Type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Types</SelectItem>
-                <SelectItem value="deposit">Deposit</SelectItem>
-                <SelectItem value="withdrawal">Withdrawal</SelectItem>
-                <SelectItem value="transfer">Transfer</SelectItem>
-                <SelectItem value="payment">Payment</SelectItem>
-                <SelectItem value="referral_bonus">Referral Bonus</SelectItem>
-              </SelectContent>
-            </Select>
+              <Select value={typeFilter} onValueChange={setTypeFilter}>
+                <SelectTrigger className="w-[140px] bg-slate-50 border-slate-200">
+                  <div className="flex items-center gap-2">
+                    <CreditCard className="w-3.5 h-3.5 text-slate-500" />
+                    <SelectValue placeholder="Type" />
+                  </div>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Types</SelectItem>
+                  <SelectItem value="deposit">Deposit</SelectItem>
+                  <SelectItem value="withdrawal">Withdrawal</SelectItem>
+                  <SelectItem value="transfer">Transfer</SelectItem>
+                  <SelectItem value="payment">Payment</SelectItem>
+                  <SelectItem value="referral_bonus">Referral Bonus</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
-            <Button variant="outline" className="bg-transparent">
-              <Download className="h-4 w-4 mr-2" />
-              Export
+      {/* Bulk Actions Bar */}
+      {selectedTransactions.size > 0 && (
+        <div className="flex items-center justify-between p-3 bg-blue-50/50 rounded-lg border border-blue-100 animate-in fade-in slide-in-from-top-2">
+          <span className="text-sm font-medium text-blue-700 flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4" />
+            {selectedTransactions.size} transaction{selectedTransactions.size !== 1 ? 's' : ''} selected
+          </span>
+          <div className="flex items-center gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => handleBulkAction("approve")}
+              disabled={isActionLoading}
+              className="bg-white text-green-700 border-green-200 hover:bg-green-50 shadow-sm"
+            >
+              {isActionLoading ? <RefreshCw className="h-3.5 w-3.5 animate-spin mr-2" /> : <CheckCircle2 className="h-3.5 w-3.5 mr-2" />}
+              Approve
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => handleBulkAction("reject")}
+              disabled={isActionLoading}
+              className="bg-white text-red-700 border-red-200 hover:bg-red-50 shadow-sm"
+            >
+              {isActionLoading ? <RefreshCw className="h-3.5 w-3.5 animate-spin mr-2" /> : <XCircle className="h-3.5 w-3.5 mr-2" />}
+              Reject
             </Button>
           </div>
+        </div>
+      )}
 
-          {selectedTransactions.size > 0 && (
-            <div className="flex items-center space-x-2 p-3 bg-blue-50 rounded-lg border border-blue-200">
-              <span className="text-sm font-medium text-blue-900">
-                {selectedTransactions.size} transaction{selectedTransactions.size !== 1 ? 's' : ''} selected
-              </span>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => handleBulkAction("approve")}
-                disabled={isActionLoading}
-                className="text-green-700 border-green-300 hover:bg-green-50"
-              >
-                {isActionLoading ? <RefreshCw className="h-4 w-4 animate-spin mr-2" /> : null}
-                Approve Selected
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => handleBulkAction("reject")}
-                disabled={isActionLoading}
-                className="text-red-700 border-red-300 hover:bg-red-50"
-              >
-                {isActionLoading ? <RefreshCw className="h-4 w-4 animate-spin mr-2" /> : null}
-                Reject Selected
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => handleBulkAction("cancel")}
-                disabled={isActionLoading}
-                className="text-orange-700 border-orange-300 hover:bg-orange-50"
-              >
-                {isActionLoading ? <RefreshCw className="h-4 w-4 animate-spin mr-2" /> : null}
-                Cancel Selected
-              </Button>
-            </div>
-          )}
-
-          <div className="rounded-md border overflow-hidden">
-            <div className="relative overflow-auto max-h-[600px]">
-              <Table className="min-w-full">
-                <TableHeader className="sticky top-0 bg-background z-10">
-                  <TableRow>
-                    <TableHead className="w-12">
+      <Card className="border-0 shadow-md shadow-slate-200/50">
+        <CardHeader className="px-6 py-4 border-b border-slate-100">
+          <CardTitle className="text-base font-semibold text-slate-800">Transaction History</CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          <div className="relative">
+            {/* Desktop / Tablet Table */}
+            <div className="hidden md:block overflow-x-auto">
+              <Table>
+                <TableHeader className="bg-slate-50/50">
+                  <TableRow className="border-b border-slate-100 hover:bg-transparent">
+                    <TableHead className="w-12 pl-6">
                       <Checkbox
                         checked={selectedTransactions.size === filteredTransactions.length && filteredTransactions.length > 0}
                         onCheckedChange={selectAllTransactions}
+                        className="border-slate-300 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
                       />
                     </TableHead>
-                    <TableHead>Transaction</TableHead>
-                    <TableHead>User</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Amount</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Reference</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead className="w-20">Actions</TableHead>
+                    <TableHead className="font-semibold text-slate-600">Transaction</TableHead>
+                    <TableHead className="font-semibold text-slate-600">User</TableHead>
+                    <TableHead className="font-semibold text-slate-600">Type</TableHead>
+                    <TableHead className="font-semibold text-slate-600">Amount</TableHead>
+                    <TableHead className="font-semibold text-slate-600">Status</TableHead>
+                    <TableHead className="font-semibold text-slate-600">Date</TableHead>
+                    <TableHead className="text-right pr-6 align-middle font-semibold text-slate-600">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredTransactions.map((transaction) => (
-                    <TableRow key={transaction.id} className="relative">
-                      <TableCell>
+                  {filteredTransactions.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={8} className="h-64 text-center text-slate-500">
+                        <div className="flex flex-col items-center justify-center">
+                          <div className="p-4 bg-slate-50 rounded-full mb-3">
+                            <FileText className="h-8 w-8 text-slate-300" />
+                          </div>
+                          <p>No transactions found matching your filters.</p>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ) : filteredTransactions.map((transaction) => (
+                    <TableRow key={transaction.id} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors group">
+                      <TableCell className="pl-6">
                         <Checkbox
                           checked={selectedTransactions.has(transaction.id)}
                           onCheckedChange={() => toggleTransactionSelection(transaction.id)}
+                          className="border-slate-300 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
                         />
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 bg-muted rounded-full flex items-center justify-center">
+                          <div className="w-9 h-9 bg-slate-100 rounded-full flex items-center justify-center border border-slate-200">
                             {getTransactionIcon(transaction.type)}
                           </div>
-                          <div>
-                            <div className="font-medium text-sm">{transaction.description}</div>
-                            <div className="text-xs text-muted-foreground">ID: {transaction.id}</div>
+                          <div className="max-w-[180px]">
+                            <div className="font-medium text-slate-900 truncate" title={transaction.description}>{transaction.description}</div>
+                            <div className="text-xs text-slate-500 font-mono">{transaction.reference}</div>
                           </div>
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div>
-                          <div className="font-medium">{transaction.userName || "Unknown User"}</div>
+                        <div className="max-w-[150px]">
+                          <div className="font-medium text-slate-900 truncate">{transaction.userName || "Unknown"}</div>
                           {transaction.userEmail && (
-                            <div className="text-xs text-muted-foreground">{transaction.userEmail}</div>
+                            <div className="text-xs text-slate-500 truncate">{transaction.userEmail}</div>
                           )}
                         </div>
                       </TableCell>
                       <TableCell>{getTypeBadge(transaction.type)}</TableCell>
                       <TableCell>
                         <div
-                          className={`font-medium ${
-                            transaction.type === "deposit" || transaction.type === "referral_bonus"
+                          className={`font-semibold ${transaction.type === "deposit" || transaction.type === "referral_bonus"
                               ? "text-green-600"
-                              : "text-red-600"
-                          }`}
+                              : "text-slate-900"
+                            }`}
                         >
                           {transaction.type === "deposit" || transaction.type === "referral_bonus" ? "+" : "-"}
                           {formatCurrency(transaction.amount)}
@@ -493,190 +509,167 @@ export function TransactionsManagement({ searchTerm: initialSearchTerm }: { sear
                       </TableCell>
                       <TableCell>{getStatusBadge(transaction.status)}</TableCell>
                       <TableCell>
-                        <div className="font-mono text-xs">{transaction.reference || "No reference"}</div>
+                        <div className="text-sm text-slate-600">{formatDate(transaction.createdAt)}</div>
                       </TableCell>
-                      <TableCell>
-                        <div className="text-sm">{formatDate(transaction.createdAt)}</div>
-                      </TableCell>
-                      <TableCell className="relative">
-                        <div className="relative">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 w-8 p-0 hover:bg-muted"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              // Toggle custom dropdown for this row
-                              setOpenDropdownId(openDropdownId === transaction.id ? null : transaction.id)
-                            }}
-                          >
-                            <MoreVertical className="h-4 w-4" />
-                            <span className="sr-only">Open menu</span>
-                          </Button>
-
-                          {/* Custom dropdown menu */}
-                          {openDropdownId === transaction.id && (
-                            <div className="absolute right-0 top-8 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-[9999]">
-                              <div className="py-1">
-                                <button
-                                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-                                  onClick={(e) => {
-                                    e.stopPropagation()
-                                    handleViewDetails(transaction)
-                                    setOpenDropdownId(null)
-                                  }}
-                                >
-                                  <Eye className="h-4 w-4 mr-2" />
-                                  View Details
-                                </button>
-                                {transaction.status === "pending" && (
-                                  <>
-                                    <button
-                                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center disabled:opacity-50"
-                                      disabled={isActionLoading}
-                                      onClick={(e) => {
-                                        e.stopPropagation()
-                                        handleTransactionAction(transaction.id, "approve")
-                                        setOpenDropdownId(null)
-                                      }}
-                                    >
-                                      <Plus className="h-4 w-4 mr-2" />
-                                      Approve
-                                    </button>
-                                    <button
-                                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center disabled:opacity-50"
-                                      disabled={isActionLoading}
-                                      onClick={(e) => {
-                                        e.stopPropagation()
-                                        handleTransactionAction(transaction.id, "reject")
-                                        setOpenDropdownId(null)
-                                      }}
-                                    >
-                                      <Minus className="h-4 w-4 mr-2" />
-                                      Reject
-                                    </button>
-                                    <button
-                                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center disabled:opacity-50"
-                                      disabled={isActionLoading}
-                                      onClick={(e) => {
-                                        e.stopPropagation()
-                                        handleTransactionAction(transaction.id, "cancel")
-                                        setOpenDropdownId(null)
-                                      }}
-                                    >
-                                      <AlertCircle className="h-4 w-4 mr-2" />
-                                      Cancel
-                                    </button>
-                                  </>
-                                )}
-                              </div>
-                            </div>
-                          )}
-                        </div>
+                      <TableCell className="text-right pr-6">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 group-hover:text-blue-600 transition-colors">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={() => handleViewDetails(transaction)}>
+                              <Eye className="h-4 w-4 mr-2 text-slate-500" /> View Details
+                            </DropdownMenuItem>
+                            {transaction.status === 'pending' && (
+                              <>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem onClick={() => handleTransactionAction(transaction.id, 'approve')} className="text-green-600 focus:text-green-600">
+                                  <CheckCircle2 className="h-4 w-4 mr-2" /> Approve
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleTransactionAction(transaction.id, 'reject')} className="text-red-600 focus:text-red-600">
+                                  <XCircle className="h-4 w-4 mr-2" /> Reject
+                                </DropdownMenuItem>
+                              </>
+                            )}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
               </Table>
             </div>
-          </div>
 
-          {filteredTransactions.length === 0 && (
-            <div className="text-center py-8 text-muted-foreground">
-              <p>No transactions found matching your criteria</p>
+            {/* Mobile: stacked cards */}
+            <div className="block md:hidden bg-slate-50/50 p-4 space-y-4">
+              {filteredTransactions.map((transaction) => (
+                <div key={transaction.id} className="bg-white border border-slate-100 rounded-xl p-4 shadow-sm relative overflow-hidden">
+                  {/* Status Stripe */}
+                  <div className={`absolute top-0 left-0 w-1 h-full ${transaction.status === 'completed' ? 'bg-green-500' :
+                      transaction.status === 'pending' ? 'bg-amber-500' :
+                        transaction.status === 'failed' ? 'bg-red-500' : 'bg-slate-300'
+                    }`} />
+
+                  <div className="flex items-start justify-between mb-3 pl-3">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-slate-50 rounded-full flex items-center justify-center border border-slate-100">
+                        {getTransactionIcon(transaction.type)}
+                      </div>
+                      <div>
+                        <div className="font-bold text-slate-900 text-sm line-clamp-1">{transaction.description}</div>
+                        <div className="text-xs text-slate-500 font-mono">{transaction.reference}</div>
+                      </div>
+                    </div>
+                    <div className={`font-bold ${transaction.type === 'deposit' || transaction.type === 'referral_bonus' ? 'text-green-600' : 'text-slate-900'
+                      }`}>
+                      {transaction.type === 'deposit' || transaction.type === 'referral_bonus' ? '+' : '-'}
+                      {formatCurrency(transaction.amount)}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4 py-3 border-y border-slate-50 mb-3 pl-3">
+                    <div>
+                      <span className="text-xs text-slate-400 block mb-1">User</span>
+                      <div className="flex items-center gap-2">
+                        <Avatar className="h-5 w-5">
+                          <AvatarFallback className="text-[10px] bg-slate-100">U</AvatarFallback>
+                        </Avatar>
+                        <span className="text-sm font-medium text-slate-700 truncate max-w-[100px]">{transaction.userName}</span>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-xs text-slate-400 block mb-1">Status</span>
+                      <div className="flex justify-end">{getStatusBadge(transaction.status)}</div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between pl-3">
+                    <span className="text-xs text-slate-400">{formatDate(transaction.createdAt)}</span>
+                    <Button variant="ghost" size="sm" className="h-8 text-slate-500" onClick={() => handleViewDetails(transaction)}>
+                      View Details
+                    </Button>
+                  </div>
+                </div>
+              ))}
             </div>
-          )}
+          </div>
         </CardContent>
       </Card>
 
       {/* Transaction Details Modal */}
       <Dialog open={isDetailsModalOpen} onOpenChange={setIsDetailsModalOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-muted rounded-full flex items-center justify-center">
+        <DialogContent className="max-w-xl">
+          <DialogHeader className="pb-4 border-b border-slate-100">
+            <DialogTitle className="flex items-center gap-3 text-xl">
+              <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center border border-slate-200">
                 {selectedTransaction && getTransactionIcon(selectedTransaction.type)}
               </div>
-              Transaction Details
+              <div>
+                <div>Transaction Details</div>
+                <div className="text-sm font-normal text-slate-500 mt-1 font-mono">#{selectedTransaction?.id}</div>
+              </div>
             </DialogTitle>
-            <DialogDescription>
-              Complete information about this transaction
-            </DialogDescription>
           </DialogHeader>
 
           {selectedTransaction && (
-            <div className="space-y-6">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Transaction ID</label>
-                  <p className="font-mono text-sm">{selectedTransaction.id}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Reference</label>
-                  <p className="font-mono text-sm">{selectedTransaction.reference}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Type</label>
-                  <div className="mt-1">{getTypeBadge(selectedTransaction.type)}</div>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Status</label>
-                  <div className="mt-1">{getStatusBadge(selectedTransaction.status)}</div>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Amount</label>
-                  <p className={`font-semibold ${
-                    selectedTransaction.type === "deposit" || selectedTransaction.type === "referral_bonus"
-                      ? "text-green-600"
-                      : "text-red-600"
+            <div className="py-4">
+              <div className="flex flex-col items-center justify-center py-6 bg-slate-50/50 rounded-lg border border-slate-100 mb-6">
+                <span className="text-sm text-slate-500 mb-1">Total Amount</span>
+                <div className={`text-3xl font-bold ${selectedTransaction.type === 'deposit' || selectedTransaction.type === 'referral_bonus' ? 'text-green-600' : 'text-slate-900'
                   }`}>
-                    {selectedTransaction.type === "deposit" || selectedTransaction.type === "referral_bonus" ? "+" : "-"}
-                    {formatCurrency(selectedTransaction.amount)}
-                  </p>
+                  {formatCurrency(selectedTransaction.amount)}
+                </div>
+                <div className="mt-2">{getStatusBadge(selectedTransaction.status)}</div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-y-4 gap-x-8 text-sm">
+                <div>
+                  <label className="text-xs text-slate-400 uppercase font-semibold">Type</label>
+                  <div className="mt-1 font-medium text-slate-700 capitalize">{selectedTransaction.type.replace('_', ' ')}</div>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-muted-foreground">Date</label>
-                  <p className="text-sm">{formatDate(selectedTransaction.createdAt)}</p>
+                  <label className="text-xs text-slate-400 uppercase font-semibold">Date & Time</label>
+                  <div className="mt-1 font-medium text-slate-700">{formatDate(selectedTransaction.createdAt)}</div>
+                </div>
+                <div className="col-span-2">
+                  <label className="text-xs text-slate-400 uppercase font-semibold">User</label>
+                  <div className="mt-1 flex items-center gap-2">
+                    <Avatar className="h-6 w-6">
+                      <AvatarFallback className="text-xs bg-blue-50 text-blue-600">U</AvatarFallback>
+                    </Avatar>
+                    <span className="font-medium text-slate-700">{selectedTransaction.userName}</span>
+                    <span className="text-slate-400">•</span>
+                    <span className="text-slate-500">{selectedTransaction.userEmail}</span>
+                  </div>
+                </div>
+                <div className="col-span-2">
+                  <label className="text-xs text-slate-400 uppercase font-semibold">Description</label>
+                  <div className="mt-1 p-3 bg-slate-50 rounded border border-slate-100 text-slate-600">
+                    {selectedTransaction.description}
+                  </div>
+                </div>
+                <div className="col-span-2">
+                  <label className="text-xs text-slate-400 uppercase font-semibold">Reference</label>
+                  <div className="mt-1 font-mono text-slate-600 select-all">{selectedTransaction.reference}</div>
                 </div>
               </div>
-
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">Description</label>
-                <p className="mt-1">{selectedTransaction.description}</p>
-              </div>
-
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">User Information</label>
-                <div className="mt-2 p-3 bg-muted rounded-lg">
-                  <p className="font-medium">{selectedTransaction.userName || "Unknown User"}</p>
-                  {selectedTransaction.userEmail && (
-                    <p className="text-sm text-muted-foreground">{selectedTransaction.userEmail}</p>
-                  )}
-                  <p className="text-xs text-muted-foreground">User ID: {selectedTransaction.userId}</p>
-                </div>
-              </div>
-
-              {selectedTransaction.metadata && (
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Additional Information</label>
-                  <pre className="mt-2 p-3 bg-muted rounded-lg text-xs overflow-x-auto">
-                    {JSON.stringify(selectedTransaction.metadata, null, 2)}
-                  </pre>
-                </div>
-              )}
 
               {selectedTransaction.status === "pending" && (
-                <div className="flex gap-3 pt-4 border-t">
+                <div className="flex gap-3 mt-8 pt-4 border-t border-slate-100">
                   <Button
                     onClick={() => {
                       handleTransactionAction(selectedTransaction.id, "approve")
                       setIsDetailsModalOpen(false)
                     }}
                     disabled={isActionLoading}
-                    className="flex-1"
+                    className="flex-1 bg-green-600 hover:bg-green-700"
                   >
-                    {isActionLoading ? <RefreshCw className="h-4 w-4 animate-spin mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
-                    Approve Transaction
+                    {isActionLoading ? <RefreshCw className="h-4 w-4 animate-spin mr-2" /> : <CheckCircle2 className="h-4 w-4 mr-2" />}
+                    Approve
                   </Button>
                   <Button
                     variant="outline"
@@ -685,10 +678,10 @@ export function TransactionsManagement({ searchTerm: initialSearchTerm }: { sear
                       setIsDetailsModalOpen(false)
                     }}
                     disabled={isActionLoading}
-                    className="flex-1"
+                    className="flex-1 text-red-600 border-red-200 hover:bg-red-50"
                   >
-                    {isActionLoading ? <RefreshCw className="h-4 w-4 animate-spin mr-2" /> : <Minus className="h-4 w-4 mr-2" />}
-                    Reject Transaction
+                    {isActionLoading ? <RefreshCw className="h-4 w-4 animate-spin mr-2" /> : <XCircle className="h-4 w-4 mr-2" />}
+                    Reject
                   </Button>
                 </div>
               )}
