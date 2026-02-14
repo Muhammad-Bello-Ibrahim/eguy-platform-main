@@ -29,15 +29,17 @@ export default function RootLayout({
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
       </head>
       <body className="font-sans antialiased bg-white text-gray-900">
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="light"
-          enableSystem={false}
-          disableTransitionOnChange
-        >
-          {children}
-          <MobileNavWrapper />
-        </ThemeProvider>
+        <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ""}>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="light"
+            enableSystem={false}
+            disableTransitionOnChange
+          >
+            {children}
+            <MobileNavWrapper />
+          </ThemeProvider>
+        </GoogleOAuthProvider>
         <Analytics />
       </body>
     </html>
