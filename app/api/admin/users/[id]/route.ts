@@ -11,7 +11,8 @@ export async function PUT(
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
-    if (session.user.role !== "admin") {
+    const user = (session as any).user;
+    if (user.role !== "admin") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
 
@@ -31,15 +32,29 @@ export async function PUT(
       return NextResponse.json({ error: "Phone number must be at least 10 digits" }, { status: 400 })
     }
 
+    // Allow updating administrative fields
+    const allowedUpdates: any = {}
+    if (updates.fullName) allowedUpdates.fullName = updates.fullName
+    if (updates.email) allowedUpdates.email = updates.email
+    if (updates.phone) allowedUpdates.phone = updates.phone
+    if (updates.status) allowedUpdates.status = updates.status
+    if (updates.kycStatus) allowedUpdates.kycStatus = updates.kycStatus
+    if (updates.referredBy) allowedUpdates.referredBy = updates.referredBy
+    if (updates.role) allowedUpdates.role = updates.role // Careful with this one
+
+    if (Object.keys(allowedUpdates).length === 0) {
+      return NextResponse.json({ error: "No valid fields to update" }, { status: 400 })
+    }
+
     // Update user in database
-    const updatedUser = await Database.updateUserById(userId, updates)
+    const updatedUser = await Database.updateUserById(userId, allowedUpdates)
 
     if (!updatedUser) {
       return NextResponse.json({ error: "User not found" }, { status: 404 })
     }
 
     // Log the update action
-    console.log(`Admin ${session.user.email} updated user ${userId}`)
+    console.log(`Admin ${user.email} updated user ${userId}:`, Object.keys(allowedUpdates))
 
     return NextResponse.json({
       message: "User updated successfully",
@@ -48,6 +63,9 @@ export async function PUT(
         fullName: updatedUser.fullName,
         email: updatedUser.email,
         phone: updatedUser.phone,
+        status: updatedUser.status,
+        kycStatus: updatedUser.kycStatus,
+        referredBy: updatedUser.referredBy
       }
     })
   } catch (error) {

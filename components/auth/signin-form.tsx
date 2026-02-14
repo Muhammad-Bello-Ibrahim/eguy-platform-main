@@ -1,16 +1,13 @@
 "use client"
 
-import type React from "react"
-
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Loader2, Eye, EyeOff, Mail, Lock } from "lucide-react"
+import { Loader2, Eye, EyeOff, Mail, Lock, ArrowRight, Github } from "lucide-react"
 
 export function SigninForm() {
   const [formData, setFormData] = useState({
@@ -63,107 +60,110 @@ export function SigninForm() {
   }
 
   return (
-    <Card className="w-full bg-white border border-gray-200 shadow-sm">
-      <CardHeader className="pb-4">
-        <CardTitle className="text-xl font-semibold text-gray-900 text-center">
-          Sign In to Your Account
-        </CardTitle>
-        <CardDescription className="text-center text-gray-600">
-          Enter your credentials to access your dashboard
-        </CardDescription>
-      </CardHeader>
+    <div className="grid gap-6">
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {error && (
+          <Alert variant="destructive" className="rounded-xl border-red-200 bg-red-50 text-red-800 animate-in fade-in zoom-in-95 duration-200">
+            <AlertDescription className="flex items-center gap-2 font-medium">
+              {error}
+            </AlertDescription>
+          </Alert>
+        )}
 
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {error && (
-            <Alert variant="destructive" className="rounded-lg border-red-200 bg-red-50">
-              <AlertDescription className="font-medium text-red-800">{error}</AlertDescription>
-            </Alert>
-          )}
-
-          <div className="space-y-2">
-            <Label htmlFor="emailOrPhone" className="text-sm font-medium text-gray-700">
-              Email or Phone Number
-            </Label>
-            <div className="relative group">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 group-focus-within:text-blue-600 transition-colors duration-200" />
-              <Input
-                id="emailOrPhone"
-                name="emailOrPhone"
-                type="text"
-                required
-                value={formData.emailOrPhone}
-                onChange={handleChange}
-                placeholder="Enter your email or phone number"
-                className="w-full rounded-lg border border-gray-300 bg-white px-10 py-2.5 text-sm text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-gray-400 transition-all duration-200"
-              />
-            </div>
+        <div className="space-y-2">
+          <Label htmlFor="emailOrPhone" className="text-sm font-medium text-zinc-700">
+            Email or Phone
+          </Label>
+          <div className="relative group">
+            <Mail className="absolute left-3 top-2.5 h-4 w-4 text-zinc-400 group-focus-within:text-primary transition-colors" />
+            <Input
+              id="emailOrPhone"
+              name="emailOrPhone"
+              placeholder="name@example.com"
+              type="text"
+              autoCapitalize="none"
+              autoComplete="username"
+              autoCorrect="off"
+              disabled={isLoading}
+              required
+              value={formData.emailOrPhone}
+              onChange={handleChange}
+              className="pl-9 h-10 bg-zinc-50/50 border-zinc-200 focus:bg-white transition-all duration-200 rounded-lg"
+            />
           </div>
+        </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="password" className="text-sm font-medium text-gray-700">
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <Label htmlFor="password" className="text-sm font-medium text-zinc-700">
               Password
             </Label>
-            <div className="relative group">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 group-focus-within:text-blue-600 transition-colors duration-200" />
-              <Input
-                id="password"
-                name="password"
-                type={showPassword ? "text" : "password"}
-                required
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="Enter your password"
-                className="w-full rounded-lg border border-gray-300 bg-white px-10 py-2.5 text-sm text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-gray-400 transition-all duration-200 pr-10"
-              />
-              <button
-                type="button"
-                aria-label={showPassword ? "Hide password" : "Show password"}
-                onClick={() => setShowPassword((v) => !v)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-600 focus:outline-none transition-colors duration-200"
-                tabIndex={0}
-              >
-                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-              </button>
-            </div>
-          </div>
-
-          <Button
-            type="submit"
-            className="w-full py-2.5 rounded-lg bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-medium text-sm shadow-sm hover:shadow-purple-500/25 transition-all duration-200 border-0"
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Signing In...
-              </>
-            ) : (
-              <>
-                <span className="mr-2">Sign In</span>
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </>
-            )}
-          </Button>
-
-          <div className="text-center pt-2">
-            <Link href="/reset-password" className="text-blue-600 hover:text-blue-700 transition-colors duration-200 font-medium text-sm">
-              Forgot your password?
+            <Link
+              href="/reset-password"
+              className="text-xs font-medium text-primary hover:text-primary/80 transition-colors"
+            >
+              Forgot password?
             </Link>
           </div>
-        </form>
-
-        <div className="mt-6 text-center">
-          <p className="text-gray-600 text-sm">
-            Don't have an account?{" "}
-            <Link href="/signup" className="text-purple-600 hover:text-purple-700 font-medium transition-colors duration-200">
-              Sign up here
-            </Link>
-          </p>
+          <div className="relative group">
+            <Lock className="absolute left-3 top-2.5 h-4 w-4 text-zinc-400 group-focus-within:text-primary transition-colors" />
+            <Input
+              id="password"
+              name="password"
+              placeholder="••••••••"
+              type={showPassword ? "text" : "password"}
+              autoComplete="current-password"
+              disabled={isLoading}
+              required
+              value={formData.password}
+              onChange={handleChange}
+              className="pl-9 pr-10 h-10 bg-zinc-50/50 border-zinc-200 focus:bg-white transition-all duration-200 rounded-lg"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-2.5 text-zinc-400 hover:text-zinc-600 focus:outline-none transition-colors"
+            >
+              {showPassword ? (
+                <EyeOff className="h-4 w-4" />
+              ) : (
+                <Eye className="h-4 w-4" />
+              )}
+            </button>
+          </div>
         </div>
-      </CardContent>
-    </Card>
+
+        <Button
+          className="w-full bg-primary hover:bg-primary/90 text-white font-semibold h-10 rounded-lg transition-all duration-200 shadow-lg shadow-primary/20 hover:shadow-primary/30"
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            <span className="flex items-center gap-2">Sign In <ArrowRight className="w-4 h-4" /></span>
+          )}
+        </Button>
+      </form>
+
+      <div className="relative">
+        <div className="absolute inset-0 flex items-center">
+          <span className="w-full border-t border-zinc-200" />
+        </div>
+        <div className="relative flex justify-center text-xs uppercase">
+          <span className="bg-background px-2 text-zinc-500">
+            Or continue with
+          </span>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <Button variant="outline" type="button" disabled={isLoading} className="h-10 rounded-lg border-zinc-200 hover:bg-zinc-50 hover:text-zinc-900">
+          <Github className="mr-2 h-4 w-4" /> Google
+        </Button>
+        <Button variant="outline" type="button" disabled={isLoading} className="h-10 rounded-lg border-zinc-200 hover:bg-zinc-50 hover:text-zinc-900">
+          <div className="mr-2 h-4 w-4 bg-zinc-900 rounded-full" /> Apple
+        </Button>
+      </div>
+    </div>
   )
 }

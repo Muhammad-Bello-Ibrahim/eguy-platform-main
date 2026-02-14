@@ -38,7 +38,7 @@ export async function verifyPassword(password, hashedPassword) {
  * Safe version of getSession — requires an active request context.
  * Avoids being executed during build analysis.
  */
-export async function getSession(req) {
+export async function getSession(req?: any) {
   try {
     // If `req` is available (API route or server action)
     const cookieStore =

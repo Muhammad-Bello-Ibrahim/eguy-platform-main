@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check SubAndGain API credentials
-    const username = process.env.SUBANDGAIN_API_USERNAME;
+    const username = process.env.SUBANDGAIN_USER_NAME;
     const apiKey = process.env.SUBANDGAIN_API_KEY;
 
     if (!username || !apiKey) {

@@ -12,10 +12,14 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const referrals = await Database.getUserReferrals(session.user.id);
+    const { user: sessionUser } = session as any;
+
+    const referrals = await Database.getUserReferrals(sessionUser.id);
+    const user = await Database.findUserById(sessionUser.id);
     console.log("Fetched referrals:", referrals);
 
     const stats = {
+      referralCode: user?.referralCode,
       totalReferrals: referrals.length,
       activeReferrals: referrals.filter((r) => r.status === "active").length,
       totalEarnings: referrals.reduce((sum, r) => sum + (r.bonusAmount || 0), 0),

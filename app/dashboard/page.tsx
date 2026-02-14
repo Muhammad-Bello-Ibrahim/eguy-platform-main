@@ -121,10 +121,10 @@ export default function DashboardPage() {
   // Paystack verification logic
   useEffect(() => {
     let isVerifying = false; // Prevent duplicate calls
-    
+
     const params = new URLSearchParams(window.location.search);
     const reference = params.get("reference") || params.get("trxref");
-    
+
     if (reference && !isVerifying) {
       isVerifying = true;
       console.log("Processing Paystack callback with reference:", reference);
@@ -249,7 +249,7 @@ export default function DashboardPage() {
           />
         </div>
 
-        {/* Quick Actions - Clean Grid */}
+        {/* Quick Actions - Modern Grid */}
         <div className="mb-8">
           <div className="max-w-lg mx-auto">
             <div className="grid grid-cols-3 gap-4">
@@ -257,47 +257,49 @@ export default function DashboardPage() {
                 {
                   icon: AirtimeIcon,
                   label: "Airtime",
-                  color: "bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200",
+                  color: "bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 border border-blue-100",
                   onClick: () => setIsAirtimeModalOpen(true)
                 },
                 {
                   icon: DataIcon,
                   label: "Data",
-                  color: "bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200",
+                  color: "bg-purple-500/10 hover:bg-purple-500/20 text-purple-600 border border-purple-100",
                   onClick: () => setIsDataModalOpen(true)
                 },
                 {
                   icon: ElectricityIcon,
                   label: "Bills",
-                  color: "bg-orange-50 hover:bg-orange-100 text-orange-700 border border-orange-200",
+                  color: "bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 border border-amber-100",
                   onClick: () => setIsBillsModalOpen(true)
                 },
                 {
                   icon: ExamPinIcon,
                   label: "Cable TV",
-                  color: "bg-green-50 hover:bg-green-100 text-green-700 border border-green-200",
+                  color: "bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 border border-emerald-100",
                   onClick: () => setIsBillsModalOpen(true)
                 },
                 {
                   icon: CableIcon,
                   label: "Exam Pin",
-                  color: "bg-pink-50 hover:bg-pink-100 text-pink-700 border border-pink-200",
+                  color: "bg-pink-500/10 hover:bg-pink-500/20 text-pink-600 border border-pink-100",
                   onClick: () => setIsBillsModalOpen(true)
                 },
                 {
                   icon: ReferEarnIcon,
                   label: "Refer",
-                  color: "bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200",
+                  color: "bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-600 border border-indigo-100",
                   onClick: () => router.push('/elevatex')
                 }
               ].map((action, index) => (
                 <button
                   key={index}
                   onClick={action.onClick}
-                  className={`p-4 rounded-xl transition-all duration-200 ${action.color} hover:shadow-md flex flex-col items-center gap-2`}
+                  className={`p-4 rounded-2xl transition-all duration-300 ${action.color} hover:shadow-lg hover:-translate-y-1 flex flex-col items-center gap-3 active:scale-95`}
                 >
-                  <action.icon className="w-6 h-6" />
-                  <span className="text-sm font-medium">{action.label}</span>
+                  <div className="p-2 bg-white rounded-full shadow-sm">
+                    <action.icon className="w-6 h-6" />
+                  </div>
+                  <span className="text-sm font-semibold">{action.label}</span>
                 </button>
               ))}
             </div>
@@ -310,7 +312,7 @@ export default function DashboardPage() {
         </div>
       </main>
 
-      {/* Modals */}
+      {/* Modals with consistent styling */}
       <DepositModal
         isOpen={isDepositModalOpen}
         onClose={() => setIsDepositModalOpen(false)}

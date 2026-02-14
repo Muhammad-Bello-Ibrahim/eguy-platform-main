@@ -261,8 +261,8 @@ export function PlansManagement({ searchTerm: initialSearchTerm }: { searchTerm?
     <div className="space-y-6 animate-fade-in-up">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900">Plans Management</h2>
-          <p className="text-slate-500 text-sm">Configure and manage data bundles and airtime pricing.</p>
+          <h2 className="text-2xl font-bold" style={{ color: 'var(--color-foreground)' }}>Plans Management</h2>
+          <p className="text-sm" style={{ color: 'var(--color-muted-foreground)' }}>Configure and manage data bundles and airtime pricing.</p>
         </div>
 
         <Dialog open={addModalOpen} onOpenChange={setAddModalOpen}>

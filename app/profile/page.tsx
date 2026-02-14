@@ -1,11 +1,16 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronRight, Pencil, X, ArrowLeft } from "lucide-react";
+import { ChevronRight, Pencil, Copy, LogOut, Shield, CreditCard, User as UserIcon, CheckCircle2, AlertCircle } from "lucide-react";
 import PayoutAccountsModal from "@/components/dashboard/payout-accounts-modal";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useToast } from "@/components/ui/use-toast";
 
 interface User {
   id: string;
@@ -28,27 +33,38 @@ interface User {
 
 export default function ProfilePage() {
   const router = useRouter();
+  const { toast } = useToast();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [elevateXStatus, setElevateXStatus] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [payoutOpen, setPayoutOpen] = useState(false);
   const [savingPayout, setSavingPayout] = useState(false);
-  const [payoutError, setPayoutError] = useState<string | null>(null);
+
+  // Edit form state
+  const [editForm, setEditForm] = useState({
+    fullName: "",
+    phone: "",
+    avatar: ""
+  });
+  const [saving, setSaving] = useState(false);
 
   async function fetchUser() {
     try {
       const res = await fetch("/api/user");
       const data = await res.json();
 
-      console.log("Profile API response:", data); // Debug log
-      console.log("User object:", data.user); // Debug log
-
       if (data.user) {
         setUser(data.user);
         setElevateXStatus(data.user?.packs?.includes("ElevateX"));
+        setEditForm({
+          fullName: data.user.fullName || data.user.name || "",
+          phone: data.user.phone || "",
+          avatar: data.user.avatar || ""
+        });
       } else if (data.error) {
         console.error("API Error:", data.error);
+        toast({ title: "Error", description: "Failed to load profile", variant: "destructive" });
       }
     } catch (error) {
       console.error("Fetch user error:", error);
@@ -63,7 +79,6 @@ export default function ProfilePage() {
 
   async function handleSavePayoutAccount(account: any) {
     setSavingPayout(true);
-    setPayoutError(null);
     try {
       const response = await fetch("/api/user", {
         method: "PUT",
@@ -71,16 +86,13 @@ export default function ProfilePage() {
         body: JSON.stringify({ payoutAccount: account })
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to save payout account");
-      }
+      if (!response.ok) throw new Error("Failed to save payout account");
 
-      // Refresh user data from database to get updated payout account
       await fetchUser();
-
       setPayoutOpen(false);
+      toast({ title: "Success", description: "Payout account updated successfully" });
     } catch (error: any) {
-      setPayoutError(error.message || "Failed to save payout account");
+      toast({ title: "Error", description: error.message || "Failed to save payout account", variant: "destructive" });
     } finally {
       setSavingPayout(false);
     }
@@ -88,246 +100,202 @@ export default function ProfilePage() {
 
   async function handleLogout() {
     await fetch("/api/auth/signout", { method: "POST" });
-    window.sessionStorage.clear(); // Clear all sessionStorage, including user
+    window.sessionStorage.clear();
     router.push("/signin");
   }
 
-  function EditProfileModal({ user, open, onClose, onSave }: { user: User; open: boolean; onClose: () => void; onSave: (u: Partial<User>) => void }) {
-    const [form, setForm] = useState({
-      fullName: user.fullName,
-      phone: user.phone,
-      avatar: user.avatar || ""
-    });
-    const [saving, setSaving] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    if (!open) return null;
-    async function handleSubmit(e: React.FormEvent) {
-      e.preventDefault();
-      setSaving(true);
-      setError(null);
-      try {
-        const res = await fetch("/api/user", {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(form)
-        });
-        if (!res.ok) {
-          throw new Error("Failed to update profile");
-        }
-        onSave(form);
-        onClose();
-      } catch (err: any) {
-        setError(err.message || "Unknown error");
-      } finally {
-        setSaving(false);
-      }
-    }
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-        <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-sm relative">
-          <button title="Close" className="absolute top-3 right-3 p-2 rounded-full hover:bg-gray-100" onClick={onClose}><X className="h-5 w-5 text-gray-600" /></button>
-          <h2 className="text-lg font-bold mb-4 text-gray-900">Edit Profile</h2>
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            <div>
-              <label className="block text-xs font-semibold mb-1 text-gray-700" htmlFor="edit-fullname">Full Name</label>
-              <input id="edit-fullname" type="text" value={form.fullName} placeholder="Full Name" onChange={e => setForm(f => ({ ...f, fullName: e.target.value }))} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:border-blue-500 focus:outline-none text-gray-900" />
-            </div>
-            <div>
-              <label className="block text-xs font-semibold mb-1 text-gray-700" htmlFor="edit-phone">Phone</label>
-              <input id="edit-phone" type="text" value={form.phone} placeholder="Phone" onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:border-blue-500 focus:outline-none text-gray-900" />
-            </div>
-            <div>
-              <label className="block text-xs font-semibold mb-1 text-gray-700" htmlFor="edit-avatar">Avatar URL</label>
-              <input id="edit-avatar" type="text" value={form.avatar} placeholder="Avatar URL" onChange={e => setForm(f => ({ ...f, avatar: e.target.value }))} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:border-blue-500 focus:outline-none text-gray-900" />
-            </div>
-            {error && <div className="text-red-600 text-xs mb-2 bg-red-50 p-2 rounded">{error}</div>}
-            <button type="submit" className="w-full mt-2 px-4 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors disabled:bg-gray-400" disabled={saving}>{saving ? "Saving..." : "Save"}</button>
-          </form>
-        </div>
-      </div>
-    );
-  }
+  const handleEditSubmit = async () => {
+    setSaving(true);
+    try {
+      const res = await fetch("/api/user", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editForm)
+      });
 
-  const [copied, setCopied] = useState(false);
+      if (!res.ok) throw new Error("Failed to update profile");
+
+      setUser(prev => prev ? ({ ...prev, ...editForm }) : null);
+      setEditOpen(false);
+      toast({ title: "Success", description: "Profile updated successfully" });
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message || "Failed to update profile", variant: "destructive" });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const copyReferralLink = () => {
+    const link = `${window.location.origin}/signup?ref=${user?.referralCode || ""}`;
+    navigator.clipboard.writeText(link);
+    toast({ title: "Copied!", description: "Referral link copied to clipboard" });
+  };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading profile...</p>
-        </div>
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     );
   }
+
   if (!user) {
-    return <div className="min-h-screen bg-gray-50 flex items-center justify-center text-gray-600">User not found.</div>;
+    return <div className="min-h-screen bg-slate-50 flex items-center justify-center text-slate-500">User not found</div>;
   }
 
   return (
-    <>
-      <EditProfileModal
-        user={user}
-        open={editOpen}
-        onClose={() => setEditOpen(false)}
-        onSave={fields => setUser(u => u ? { ...u, ...fields } : u)}
-      />
+    <div className="min-h-screen bg-slate-50/50 pb-20">
+      <div className="bg-gradient-to-b from-blue-600 to-blue-800 pb-32 pt-12 px-4">
+        <div className="container max-w-lg mx-auto text-center text-white">
+          <h1 className="text-2xl font-bold mb-2">My Profile</h1>
+          <p className="text-blue-100">Manage your account settings</p>
+        </div>
+      </div>
+
+      <div className="container max-w-lg mx-auto px-4 -mt-24 space-y-6">
+        {/* Profile Stats Card */}
+        <Card className="border-0 shadow-xl overflow-hidden">
+          <CardContent className="p-6">
+            <div className="flex flex-col items-center">
+              <div className="relative mb-4">
+                <Avatar className="h-24 w-24 border-4 border-white shadow-lg">
+                  <AvatarImage src={user.avatar} />
+                  <AvatarFallback className="bg-slate-100 text-slate-400 text-2xl">
+                    {user.fullName?.charAt(0) || user.name?.charAt(0) || "U"}
+                  </AvatarFallback>
+                </Avatar>
+                <button
+                  onClick={() => setEditOpen(true)}
+                  className="absolute bottom-0 right-0 p-2 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-colors"
+                >
+                  <Pencil className="h-4 w-4" />
+                </button>
+              </div>
+
+              <h2 className="text-xl font-bold text-slate-900">{user.fullName || user.name}</h2>
+              <p className="text-slate-500 mb-4">{user.email}</p>
+
+              <div className="flex gap-2 mb-6">
+                <Badge variant="secondary" className={`px-3 py-1 ${elevateXStatus ? "bg-green-100 text-green-700" : "bg-slate-100 text-slate-600"}`}>
+                  {elevateXStatus ? "ElevateX Active" : "In Free Tier"}
+                </Badge>
+                <Badge variant="outline" className={user.kycStatus === 'verified' ? "text-green-600 border-green-200" : "text-amber-600 border-amber-200"}>
+                  KYC: {user.kycStatus || "Pending"}
+                </Badge>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 w-full">
+                <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 text-center">
+                  <p className="text-xs text-slate-500 mb-1">Joined</p>
+                  <p className="font-semibold text-slate-900">{new Date(user.joined || Date.now()).toLocaleDateString()}</p>
+                </div>
+                <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 text-center">
+                  <p className="text-xs text-slate-500 mb-1">Referral Code</p>
+                  <p className="font-mono font-semibold text-slate-900">{user.referralCode || "---"}</p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Payout & Settings Grid */}
+        <div className="grid gap-4">
+          <Card className="border-slate-100 shadow-sm hover:shadow-md transition-shadow cursor-pointer" onClick={() => setPayoutOpen(true)}>
+            <CardContent className="p-4 flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-indigo-50 text-indigo-600 rounded-xl">
+                  <CreditCard className="h-6 w-6" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-slate-900">Payout Account</h3>
+                  <p className="text-sm text-slate-500">
+                    {user.payoutAccount ? `${user.payoutAccount.bank} ••••${user.payoutAccount.accountNumber.slice(-4)}` : "Not set up"}
+                  </p>
+                </div>
+              </div>
+              <ChevronRight className="h-5 w-5 text-slate-300" />
+            </CardContent>
+          </Card>
+
+          <Card className="border-slate-100 shadow-sm hover:shadow-md transition-shadow cursor-pointer" onClick={copyReferralLink}>
+            <CardContent className="p-4 flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-purple-50 text-purple-600 rounded-xl">
+                  <UserIcon className="h-6 w-6" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-slate-900">Refer & Earn</h3>
+                  <p className="text-sm text-slate-500">Share your link with friends</p>
+                </div>
+              </div>
+              <Copy className="h-5 w-5 text-slate-300" />
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Logout Button */}
+        <Button
+          variant="ghost"
+          className="w-full text-red-600 hover:text-red-700 hover:bg-red-50 py-6"
+          onClick={handleLogout}
+        >
+          <LogOut className="h-5 w-5 mr-2" />
+          Sign Out
+        </Button>
+      </div>
+
+      {/* Edit Profile Dialog */}
+      <Dialog open={editOpen} onOpenChange={setEditOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Profile</DialogTitle>
+            <DialogDescription>Update your personal information</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="fullName">Full Name</Label>
+              <Input
+                id="fullName"
+                value={editForm.fullName}
+                onChange={(e) => setEditForm({ ...editForm, fullName: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="phone">Phone Number</Label>
+              <Input
+                id="phone"
+                value={editForm.phone}
+                onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="avatar">Avatar URL</Label>
+              <Input
+                id="avatar"
+                value={editForm.avatar}
+                onChange={(e) => setEditForm({ ...editForm, avatar: e.target.value })}
+                placeholder="https://..."
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditOpen(false)}>Cancel</Button>
+            <Button onClick={handleEditSubmit} disabled={saving}>
+              {saving ? "Saving..." : "Save Changes"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Payout Modal - Reuse existing component or modernize if needed */}
       <PayoutAccountsModal
         open={payoutOpen}
         onClose={() => setPayoutOpen(false)}
         onSave={handleSavePayoutAccount}
       />
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100">
-        {/* Main Content */}
-        <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-24">
-          <div className="max-w-lg mx-auto space-y-6">
-            {/* Profile Card */}
-            <Card className="bg-white border border-gray-200 shadow-md hover:shadow-lg transition-shadow duration-200">
-              <CardContent className="p-8">
-                <div className="text-center">
-                  <div className="relative inline-block mb-6">
-                    <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-2xl font-bold shadow-lg">
-                      {user?.fullName?.charAt(0)?.toUpperCase() || user?.name?.charAt(0)?.toUpperCase() || "?"}
-                    </div>
-                    <button
-                      className="absolute -bottom-2 -right-2 p-3 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg transition-all duration-200 hover:scale-105"
-                      aria-label="Edit Profile"
-                      title="Edit Profile"
-                      onClick={() => setEditOpen(true)}
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </button>
-                  </div>
-                  <h2 className="text-2xl font-bold text-gray-900 mb-2">{user?.fullName || user?.name || "Unknown User"}</h2>
-                  <p className="text-gray-600 mb-1 text-lg">{user?.email || "No email"}</p>
-                  <p className="text-gray-500 mb-6">{user?.phone || "No phone"}</p>
-
-                  {/* ElevateX Status */}
-                  <div className="flex items-center justify-center gap-3 mb-6">
-                    <span className="text-sm font-medium text-gray-700">ElevateX Status:</span>
-                    <Badge className={`${elevateXStatus ? "bg-green-100 text-green-800 border-green-300 hover:bg-green-200" : "bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200"} px-3 py-1`}>
-                      {elevateXStatus ? "✅ Activated" : "⏸️ Inactive"}
-                    </Badge>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Referral Link */}
-            <Card className="bg-white border border-gray-200 shadow-md hover:shadow-lg transition-shadow duration-200">
-              <CardContent className="p-6">
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-gray-900">Referral Link</h3>
-                  <div className="flex items-center gap-3">
-                    <input
-                      type="text"
-                      value={`${typeof window !== "undefined" ? window.location.origin : ""}/signup?ref=${user?.referralCode || ""}`}
-                      readOnly
-                      placeholder="Referral Link"
-                      className="font-mono text-sm bg-gray-50 px-4 py-3 rounded-lg w-full text-center border border-gray-200 focus:border-blue-500 focus:outline-none"
-                    />
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => {
-                        const link = `${window.location.origin}/signup?ref=${user?.referralCode || ""}`;
-                        navigator.clipboard.writeText(link);
-                        setCopied(true);
-                        setTimeout(() => setCopied(false), 2000);
-                      }}
-                      className={`shrink-0 px-4 py-2 ${copied ? "bg-green-100 text-green-700 border-green-300" : "hover:bg-gray-50"}`}
-                    >
-                      {copied ? "✅ Copied!" : "📋 Copy"}
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Payout Account */}
-            <Card className="bg-white border border-gray-200 shadow-md hover:shadow-lg transition-shadow duration-200">
-              <CardHeader className="pb-4">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-xl font-semibold text-gray-900">Payout Account</CardTitle>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => setPayoutOpen(true)}
-                    className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-200"
-                  >
-                    <Pencil className="h-4 w-4 mr-2" />
-                    {user?.payoutAccount ? "Edit" : "Add"}
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                {user?.payoutAccount ? (
-                  <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg p-6 border border-gray-200">
-                    <div className="grid grid-cols-1 gap-4">
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm font-medium text-gray-600">Bank:</span>
-                        <span className="text-sm font-semibold text-gray-900">{user?.payoutAccount?.bank || "N/A"}</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm font-medium text-gray-600">Account Number:</span>
-                        <span className="text-sm font-mono font-semibold text-gray-900">{user?.payoutAccount?.accountNumber || "N/A"}</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm font-medium text-gray-600">Account Name:</span>
-                        <span className="text-sm font-semibold text-gray-900">{user?.payoutAccount?.accountName || "N/A"}</span>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
-                        <span className="text-yellow-600 text-sm">⚠️</span>
-                      </div>
-                      <div>
-                        <p className="text-yellow-800 font-medium">No payout account added</p>
-                        <p className="text-yellow-700 text-sm">Add your bank details for withdrawals</p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Action Buttons */}
-            <div className="space-y-4">
-              <Button
-                className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
-                onClick={() => router.push("/kyc")}
-              >
-                <span className="mr-3">KYC Verification</span>
-                <Badge className={`px-2 py-1 ${user?.kycStatus === "verified" ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"}`}>
-                  {user?.kycStatus === "verified" ? "✅ Verified" : "⏳ Pending"}
-                </Badge>
-                <ChevronRight className="h-5 w-5 ml-auto" />
-              </Button>
-
-              <Button
-                variant="outline"
-                className="w-full border-2 border-gray-300 hover:bg-gray-50 hover:border-gray-400 text-gray-700 font-semibold py-4 rounded-xl transition-all duration-200"
-                onClick={() => router.push("/settings")}
-              >
-                <span className="mr-3">Account Settings</span>
-                <ChevronRight className="h-5 w-5 ml-auto" />
-              </Button>
-
-              <Button
-                variant="outline"
-                className="w-full border-2 border-red-300 text-red-600 hover:bg-red-50 hover:border-red-400 font-semibold py-4 rounded-xl transition-all duration-200"
-                onClick={handleLogout}
-              >
-                <span className="mr-3">Sign Out</span>
-                <ArrowLeft className="h-5 w-5 ml-auto rotate-180" />
-              </Button>
-            </div>
-          </div>
-        </main>
-      </div>
-    </>
+    </div>
   );
 }
+
+
+

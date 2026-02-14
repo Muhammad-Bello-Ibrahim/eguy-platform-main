@@ -1,94 +1,76 @@
 "use client"
 import { SignupForm } from "@/components/auth/signup-form"
 import Link from "next/link"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, Rocket } from "lucide-react"
 
 export default function SignupPage() {
   return (
-    <div className="min-h-screen w-full flex bg-gray-50">
-      {/* Left side - Large Typography Design */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gray-50 p-8 relative">
-        {/* Animated background patterns */}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_40%,_rgba(16,185,129,0.03),transparent_50%)]"></div>
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_60%,_rgba(52,211,153,0.03),transparent_50%)]"></div>
+    <div className="min-h-screen w-full flex bg-background">
+      {/* Left side - Visual & Brand */}
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-zinc-900 text-white p-12 flex-col justify-between">
+        {/* Animated Background */}
+        <div className="absolute inset-0 z-0">
+          <div className="absolute top-[-20%] right-[-20%] w-[70%] h-[70%] rounded-full bg-gradient-to-bl from-emerald-500/20 to-teal-500/20 blur-[120px] animate-pulse" />
+          <div className="absolute bottom-[-20%] left-[-20%] w-[70%] h-[70%] rounded-full bg-gradient-to-tr from-cyan-500/20 to-blue-500/20 blur-[120px] animate-pulse delay-1000" />
+          <div className="absolute top-[30%] left-[30%] w-[40%] h-[40%] rounded-full bg-white/5 blur-[80px]" />
+        </div>
 
-        {/* Floating orbs */}
-        <div className="absolute top-16 left-16 w-32 h-32 bg-gradient-to-r from-emerald-400 to-teal-400 rounded-full blur-3xl opacity-20 animate-pulse"></div>
-        <div className="absolute top-32 right-32 w-24 h-24 bg-gradient-to-r from-cyan-400 to-emerald-400 rounded-full blur-3xl opacity-20 animate-pulse delay-1000"></div>
-        <div className="absolute bottom-32 left-1/4 w-40 h-40 bg-gradient-to-r from-teal-400 to-cyan-400 rounded-full blur-3xl opacity-15 animate-pulse delay-500"></div>
-
-        <div className="relative z-10 w-full h-full flex flex-col justify-center">
-          <div className="space-y-8">
-            {/* Main headline */}
-            <div className="space-y-4">
-              <h1 className="text-6xl md:text-7xl font-black text-gray-900 leading-tight">
-                <span className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 bg-clip-text text-transparent">
-                  Join
-                </span>
-                <br />
-                <span className="bg-gradient-to-r from-teal-600 via-cyan-600 to-emerald-600 bg-clip-text text-transparent">
-                  Today
-                </span>
-              </h1>
-              <p className="text-xl md:text-2xl text-gray-600 font-light leading-relaxed max-w-lg">
-                Start your financial transformation. Experience next-generation banking with cutting-edge technology and personalized insights.
-              </p>
+        {/* Content */}
+        <div className="relative z-10">
+          <Link href="/" className="flex items-center gap-2 text-white/80 hover:text-white transition-colors w-fit">
+            <div className="w-8 h-8 rounded-lg bg-white/10 backdrop-blur border border-white/20 flex items-center justify-center">
+              <span className="font-bold">eG</span>
             </div>
+            <span className="font-medium tracking-tight">eGuy Platform</span>
+          </Link>
+        </div>
 
-            {/* Feature highlights */}
-            <div className="space-y-6">
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full flex items-center justify-center flex-shrink-0">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                  </svg>
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-1">Earn Rewards</h3>
-                  <p className="text-gray-600 text-sm leading-relaxed">
-                    Get paid for referrals and unlock exclusive bonuses as you grow
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 bg-gradient-to-r from-teal-500 to-cyan-500 rounded-full flex items-center justify-center flex-shrink-0">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-1">Quick Setup</h3>
-                  <p className="text-gray-600 text-sm leading-relaxed">
-                    Get started in minutes with our streamlined registration process
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 bg-gradient-to-r from-cyan-500 to-emerald-500 rounded-full flex items-center justify-center flex-shrink-0">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-1">Lightning Fast</h3>
-                  <p className="text-gray-600 text-sm leading-relaxed">
-                    Experience blazing-fast transactions and instant notifications
-                  </p>
-                </div>
-              </div>
-            </div>
+        <div className="relative z-10 max-w-lg">
+          <div className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-sm text-emerald-200 mb-6 backdrop-blur-sm">
+            <Rocket className="mr-2 h-3.5 w-3.5" />
+            <span className="font-medium">Start Your Journey</span>
           </div>
+          <h1 className="text-5xl font-bold tracking-tight mb-6 leading-tight">
+            Join the future of <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">digital banking</span>.
+          </h1>
+          <p className="text-lg text-zinc-400 leading-relaxed">
+            Create an account in minutes. Enjoy zero fees, instant transfers, and rewards that grow with you.
+          </p>
+        </div>
+
+        <div className="relative z-10 flex items-center gap-4 text-sm text-zinc-500">
+          <p>© 2026 eGuy Platform</p>
+          <span className="w-1 h-1 rounded-full bg-zinc-700" />
+          <Link href="#" className="hover:text-zinc-300 transition-colors">Privacy</Link>
+          <span className="w-1 h-1 rounded-full bg-zinc-700" />
+          <Link href="#" className="hover:text-zinc-300 transition-colors">Terms</Link>
         </div>
       </div>
 
-      {/* Right side - Form */}
-      <div className="w-full lg:w-1/2 flex flex-col">
-        <div className="flex-1 flex items-center justify-center p-8">
-          <div className="w-full max-w-md">
-            <SignupForm />
+      {/* Right side - Signup Form */}
+      <div className="w-full lg:w-1/2 flex flex-col justify-center items-center p-6 lg:p-12 relative bg-white/50 backdrop-blur-3xl overflow-y-auto">
+        {/* Mobile Header / Brand */}
+        <div className="w-full max-w-md mb-8 lg:hidden flex justify-between items-center">
+          <Link href="/" className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-bold border border-primary/20">
+              eG
+            </div>
+            <span className="font-semibold text-zinc-900">eGuy</span>
+          </Link>
+        </div>
+
+        <div className="w-full max-w-[400px] space-y-6">
+          <div className="space-y-2 text-center lg:text-left">
+            <h2 className="text-3xl font-bold tracking-tight text-zinc-900">Create account</h2>
+            <p className="text-zinc-500">
+              Already have an account?{" "}
+              <Link href="/signin" className="font-medium text-primary hover:text-primary/80 transition-colors underline-offset-4 hover:underline">
+                Sign in instead
+              </Link>
+            </p>
           </div>
+
+          <SignupForm />
         </div>
       </div>
     </div>

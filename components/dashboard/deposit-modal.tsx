@@ -1,16 +1,14 @@
 "use client"
-import { Plus, Wallet } from "lucide-react"
-
 import type React from "react"
-
 import { useState } from "react"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Loader2, CreditCard } from "lucide-react"
+import { Loader2, Wallet, CreditCard, Banknote, Smartphone } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { cn } from "@/lib/utils"
 
 interface DepositModalProps {
   isOpen: boolean
@@ -50,7 +48,6 @@ export function DepositModal({ isOpen, onClose, onSuccess }: DepositModalProps) 
 
       const data = await response.json();
       if (data.authorization_url) {
-        // Redirect to Paystack
         window.location.href = data.authorization_url;
       } else {
         throw new Error("Could not get payment link.");
@@ -61,75 +58,102 @@ export function DepositModal({ isOpen, onClose, onSuccess }: DepositModalProps) 
     }
   }
 
+  const quickAmounts = [500, 1000, 2000, 5000];
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md bg-white border border-gray-200 shadow-lg">
-        <DialogHeader className="pb-4">
-          <DialogTitle className="flex items-center gap-3 text-xl font-bold text-gray-900">
-            <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-              <Wallet className="w-5 h-5 text-green-600" />
-            </div>
-            Fund Wallet
+      <DialogContent className="sm:max-w-[425px] overflow-hidden">
+        <DialogHeader className="flex flex-col items-center justify-center text-center pb-2">
+          <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mb-4 ring-8 ring-emerald-50/50">
+            <Wallet className="w-8 h-8 text-emerald-600" />
+          </div>
+          <DialogTitle className="text-2xl font-bold bg-gradient-to-br from-gray-900 to-gray-600 bg-clip-text text-transparent">
+            Fund Your Wallet
           </DialogTitle>
-          <DialogDescription className="text-gray-600">
-            Add money to your eGuy wallet using your debit card or bank transfer
+          <DialogDescription className="text-gray-500 text-base max-w-[280px] mx-auto">
+            Securely add money via Bank Transfer or Card
           </DialogDescription>
         </DialogHeader>
 
-        <form className="space-y-6" onSubmit={handleSubmit}>
+        <form className="space-y-6 pt-2" onSubmit={handleSubmit}>
           {error && (
-            <Alert variant="destructive" className="rounded-lg border-red-200 bg-red-50">
-              <AlertDescription className="font-medium text-red-800">{error}</AlertDescription>
+            <Alert variant="destructive" className="rounded-2xl border-red-100 bg-red-50/50">
+              <AlertDescription className="font-medium text-red-700 text-center">{error}</AlertDescription>
             </Alert>
           )}
 
           <div className="space-y-3">
-            <Label htmlFor="amount" className="text-sm font-semibold text-gray-900">Amount (₦)</Label>
-            <div className="flex items-center gap-3 bg-gray-50 rounded-xl px-4 py-3 border border-gray-200">
-              <Plus className="text-green-600 w-5 h-5" />
+            <Label htmlFor="amount" className="text-sm font-semibold text-gray-700 ml-1">
+              Enter Amount
+            </Label>
+            <div className="relative">
+              <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-medium text-lg">₦</div>
               <Input
                 id="amount"
                 type="number"
-                placeholder="Enter amount"
+                placeholder="0.00"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 min={100}
                 step={100}
                 required
-                className="bg-transparent outline-none w-full text-lg font-semibold placeholder:text-gray-400"
+                className="pl-10 h-14 rounded-2xl text-lg font-bold bg-gray-50/50 border-gray-200 focus:bg-white transition-all shadow-sm"
               />
             </div>
-            <p className="text-xs text-gray-600">Minimum deposit: ₦100</p>
-          </div>
 
-          <div className="bg-gray-50 p-4 rounded-xl space-y-2 border border-gray-200">
-            <h4 className="font-semibold text-sm text-gray-900">Supported Payment Methods</h4>
-            <div className="space-y-1 text-xs text-gray-600">
-              <div className="flex items-center gap-2">
-                <CreditCard className="w-3 h-3" />
-                <span>Debit/Credit Cards (Visa, Mastercard)</span>
-              </div>
-              <p>• Bank Transfer</p>
-              <p>• USSD (*737#)</p>
+            <div className="flex gap-2 flex-wrap justify-center mt-2">
+              {quickAmounts.map((amt) => (
+                <button
+                  key={amt}
+                  type="button"
+                  onClick={() => setAmount(amt.toString())}
+                  className={cn(
+                    "px-3 py-1.5 rounded-full text-xs font-semibold border transition-all",
+                    amount === amt.toString()
+                      ? "bg-emerald-600 border-emerald-600 text-white shadow-md shadow-emerald-200"
+                      : "bg-white border-gray-200 text-gray-600 hover:border-emerald-300 hover:text-emerald-600"
+                  )}
+                >
+                  ₦{amt.toLocaleString()}
+                </button>
+              ))}
             </div>
           </div>
 
-          <div className="flex gap-3 pt-2">
-            <Button
-              type="submit"
-              disabled={isLoading}
-              className="flex-1 rounded-xl bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold text-lg shadow-lg hover:shadow-green-500/25 transition-all duration-200 border-0"
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Processing...
-                </>
-              ) : (
-                "Fund Wallet"
-              )}
-            </Button>
+          <div className="space-y-3">
+            <Label className="text-xs font-semibold text-gray-500 uppercase tracking-wider ml-1">
+              Supported Methods
+            </Label>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100">
+                <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                  <CreditCard className="w-4 h-4 text-blue-600" />
+                </div>
+                <span className="text-xs font-medium text-gray-700">Cards</span>
+              </div>
+              <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100">
+                <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
+                  <Banknote className="w-4 h-4 text-purple-600" />
+                </div>
+                <span className="text-xs font-medium text-gray-700">Transfers</span>
+              </div>
+            </div>
           </div>
+
+          <Button
+            type="submit"
+            disabled={isLoading}
+            className="w-full h-12 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-lg shadow-xl shadow-emerald-200 transition-all duration-200"
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                Processing...
+              </>
+            ) : (
+              "Proceed to Payment"
+            )}
+          </Button>
         </form>
       </DialogContent>
     </Dialog>

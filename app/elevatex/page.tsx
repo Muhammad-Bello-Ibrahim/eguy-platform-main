@@ -1,12 +1,19 @@
 "use client";
+
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
+import {
+	TrendingUp, Users, Zap, Wallet, ArrowRight, Copy, CheckCircle2,
+	AlertCircle, ArrowUpRight, ArrowDownLeft, Layers, Crown, Sparkles
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { DepositModal } from "@/components/dashboard/deposit-modal";
 import { WithdrawModal } from "@/components/dashboard/withdraw-modal";
-import { Users, TrendingUp, Zap, ArrowLeft } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useToast } from "@/components/ui/use-toast";
+import { Progress } from "@/components/ui/progress";
 
 // Format time to 12-hour
 function format12Hour(timeStr: string) {
@@ -20,68 +27,101 @@ function format12Hour(timeStr: string) {
 
 // Format date to ddmmyy
 function formatDDMMYY(dateStr: string) {
-	// Accepts yyyy-mm-dd or yyyy-mm-ddTHH:MM:SS
 	const d = new Date(dateStr);
 	const day = String(d.getDate()).padStart(2, "0");
 	const month = String(d.getMonth() + 1).padStart(2, "0");
 	const year = String(d.getFullYear()).slice(-2);
-	return `${day}${month}${year}`;
+	return `${day}/${month}/${year}`;
 }
+
+const formatCurrency = (amount: number) => {
+	return new Intl.NumberFormat('en-NG', {
+		style: 'currency',
+		currency: 'NGN',
+		minimumFractionDigits: 0,
+		maximumFractionDigits: 0,
+	}).format(amount);
+};
 
 export default function ElevatexPage() {
 	const router = useRouter();
-	// ...existing code...
-	const [earningHistory, setEarningHistory] = useState<any[]>([]);
+	const { toast } = useToast();
+	const [balance, setBalance] = useState<number>(0);
 	const [earnings, setEarnings] = useState<number>(0);
+	const [isLoading, setIsLoading] = useState(true);
 	const [subscribed, setSubscribed] = useState(false);
-	const [treeComplete, setTreeComplete] = useState(false);
+	const [referralCode, setReferralCode] = useState<string>("");
+	const [activating, setActivating] = useState(false);
+	const [showDeposit, setShowDeposit] = useState(false);
+	const [showWithdraw, setShowWithdraw] = useState(false);
 
+	// ElevateX specific data
 	const [elevatexTransactions, setElevatexTransactions] = useState<any[]>([]);
 	const [transactionsLoading, setTransactionsLoading] = useState(false);
+	const [referralTree, setReferralTree] = useState<any[]>([]);
+	const [referralsPerLevel, setReferralsPerLevel] = useState<number[]>([0, 0, 0, 0, 0]);
+	const [progressPercent, setProgressPercent] = useState(0);
 
-	// Calculate net earnings from transactions
-	const getNetEarnings = () => {
-		const earnings = elevatexTransactions
-			.filter((tx: any) => tx.type === 'earning' || tx.type === 'referral_bonus')
-			.reduce((sum: number, tx: any) => sum + (tx.amount || 0), 0);
+	const referralLink = referralCode ? `${window.location.origin}/signup?ref=${referralCode}` : "";
+	const [copied, setCopied] = useState(false);
 
-		const expenses = elevatexTransactions
-			.filter((tx: any) => tx.type === 'activation' || tx.type === 'withdrawal')
-			.reduce((sum: number, tx: any) => sum + Math.abs(tx.amount || 0), 0);
-
-		return earnings - expenses;
+	const handleCopyReferral = () => {
+		navigator.clipboard.writeText(referralLink);
+		setCopied(true);
+		toast({ title: "Copied!", description: "Referral link copied to clipboard" });
+		setTimeout(() => setCopied(false), 2000);
 	};
 
-	// Fetch all ElevateX-related transactions
+	const fetchWalletBalance = async () => {
+		try {
+			const res = await fetch("/api/wallet/balance");
+			const data = await res.json();
+			if (typeof data.balance === "number") {
+				setBalance(data.balance);
+			}
+		} catch (error) {
+			console.error("Failed to fetch balance", error);
+		}
+	};
+
+	useEffect(() => {
+		const init = async () => {
+			await fetchWalletBalance();
+			// Fetch user status
+			try {
+				const res = await fetch("/api/user");
+				const data = await res.json();
+				if (data.user) {
+					setSubscribed(!!data.user.elevatexActivated);
+					if (data.user.referralCode) setReferralCode(data.user.referralCode);
+				}
+			} catch (error) {
+				console.error("Failed to fetch user", error);
+			} finally {
+				setIsLoading(false);
+			}
+		};
+		init();
+	}, []);
+
+	// Fetch ElevateX data when subscribed
 	useEffect(() => {
 		if (subscribed) {
+			// Transactions
 			setTransactionsLoading(true);
 			fetch("/api/elevatex/transactions")
 				.then((res) => res.json())
 				.then((data) => {
 					setElevatexTransactions(data.transactions || []);
 				})
-				.catch((error) => {
-					console.error("Failed to fetch ElevateX transactions:", error);
-				})
-				.finally(() => {
-					setTransactionsLoading(false);
-				});
-		}
-	}, [subscribed]);
-	const [referralTree, setReferralTree] = useState<any[]>([]);
-	const [referralsPerLevel, setReferralsPerLevel] = useState<number[]>([0, 0, 0, 0, 0]);
-	const [progressPercent, setProgressPercent] = useState(0);
+				.catch((error) => console.error("Failed to fetch ElevateX transactions:", error))
+				.finally(() => setTransactionsLoading(false));
 
-
-	// Fetch referral tree for progress bar
-	useEffect(() => {
-		if (subscribed) {
+			// Referrals
 			fetch("/api/elevatex/referrals")
 				.then((res) => res.json())
 				.then((data) => {
 					setReferralTree(data.referralTree || []);
-					// Calculate referrals per level
 					let perLevel = [0, 0, 0, 0, 0];
 					let current = data.referralTree;
 					for (let i = 0; i < 5; i++) {
@@ -93,393 +133,319 @@ export default function ElevatexPage() {
 						}
 					}
 					setReferralsPerLevel(perLevel);
-					// Calculate progress percent based on total referrals
 					let totalReferrals = perLevel.reduce((sum, n) => sum + n, 0);
-					let percent = Math.min((totalReferrals / (5 * 5)) * 100, 100); // 5 levels, 5 per level
+					let percent = Math.min((totalReferrals / (5 * 5)) * 100, 100);
 					setProgressPercent(percent);
-				});
+				})
+				.catch((error) => console.error("Failed to fetch referrals:", error));
 		}
 	}, [subscribed]);
-	const [showDeposit, setShowDeposit] = useState(false);
-	const [showWithdraw, setShowWithdraw] = useState(false);
-	// Mock user and tree data for UI demonstration
 
-	// ...existing code...
-	const [directReferrals, setDirectReferrals] = useState([
-		{ name: "User 1", level: 1, spillover: false },
-		{ name: "User 2", level: 1, spillover: false },
-		{ name: "User 3", level: 1, spillover: true },
-		{ name: "User 4", level: 1, spillover: false },
-		{ name: "User 5", level: 1, spillover: false },
-	]);
-
-	const [balance, setBalance] = useState<number>(0);
-	const [isLoading, setIsLoading] = useState(true);
-	const [referralCode, setReferralCode] = useState<string>("");
-	const [activating, setActivating] = useState(false);
-	const referralLink = referralCode ? `https://eguy.app/signup?ref=${referralCode}` : "";
-	const [copied, setCopied] = useState(false);
-	const handleCopyReferral = () => {
-		navigator.clipboard.writeText(referralLink);
-		setCopied(true);
-		setTimeout(() => setCopied(false), 2000);
-	};
-
+	// Calculate dynamic earnings
 	useEffect(() => {
-		fetch("/api/wallet/balance")
-			.then((res) => res.json())
-			.then((data) => {
-				if (typeof data.balance === "number") {
-					setBalance(data.balance);
-				}
-			})
-			.finally(() => setIsLoading(false));
-		// Fetch referral code and activation status
-		fetch("/api/user")
-			.then((res) => res.json())
-			.then((data) => {
-				if (data.user) {
-					setSubscribed(!!data.user.elevatexActivated);
-					if (data.user.referralCode) setReferralCode(data.user.referralCode);
-				}
-			});
-	}, []);
+		if (elevatexTransactions.length > 0) {
+			const totalEarnings = elevatexTransactions
+				.filter((tx: any) => tx.type === 'earning' || tx.type === 'referral_bonus')
+				.reduce((sum: number, tx: any) => sum + (tx.amount || 0), 0);
+			setEarnings(totalEarnings);
+		}
+	}, [elevatexTransactions]);
 
 	const handleActivateElevatex = async () => {
 		setActivating(true);
-		const res = await fetch("/api/elevatex/activate", { method: "POST" });
-		const data = await res.json();
-		if (data.success) {
-			setSubscribed(true);
-			setReferralCode(data.referralCode);
-			// Refresh balance after activation
-			fetch("/api/wallet/balance")
-				.then((res) => res.json())
-				.then((data) => {
-					if (typeof data.balance === "number") {
-						setBalance(data.balance);
-					}
-				});
-		} else {
-			alert(data.error || "Activation failed");
+		try {
+			const res = await fetch("/api/elevatex/activate", { method: "POST" });
+			const data = await res.json();
+			if (data.success) {
+				setSubscribed(true);
+				setReferralCode(data.referralCode);
+				await fetchWalletBalance();
+				toast({ title: "Success!", description: "Welcome to ElevateX!" });
+			} else {
+				toast({ title: "Activation Failed", description: data.error || "Could not activate ElevateX", variant: "destructive" });
+			}
+		} catch (error) {
+			toast({ title: "Error", description: "Something went wrong", variant: "destructive" });
+		} finally {
+			setActivating(false);
 		}
-		setActivating(false);
 	}
 
 	if (isLoading) {
 		return (
-			<div className="min-h-screen bg-gray-50 flex items-center justify-center">
-				<div className="text-center">
-					<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-					<p className="text-gray-600">Loading ElevateX...</p>
+			<div className="min-h-screen bg-slate-50 flex items-center justify-center">
+				<div className="flex flex-col items-center gap-4">
+					<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+					<p className="text-slate-500 font-medium">Loading ElevateX...</p>
 				</div>
 			</div>
 		);
 	}
 
 	return (
-		<div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
-			{/* Main Content */}
-			<main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-24">
-				{/* Wallet Card - Updated theme */}
-				<Card className="bg-gradient-to-r from-blue-500 to-purple-600 border-none rounded-2xl p-6 mb-6 max-w-md mx-auto">
-					<div className="flex flex-col gap-4">
-						<div className="flex items-center justify-between">
-							<span className="text-lg font-semibold text-white tracking-wide">Balance</span>
-						</div>
-						<div className="flex items-center justify-between">
-							<div className="text-3xl md:text-4xl font-extrabold tracking-tight text-white">
-								₦{balance.toLocaleString()}
+		<div className="min-h-screen bg-slate-50/50 pb-20">
+			{/* Hero Section */}
+			<div className="bg-gradient-to-br from-indigo-900 via-purple-900 to-indigo-800 text-white pb-32 pt-12 px-4 relative overflow-hidden">
+				<div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
+					<div className="absolute top-10 left-10 w-64 h-64 bg-purple-500 rounded-full blur-3xl"></div>
+					<div className="absolute bottom-10 right-10 w-96 h-96 bg-indigo-500 rounded-full blur-3xl"></div>
+				</div>
+
+				<div className="container max-w-5xl mx-auto relative z-10">
+					<div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
+						<div>
+							<div className="flex items-center gap-2 mb-2">
+								<Badge className="bg-white/10 hover:bg-white/20 text-white border-0 backdrop-blur-md">
+									<Sparkles className="w-3 h-3 mr-1 text-yellow-400" /> 2026 Edition
+								</Badge>
 							</div>
+							<h1 className="text-3xl md:text-5xl font-bold mb-2 tracking-tight">
+								Elevate<span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-400">X</span>
+							</h1>
+							<p className="text-indigo-200 text-lg max-w-lg">
+								Unlock exponential growth with our advanced referral system. Join the elite network today.
+							</p>
 						</div>
+
 						{subscribed && (
-							<div className="bg-white/20 rounded-xl px-3 py-2">
-								<div className="text-sm font-medium text-white/80 mb-1">ElevateX Earnings</div>
-								<div className="text-xl font-bold text-white">₦{earnings.toLocaleString()}</div>
-							</div>
-						)}
-						{!subscribed ? (
-							<Button
-								className="w-full mt-4 bg-white text-blue-600 hover:bg-slate-100 font-semibold"
-								onClick={handleActivateElevatex}
-								disabled={activating || balance < 1000}
-							>
-								{activating ? "Activating..." : "Activate ElevateX"}
-							</Button>
-						) : (
-							<div className="grid grid-cols-2 gap-3 mt-4">
-								<Button
-									className="bg-white/20 hover:bg-white/30 text-white border border-white/30 rounded-xl py-3 font-semibold"
-									onClick={() => setShowDeposit(true)}
-								>
-									<span>Add Funds</span>
-								</Button>
-								<Button
-									className="bg-white/20 hover:bg-white/30 text-white border border-white/30 rounded-xl py-3 font-semibold"
-									onClick={() => setShowWithdraw(true)}
-								>
-									<span>Withdraw</span>
-								</Button>
+							<div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl p-4 flex items-center gap-4 min-w-[200px]">
+								<div className="p-3 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-xl shadow-lg">
+									<Crown className="w-6 h-6 text-white" />
+								</div>
+								<div>
+									<p className="text-xs text-indigo-200 uppercase tracking-wider font-medium">Current Status</p>
+									<p className="text-xl font-bold">Active Member</p>
+								</div>
 							</div>
 						)}
 					</div>
-					{/* Deposit Modal */}
-					<DepositModal
-						isOpen={showDeposit}
-						onClose={() => setShowDeposit(false)}
-						onSuccess={() => {
-							setShowDeposit(false);
-							// Refresh balance after deposit
-							fetch("/api/wallet/balance")
-								.then((res) => res.json())
-								.then((data) => {
-									if (typeof data.balance === "number") {
-										setBalance(data.balance);
-									}
-								});
-						}}
-					/>
-					{/* Withdraw Modal */}
-					<WithdrawModal
-						isOpen={showWithdraw}
-						onClose={() => setShowWithdraw(false)}
-						onSuccess={() => {
-							setShowWithdraw(false);
-							// Refresh balance after withdrawal
-							fetch("/api/wallet/balance")
-								.then((res) => res.json())
-								.then((data) => {
-									if (typeof data.balance === "number") {
-										setBalance(data.balance);
-									}
-								});
-						}}
-					/>
-				</Card>
+				</div>
+			</div>
 
-				{/* Tree Levels - Single Horizontal Bar for All Levels */}
-				<Card className="bg-white/80 backdrop-blur-sm border-slate-200 shadow-lg mb-6 max-w-md mx-auto">
-					<CardHeader className="pb-3">
-						<CardTitle className="flex items-center gap-2 text-slate-900">
-							<Users className="w-5 h-5" />
-							Referral Progress
-						</CardTitle>
-					</CardHeader>
-					<CardContent className="pt-0">
-						{/* Icons above each segment */}
-						<div className="flex w-full justify-between mb-2 px-1">
-							{[1, 2, 3, 4, 5].map((level) => {
-								// Mock progress for each level
-								const referralCount = [5, 10, 25, 50, 100][level - 1];
-								const userCount = Math.min(referralCount, level === 1 ? directReferrals.length : referralCount);
-								const iconColor = userCount === referralCount ? "text-green-600" : "text-gray-400";
-								return (
-									<div key={level} className="flex flex-col items-center w-1/5">
-										<Users className={`h-6 w-6 ${iconColor}`} />
-									</div>
-								);
-							})}
-						</div>
-						{/* Single horizontal progress bar divided into 5 segments */}
-						{/* Progress bar with proportional logic */}
-						<div className="w-full h-3 bg-slate-200 rounded-full flex overflow-hidden relative mb-2">
-							{/* Filled bar proportional to total referrals */}
-							<div className="absolute top-0 left-0 h-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full" style={{ width: `${progressPercent}%` }}></div>
-							{/* Segments for each level */}
-							{[1, 2, 3, 4, 5].map((level, idx) => (
-								<div
-									key={level}
-									className="h-3"
-									style={{ width: "20%", background: "transparent" }}
-								></div>
-							))}
-						</div>
-						{/* Points for referrals in incomplete levels */}
-						<div className="w-full flex justify-between mt-1 px-1 mb-2">
-							{[1, 2, 3, 4, 5].map((level, idx) => (
-								<span key={level} className="w-1/5 flex justify-center">
-									{referralsPerLevel[idx] > 0 && referralsPerLevel[idx] < 5 && (
-										<span className="inline-block w-2 h-2 bg-yellow-400 rounded-full"></span>
-									)}
-								</span>
-							))}
-						</div>
-						{/* Level names below each segment */}
-						<div className="flex w-full justify-between px-1">
-							{[1, 2, 3, 4, 5].map((level) => (
-								<span key={level} className="text-xs font-semibold text-slate-600 w-1/5 text-center">Level {level}</span>
-							))}
-						</div>
-					</CardContent>
-				</Card>
+			<div className="container max-w-5xl mx-auto px-4 -mt-24 relative z-20 space-y-6">
 
-				{/* Referral Link - single row with copy icon */}
-				{subscribed && referralCode && (
-					<Card className="bg-white/80 backdrop-blur-sm border-slate-200 shadow-lg mb-6 max-w-md mx-auto">
-						<CardContent className="p-4">
-							<div className="flex items-center gap-2">
-								<span className="font-mono text-sm flex-1 bg-slate-50 px-3 py-2 rounded-lg">{referralLink}</span>
-								<Button size="sm" variant="outline" onClick={handleCopyReferral} className="shrink-0">
-									{copied ? "Copied!" : "Copy"}
-								</Button>
-							</div>
-						</CardContent>
-					</Card>
-				)}
+				{/* Main Action Card */}
+				<motion.div
+					initial={{ opacity: 0, y: 20 }}
+					animate={{ opacity: 1, y: 0 }}
+					transition={{ duration: 0.5 }}
+				>
+					<Card className="border-0 shadow-xl overflow-hidden bg-white">
+						<CardContent className="p-0">
+							<div className="grid md:grid-cols-2">
+								<div className="p-8 bg-gradient-to-br from-indigo-50 to-white">
+									<div className="flex items-center gap-3 mb-6">
+										<div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600">
+											<Wallet className="w-5 h-5" />
+										</div>
+										<div>
+											<p className="text-sm font-medium text-slate-500">Wallet Balance</p>
+											<h3 className="text-2xl font-bold text-slate-900">{formatCurrency(balance)}</h3>
+										</div>
+									</div>
 
-				{/* All ElevateX Transactions */}
-				<Card className="bg-white/80 backdrop-blur-sm border-slate-200 shadow-lg max-w-4xl mx-auto">
-					<CardHeader className="pb-3">
-						<CardTitle className="flex items-center gap-2 text-slate-900">
-							<Zap className="w-5 h-5" />
-							All ElevateX Transactions
-						</CardTitle>
-					</CardHeader>
-					<CardContent className="pt-0">
-						{transactionsLoading ? (
-							<div className="text-center py-8">
-								<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-								<p className="text-slate-600">Loading transactions...</p>
-							</div>
-						) : elevatexTransactions.length === 0 ? (
-							<div className="text-center py-8 text-slate-500">
-								<p>No ElevateX transactions yet.</p>
-								<p className="text-sm mt-2">All your ElevateX-related transactions will appear here.</p>
-							</div>
-						) : (
-							<div className="space-y-3">
-								{/* Transaction Summary */}
-								<div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 p-4 bg-slate-50 rounded-lg">
-									<div className="text-center">
-										<div className="text-xl font-bold text-blue-600">{elevatexTransactions.length}</div>
-										<div className="text-sm text-slate-600">Total Transactions</div>
-									</div>
-									<div className="text-center">
-										<div className="text-xl font-bold text-green-600">
-											₦{elevatexTransactions
-												.filter((tx: any) => tx.type === 'earning' || tx.type === 'referral_bonus')
-												.reduce((sum: number, tx: any) => sum + (tx.amount || 0), 0)
-												.toLocaleString()}
-										</div>
-										<div className="text-sm text-slate-600">Total Earnings</div>
-									</div>
-									<div className="text-center">
-										<div className="text-xl font-bold text-red-600">
-											₦{elevatexTransactions
-												.filter((tx: any) => tx.type === 'activation' || tx.type === 'withdrawal')
-												.reduce((sum: number, tx: any) => sum + Math.abs(tx.amount || 0), 0)
-												.toLocaleString()}
-										</div>
-										<div className="text-sm text-slate-600">Total Spent</div>
-									</div>
-									<div className="text-center">
-										<div className={`text-xl font-bold ${getNetEarnings() >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-											₦{Math.abs(getNetEarnings()).toLocaleString()}
-										</div>
-										<div className="text-sm text-slate-600">Net {getNetEarnings() >= 0 ? 'Profit' : 'Loss'}</div>
+									<div className="space-y-3">
+										<Button
+											className="w-full bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-200"
+											onClick={() => setShowDeposit(true)}
+											size="lg"
+										>
+											<ArrowDownLeft className="w-4 h-4 mr-2" /> Add Funds
+										</Button>
+										<Button
+											variant="outline"
+											className="w-full border-indigo-200 text-indigo-700 hover:bg-indigo-50"
+											onClick={() => setShowWithdraw(true)}
+											size="lg"
+										>
+											<ArrowUpRight className="w-4 h-4 mr-2" /> Withdraw
+										</Button>
 									</div>
 								</div>
 
-								{/* Transaction List */}
-								{elevatexTransactions
-									.sort((a: any, b: any) => new Date(b.createdAt || b.date).getTime() - new Date(a.createdAt || a.date).getTime())
-									.map((tx: any, idx: number) => (
-									<div key={idx} className="group bg-white hover:bg-slate-50 rounded-lg p-4 border border-slate-200 hover:border-slate-300 transition-all duration-200">
-										<div className="flex items-center justify-between">
-											<div className="flex items-center gap-3">
-												{/* Transaction type icon */}
-												<div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-													tx.type === 'earning' || tx.type === 'referral_bonus'
-														? 'bg-green-100'
-														: tx.type === 'activation'
-														? 'bg-blue-100'
-														: 'bg-orange-100'
-												}`}>
-													{tx.type === 'earning' || tx.type === 'referral_bonus' ? (
-														<TrendingUp className="w-5 h-5 text-green-600" />
-													) : tx.type === 'activation' ? (
-														<Zap className="w-5 h-5 text-blue-600" />
-													) : (
-														<ArrowLeft className="w-5 h-5 text-orange-600" />
-													)}
+								<div className="p-8 bg-slate-50 border-t md:border-t-0 md:border-l border-slate-100 flex flex-col justify-center">
+									{!subscribed ? (
+										<div className="text-center">
+											<div className="mx-auto w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mb-4">
+												<Zap className="w-8 h-8 text-yellow-600" />
+											</div>
+											<h3 className="text-xl font-bold text-slate-900 mb-2">Activate Membership</h3>
+											<p className="text-slate-500 mb-6 text-sm">
+												Start earning referral bonuses and unlock premium features for just ₦1,000.
+											</p>
+											<Button
+												onClick={handleActivateElevatex}
+												disabled={activating || balance < 1000}
+												className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white border-0"
+												size="lg"
+											>
+												{activating ? "Activating..." : "Join ElevateX Now"}
+											</Button>
+											{balance < 1000 && (
+												<p className="text-xs text-red-500 mt-2 flex items-center justify-center">
+													<AlertCircle className="w-3 h-3 mr-1" /> Insufficient balance
+												</p>
+											)}
+										</div>
+									) : (
+										<div>
+											<div className="flex items-center gap-3 mb-6">
+												<div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600">
+													<TrendingUp className="w-5 h-5" />
 												</div>
-												<div className="flex-1 min-w-0">
-													<div className="font-semibold text-slate-900">{tx.description || `${tx.type.charAt(0).toUpperCase() + tx.type.slice(1)} Transaction`}</div>
-													<div className="flex items-center gap-2 mt-1">
-														<span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-															tx.type === 'earning' || tx.type === 'referral_bonus'
-																? 'bg-green-100 text-green-800'
-																: tx.type === 'activation'
-																? 'bg-blue-100 text-blue-800'
-																: 'bg-orange-100 text-orange-800'
-														}`}>
-															{tx.type.replace('_', ' ').toUpperCase()}
-														</span>
-														{tx.level && (
-															<span className="text-xs text-slate-500">Level {tx.level}</span>
-														)}
-													</div>
+												<div>
+													<p className="text-sm font-medium text-slate-500">Total Earnings</p>
+													<h3 className="text-2xl font-bold text-slate-900">{formatCurrency(earnings)}</h3>
 												</div>
 											</div>
-
-											<div className="text-right">
-												<div className={`text-lg font-bold ${
-													tx.type === 'earning' || tx.type === 'referral_bonus'
-														? 'text-green-600'
-														: 'text-red-600'
-												}`}>
-													{tx.type === 'earning' || tx.type === 'referral_bonus' ? '+' : '-'}
-													₦{Math.abs(tx.amount || 0).toLocaleString()}
+											<div className="bg-white rounded-xl p-4 border border-slate-200">
+												<div className="flex items-center justify-between mb-2">
+													<span className="text-sm font-medium text-slate-600">Referral Link</span>
+													<Button variant="ghost" size="icon" className="h-6 w-6" onClick={handleCopyReferral}>
+														{copied ? <CheckCircle2 className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4 text-slate-400" />}
+													</Button>
 												</div>
-												<div className="text-sm text-slate-500">
-													{tx.createdAt ? formatDDMMYY(tx.createdAt) : tx.date}
+												<div className="bg-slate-50 p-2 rounded-lg border border-slate-100 truncate text-xs font-mono text-slate-500">
+													{referralLink || "Loading..."}
 												</div>
-												{tx.status && (
-													<div className={`text-xs mt-1 px-2 py-0.5 rounded-full inline-block ${
-														tx.status === 'completed'
-															? 'bg-green-100 text-green-800'
-															: tx.status === 'pending'
-															? 'bg-yellow-100 text-yellow-800'
-															: 'bg-red-100 text-red-800'
-													}`}>
-														{tx.status.toUpperCase()}
-													</div>
-												)}
 											</div>
 										</div>
+									)}
+								</div>
+							</div>
+						</CardContent>
+					</Card>
+				</motion.div>
 
-										{/* Additional Details */}
-										{(tx.reference || tx.provider || tx.recipient) && (
-											<div className="mt-3 pt-3 border-t border-slate-200">
-												<div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
-													{tx.reference && (
-														<div>
-															<span className="font-medium text-slate-600">Reference:</span>
-															<div className="font-mono text-slate-900 mt-1">{tx.reference}</div>
+				{subscribed && (
+					<>
+						<div className="grid md:grid-cols-2 gap-6">
+							{/* Network Progress */}
+							<motion.div
+								initial={{ opacity: 0, y: 20 }}
+								animate={{ opacity: 1, y: 0 }}
+								transition={{ duration: 0.5, delay: 0.1 }}
+							>
+								<Card className="h-full border-slate-100 shadow-lg">
+									<CardHeader>
+										<CardTitle className="flex items-center gap-2">
+											<Layers className="w-5 h-5 text-indigo-600" /> Network Progress
+										</CardTitle>
+										<CardDescription>Your 5-level referral tree status</CardDescription>
+									</CardHeader>
+									<CardContent>
+										<div className="mb-6">
+											<div className="flex justify-between items-end mb-2">
+												<span className="text-3xl font-bold text-indigo-600">{Math.round(progressPercent)}%</span>
+												<span className="text-sm text-slate-500 font-medium">{referralsPerLevel.reduce((a, b) => a + b, 0)} / 25 Total Members</span>
+											</div>
+											<Progress value={progressPercent} className="h-3 bg-indigo-100" />
+										</div>
+
+										<div className="space-y-4">
+											{[1, 2, 3, 4, 5].map((level, idx) => (
+												<div key={level} className="flex items-center justify-between group">
+													<div className="flex items-center gap-3">
+														<div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${referralsPerLevel[idx] > 0 ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-400'}`}>
+															L{level}
 														</div>
-													)}
-													{tx.provider && (
-														<div>
-															<span className="font-medium text-slate-600">Provider:</span>
-															<div className="text-slate-900 mt-1">{tx.provider}</div>
+														<div className="flex flex-col">
+															<span className="text-sm font-medium text-slate-700">Level {level}</span>
+															<span className="text-xs text-slate-400">Target: 5 Members</span>
 														</div>
-													)}
-													{tx.recipient && (
-														<div>
-															<span className="font-medium text-slate-600">Recipient:</span>
-															<div className="text-slate-900 mt-1">{tx.recipient}</div>
-														</div>
-													)}
+													</div>
+													<Badge variant="outline" className={`${referralsPerLevel[idx] === 5 ? 'bg-green-50 text-green-700 border-green-200' : 'bg-slate-50 text-slate-600 border-slate-200'}`}>
+														{referralsPerLevel[idx]}/5
+													</Badge>
 												</div>
+											))}
+										</div>
+									</CardContent>
+								</Card>
+							</motion.div>
+
+							{/* Recent Transactions */}
+							<motion.div
+								initial={{ opacity: 0, y: 20 }}
+								animate={{ opacity: 1, y: 0 }}
+								transition={{ duration: 0.5, delay: 0.2 }}
+							>
+								<Card className="h-full border-slate-100 shadow-lg">
+									<CardHeader>
+										<CardTitle className="flex items-center gap-2">
+											<Zap className="w-5 h-5 text-yellow-500" /> Recent Activity
+										</CardTitle>
+										<CardDescription>Latest earnings and withdrawals</CardDescription>
+									</CardHeader>
+									<CardContent>
+										{transactionsLoading ? (
+											<div className="flex justify-center py-8">
+												<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-300"></div>
+											</div>
+										) : elevatexTransactions.length === 0 ? (
+											<div className="text-center py-12 bg-slate-50 rounded-xl border border-dashed border-slate-200">
+												<p className="text-slate-500 text-sm">No transactions yet</p>
+											</div>
+										) : (
+											<div className="space-y-4">
+												{elevatexTransactions.slice(0, 5).map((tx: any, i: number) => (
+													<div key={i} className="flex items-center justify-between p-3 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors border border-slate-100">
+														<div className="flex items-center gap-3">
+															<div className={`w-10 h-10 rounded-full flex items-center justify-center ${tx.type === 'earning' || tx.type === 'referral_bonus' ? 'bg-green-100 text-green-600' :
+																tx.type === 'activation' ? 'bg-blue-100 text-blue-600' : 'bg-orange-100 text-orange-600'
+																}`}>
+																{tx.type === 'earning' || tx.type === 'referral_bonus' ? <TrendingUp className="w-5 h-5" /> :
+																	tx.type === 'activation' ? <Zap className="w-5 h-5" /> : <ArrowRight className="w-5 h-5" />}
+															</div>
+															<div>
+																<p className="text-sm font-semibold text-slate-800">
+																	{tx.type === 'earning' ? 'Commission' :
+																		tx.type === 'referral_bonus' ? 'Referral Bonus' :
+																			tx.type.charAt(0).toUpperCase() + tx.type.slice(1)}
+																</p>
+																<p className="text-xs text-slate-500">{tx.createdAt ? formatDDMMYY(tx.createdAt) : tx.date}</p>
+															</div>
+														</div>
+														<span className={`font-bold text-sm ${tx.type === 'earning' || tx.type === 'referral_bonus' ? 'text-green-600' : 'text-slate-600'
+															}`}>
+															{tx.type === 'earning' || tx.type === 'referral_bonus' ? '+' : '-'} {formatCurrency(Math.abs(tx.amount))}
+														</span>
+													</div>
+												))}
+												{elevatexTransactions.length > 5 && (
+													<Button variant="ghost" className="w-full text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50" size="sm">
+														View All History
+													</Button>
+												)}
 											</div>
 										)}
-									</div>
-								))}
-							</div>
-						)}
-					</CardContent>
-				</Card>
-			</main>
+									</CardContent>
+								</Card>
+							</motion.div>
+						</div>
+					</>
+				)}
+			</div>
+
+			{/* Modals */}
+			<DepositModal
+				isOpen={showDeposit}
+				onClose={() => setShowDeposit(false)}
+				onSuccess={() => {
+					setShowDeposit(false);
+					fetchWalletBalance();
+					toast({ title: "Deposit Successful", description: "Your wallet has been funded." });
+				}}
+			/>
+			<WithdrawModal
+				isOpen={showWithdraw}
+				onClose={() => setShowWithdraw(false)}
+				onSuccess={() => {
+					setShowWithdraw(false);
+					fetchWalletBalance();
+					toast({ title: "Withdrawal Successful", description: "Funds have been processed." });
+				}}
+			/>
 		</div>
 	);
 }

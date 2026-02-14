@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
   // Generate token
   const token = crypto.randomBytes(32).toString("hex")
   const expires = Date.now() + 1000 * 60 * 30 // 30 min
-  await Database.saveResetToken(user.id, token, expires)
+  await Database.savePasswordResetToken(user.id, token, expires)
   await sendResetEmail(email, token)
   return NextResponse.json({ message: "Reset link sent" })
 }

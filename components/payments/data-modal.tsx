@@ -9,11 +9,12 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Loader2, Wifi } from "lucide-react"
+import { Loader2, Wifi, Check } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { Skeleton } from "@/components/ui/skeleton"
 import { SuccessModal } from "@/components/ui/success-modal"
 import { ErrorModal } from "@/components/ui/error-modal"
+import { cn } from "@/lib/utils"
 
 interface DataModalProps {
   isOpen: boolean
@@ -47,6 +48,18 @@ type BundlesResponse = {
 export function DataModal({ isOpen, onClose, onSuccess }: DataModalProps) {
   const [bundles, setBundles] = useState<BundlesResponse[]>([]);
   const [fetching, setFetching] = useState(true);
+  const [formData, setFormData] = useState({
+    network: "",
+    phone: "",
+    plan: "",
+  })
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState("")
+  const [successModalOpen, setSuccessModalOpen] = useState(false)
+  const [errorModalOpen, setErrorModalOpen] = useState(false)
+  const [transactionData, setTransactionData] = useState<any>(null)
+  const { toast } = useToast()
+
   useEffect(() => {
     async function fetchBundles() {
       setFetching(true);
@@ -54,7 +67,7 @@ export function DataModal({ isOpen, onClose, onSuccess }: DataModalProps) {
         const res = await fetch("/api/admin/data-plans");
         const data = await res.json();
         if (data && data.length > 0) {
-          // Group by network for dropdown compatibility
+          // Group by network
           const grouped = data.reduce((acc: any, plan: any) => {
             if (!acc[plan.network]) acc[plan.network] = [];
             acc[plan.network].push(plan);
@@ -67,7 +80,7 @@ export function DataModal({ isOpen, onClose, onSuccess }: DataModalProps) {
             }))
           );
         } else {
-          // Fallback data if database is empty
+          // Fallback data
           const fallbackData = [
             // MTN Plans
             { _id: '1', network: 'MTN', dataBundle: '100MB', dataPlan: 'MTN_100MB', duration: '1 Day', type: 'Daily', status: 'Active', price: 100, apiPrice: 90 },
@@ -75,24 +88,10 @@ export function DataModal({ isOpen, onClose, onSuccess }: DataModalProps) {
             { _id: '3', network: 'MTN', dataBundle: '1GB', dataPlan: 'MTN_1GB', duration: '1 Day', type: 'Daily', status: 'Active', price: 250, apiPrice: 225 },
             { _id: '4', network: 'MTN', dataBundle: '2GB', dataPlan: 'MTN_2GB', duration: '3 Days', type: 'Weekly', status: 'Active', price: 500, apiPrice: 450 },
             { _id: '5', network: 'MTN', dataBundle: '5GB', dataPlan: 'MTN_5GB', duration: '7 Days', type: 'Weekly', status: 'Active', price: 1000, apiPrice: 900 },
-            // Airtel Plans
+            // ... minimal fallback
             { _id: '6', network: 'AIRTEL', dataBundle: '100MB', dataPlan: 'AIRTEL_100MB', duration: '1 Day', type: 'Daily', status: 'Active', price: 100, apiPrice: 90 },
-            { _id: '7', network: 'AIRTEL', dataBundle: '500MB', dataPlan: 'AIRTEL_500MB', duration: '1 Day', type: 'Daily', status: 'Active', price: 150, apiPrice: 135 },
-            { _id: '8', network: 'AIRTEL', dataBundle: '1GB', dataPlan: 'AIRTEL_1GB', duration: '1 Day', type: 'Daily', status: 'Active', price: 250, apiPrice: 225 },
-            { _id: '9', network: 'AIRTEL', dataBundle: '2GB', dataPlan: 'AIRTEL_2GB', duration: '3 Days', type: 'Weekly', status: 'Active', price: 500, apiPrice: 450 },
-            { _id: '10', network: 'AIRTEL', dataBundle: '5GB', dataPlan: 'AIRTEL_5GB', duration: '7 Days', type: 'Weekly', status: 'Active', price: 1000, apiPrice: 900 },
-            // GLO Plans
             { _id: '11', network: 'GLO', dataBundle: '100MB', dataPlan: 'GLO_100MB', duration: '1 Day', type: 'Daily', status: 'Active', price: 100, apiPrice: 90 },
-            { _id: '12', network: 'GLO', dataBundle: '500MB', dataPlan: 'GLO_500MB', duration: '1 Day', type: 'Daily', status: 'Active', price: 150, apiPrice: 135 },
-            { _id: '13', network: 'GLO', dataBundle: '1GB', dataPlan: 'GLO_1GB', duration: '1 Day', type: 'Daily', status: 'Active', price: 250, apiPrice: 225 },
-            { _id: '14', network: 'GLO', dataBundle: '2GB', dataPlan: 'GLO_2GB', duration: '3 Days', type: 'Weekly', status: 'Active', price: 500, apiPrice: 450 },
-            { _id: '15', network: 'GLO', dataBundle: '5GB', dataPlan: 'GLO_5GB', duration: '7 Days', type: 'Weekly', status: 'Active', price: 1000, apiPrice: 900 },
-            // 9MOBILE Plans
             { _id: '16', network: '9MOBILE', dataBundle: '100MB', dataPlan: '9MOBILE_100MB', duration: '1 Day', type: 'Daily', status: 'Active', price: 100, apiPrice: 90 },
-            { _id: '17', network: '9MOBILE', dataBundle: '500MB', dataPlan: '9MOBILE_500MB', duration: '1 Day', type: 'Daily', status: 'Active', price: 150, apiPrice: 135 },
-            { _id: '18', network: '9MOBILE', dataBundle: '1GB', dataPlan: '9MOBILE_1GB', duration: '1 Day', type: 'Daily', status: 'Active', price: 250, apiPrice: 225 },
-            { _id: '19', network: '9MOBILE', dataBundle: '2GB', dataPlan: '9MOBILE_2GB', duration: '3 Days', type: 'Weekly', status: 'Active', price: 500, apiPrice: 450 },
-            { _id: '20', network: '9MOBILE', dataBundle: '5GB', dataPlan: '9MOBILE_5GB', duration: '7 Days', type: 'Weekly', status: 'Active', price: 1000, apiPrice: 900 },
           ];
 
           const grouped = fallbackData.reduce((acc: any, plan: any) => {
@@ -108,55 +107,18 @@ export function DataModal({ isOpen, onClose, onSuccess }: DataModalProps) {
           );
         }
       } catch (e) {
-        // Fallback data if API fails
-        const fallbackData = [
-          // MTN Plans
-          { _id: '1', network: 'MTN', dataBundle: '100MB', dataPlan: 'MTN_100MB', duration: '1 Day', type: 'Daily', status: 'Active', price: 100, apiPrice: 90 },
-          { _id: '2', network: 'MTN', dataBundle: '500MB', dataPlan: 'MTN_500MB', duration: '1 Day', type: 'Daily', status: 'Active', price: 150, apiPrice: 135 },
-          { _id: '3', network: 'MTN', dataBundle: '1GB', dataPlan: 'MTN_1GB', duration: '1 Day', type: 'Daily', status: 'Active', price: 250, apiPrice: 225 },
-          { _id: '4', network: 'MTN', dataBundle: '2GB', dataPlan: 'MTN_2GB', duration: '3 Days', type: 'Weekly', status: 'Active', price: 500, apiPrice: 450 },
-          { _id: '5', network: 'MTN', dataBundle: '5GB', dataPlan: 'MTN_5GB', duration: '7 Days', type: 'Weekly', status: 'Active', price: 1000, apiPrice: 900 },
-          // Airtel Plans
-          { _id: '6', network: 'AIRTEL', dataBundle: '100MB', dataPlan: 'AIRTEL_100MB', duration: '1 Day', type: 'Daily', status: 'Active', price: 100, apiPrice: 90 },
-          { _id: '7', network: 'AIRTEL', dataBundle: '500MB', dataPlan: 'AIRTEL_500MB', duration: '1 Day', type: 'Daily', status: 'Active', price: 150, apiPrice: 135 },
-          { _id: '8', network: 'AIRTEL', dataBundle: '1GB', dataPlan: 'AIRTEL_1GB', duration: '1 Day', type: 'Daily', status: 'Active', price: 250, apiPrice: 225 },
-          { _id: '9', network: 'AIRTEL', dataBundle: '2GB', dataPlan: 'AIRTEL_2GB', duration: '3 Days', type: 'Weekly', status: 'Active', price: 500, apiPrice: 450 },
-          { _id: '10', network: 'AIRTEL', dataBundle: '5GB', dataPlan: 'AIRTEL_5GB', duration: '7 Days', type: 'Weekly', status: 'Active', price: 1000, apiPrice: 900 },
-        ];
-
-        const grouped = fallbackData.reduce((acc: any, plan: any) => {
-          if (!acc[plan.network]) acc[plan.network] = [];
-          acc[plan.network].push(plan);
-          return acc;
-        }, {});
-        setBundles(
-          Object.keys(grouped).map((network) => ({
-            NETWORK: network,
-            BUNDLE: grouped[network],
-          }))
-        );
+        // Error handling
       }
       setFetching(false);
     }
     fetchBundles();
   }, []);
-  const [formData, setFormData] = useState({
-    network: "",
-    phone: "",
-    plan: "",
-  })
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState("")
-  const [successModalOpen, setSuccessModalOpen] = useState(false)
-  const [errorModalOpen, setErrorModalOpen] = useState(false)
-  const [transactionData, setTransactionData] = useState<any>(null)
-  const { toast } = useToast()
 
   const selectedPlan =
     formData.network && formData.plan
       ? bundles
-          .find((b) => b.NETWORK === formData.network)
-          ?.BUNDLE.find((p) => p.dataPlan === formData.plan)
+        .find((b) => b.NETWORK === formData.network)
+        ?.BUNDLE.find((p) => p.dataPlan === formData.plan)
       : null;
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -196,7 +158,7 @@ export function DataModal({ isOpen, onClose, onSuccess }: DataModalProps) {
         throw new Error(data.error || "Data purchase failed")
       }
 
-      // Success - show success modal
+      // Success
       setTransactionData({
         title: "Data Purchase Successful",
         description: `${selectedPlan.dataBundle} ${formData.network} data sent to ${formData.phone}`,
@@ -210,7 +172,7 @@ export function DataModal({ isOpen, onClose, onSuccess }: DataModalProps) {
       onClose()
       setFormData({ network: "", phone: "", plan: "" })
     } catch (error) {
-      // Error - show error modal
+      // Error
       setTransactionData({
         title: "Data Purchase Failed",
         description: error instanceof Error ? error.message : "Something went wrong",
@@ -224,157 +186,163 @@ export function DataModal({ isOpen, onClose, onSuccess }: DataModalProps) {
 
   return (
     <>
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md bg-white border border-gray-200 shadow-lg">
-        <DialogHeader className="pb-4">
-          <DialogTitle className="flex items-center gap-3 text-xl font-bold text-gray-900">
-            <div className="w-10 h-10 bg-teal-100 rounded-full flex items-center justify-center">
-              <Wifi className="w-5 h-5 text-teal-600" />
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="sm:max-w-[425px] overflow-hidden">
+          <DialogHeader className="flex flex-col items-center justify-center text-center pb-2">
+            <div className="w-16 h-16 bg-teal-50 rounded-full flex items-center justify-center mb-4 ring-8 ring-teal-50/50">
+              <Wifi className="w-8 h-8 text-teal-600" />
             </div>
-            Buy Data Bundle
-          </DialogTitle>
-          <DialogDescription className="text-gray-600">
-            Purchase data bundles for internet access
-          </DialogDescription>
-        </DialogHeader>
+            <DialogTitle className="text-2xl font-bold bg-gradient-to-br from-gray-900 to-gray-600 bg-clip-text text-transparent">
+              Buy Data Bundle
+            </DialogTitle>
+            <DialogDescription className="text-gray-500 text-base max-w-[280px] mx-auto">
+              Get connected with affordable data plans
+            </DialogDescription>
+          </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {error && (
-            <Alert variant="destructive" className="rounded-lg border-red-200 bg-red-50">
-              <AlertDescription className="font-medium text-red-800">{error}</AlertDescription>
-            </Alert>
-          )}
+          <form onSubmit={handleSubmit} className="space-y-6 pt-2">
+            {error && (
+              <Alert variant="destructive" className="rounded-2xl border-red-100 bg-red-50/50">
+                <AlertDescription className="font-medium text-red-700 text-center">{error}</AlertDescription>
+              </Alert>
+            )}
 
-          {fetching ? (
-            <div className="space-y-4">
-              <Skeleton className="h-12 w-full rounded-xl" />
-              <Skeleton className="h-12 w-full rounded-xl" />
-              <Skeleton className="h-12 w-full rounded-xl" />
-            </div>
-          ) : (
-            <>
-              <div className="space-y-3">
-                <Label htmlFor="network" className="text-sm font-semibold text-gray-900">Network Provider</Label>
-                <Select
-                  value={formData.network}
-                  onValueChange={(value) => setFormData((prev) => ({ ...prev, network: value, plan: "" }))}
-                >
-                  <SelectTrigger className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-base font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-500">
-                    <SelectValue placeholder="Select network provider" />
-                  </SelectTrigger>
-                  <SelectContent className="w-full">
-                    {bundles.map((bundle) => (
-                      <SelectItem key={bundle.NETWORK} value={bundle.NETWORK}>
-                        <div className="flex items-center space-x-2">
-                          <img src={networkImages[bundle.NETWORK] || "/placeholder-logo.png"} alt={bundle.NETWORK + ' logo'} className="w-6 h-6 rounded-full object-contain" />
-                          <span>{bundle.NETWORK}</span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+            {fetching ? (
+              <div className="space-y-4">
+                <Skeleton className="h-14 w-full rounded-2xl" />
+                <Skeleton className="h-14 w-full rounded-2xl" />
+                <Skeleton className="h-14 w-full rounded-2xl" />
               </div>
-
-              <div className="space-y-3">
-                <Label htmlFor="phone" className="text-sm font-semibold text-gray-900">Phone Number</Label>
-                <Input
-                  id="phone"
-                  type="tel"
-                  placeholder="08012345678"
-                  value={formData.phone}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, phone: e.target.value }))}
-                  className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-teal-500"
-                  required
-                />
-              </div>
-
-              {formData.network && (
+            ) : (
+              <>
+                {/* Network Select */}
                 <div className="space-y-3">
-                  <Label htmlFor="plan" className="text-sm font-semibold text-gray-900">Data Plan</Label>
-                  <Select
-                    value={formData.plan}
-                    onValueChange={(value) => setFormData((prev) => ({ ...prev, plan: value }))}
-                  >
-                    <SelectTrigger className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-base font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-500">
-                      <SelectValue placeholder="Select data plan" />
-                    </SelectTrigger>
-                    <SelectContent className="w-full">
-                      {bundles
-                        .find((b) => b.NETWORK === formData.network)?.BUNDLE
-                        .filter((plan) => plan.status === "Active")
-                        .map((plan) => (
-                          <SelectItem key={plan.dataPlan} value={plan.dataPlan}>
-                            <div className="flex items-center justify-between w-full">
-                              <span>{plan.dataBundle} {plan.duration} ({plan.type})</span>
-                              <span className="font-medium text-teal-600">₦{plan.price}</span>
+                  <Label className="text-sm font-semibold text-gray-700 ml-1">Network Provider</Label>
+                  <div className="grid grid-cols-4 gap-2">
+                    {bundles.map((bundle) => (
+                      <div
+                        key={bundle.NETWORK}
+                        onClick={() => setFormData(prev => ({ ...prev, network: bundle.NETWORK, plan: "" }))}
+                        className={cn(
+                          "flex flex-col items-center justify-center p-2 rounded-xl border cursor-pointer transition-all",
+                          formData.network === bundle.NETWORK
+                            ? "bg-teal-50 border-teal-500 ring-2 ring-teal-200"
+                            : "bg-gray-50 border-gray-100 hover:border-teal-200 hover:bg-white"
+                        )}
+                      >
+                        <div className="relative w-8 h-8 mb-1">
+                          <img src={networkImages[bundle.NETWORK] || "/placeholder-logo.png"} alt={bundle.NETWORK} className="w-full h-full rounded-full object-cover" />
+                          {formData.network === bundle.NETWORK && (
+                            <div className="absolute -bottom-1 -right-1 bg-teal-500 text-white rounded-full p-0.5">
+                              <Check className="w-2.5 h-2.5" />
                             </div>
-                          </SelectItem>
-                        ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-
-              {selectedPlan && (
-                <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm font-medium text-gray-900">Total Amount:</span>
-                    <span className="font-bold text-teal-600">₦{selectedPlan.price}</span>
+                          )}
+                        </div>
+                        <span className="text-[10px] font-bold text-gray-700">{bundle.NETWORK}</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
-              )}
 
-              <div className="flex gap-3 pt-2">
+                {/* Phone Input */}
+                <div className="space-y-3">
+                  <Label htmlFor="phone" className="text-sm font-semibold text-gray-700 ml-1">Phone Number</Label>
+                  <Input
+                    id="phone"
+                    type="tel"
+                    placeholder="080 1234 5678"
+                    value={formData.phone}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, phone: e.target.value }))}
+                    className="h-14 rounded-2xl text-lg bg-gray-50/50 border-gray-200 focus:bg-white transition-all"
+                    required
+                  />
+                </div>
+
+                {formData.network && (
+                  <div className="space-y-3">
+                    <Label htmlFor="plan" className="text-sm font-semibold text-gray-700 ml-1">Data Plan</Label>
+                    <Select
+                      value={formData.plan}
+                      onValueChange={(value) => setFormData((prev) => ({ ...prev, plan: value }))}
+                    >
+                      <SelectTrigger className="w-full h-14 rounded-xl border border-gray-200 bg-gray-50/50 px-4 text-base font-medium text-gray-900 focus:ring-2 focus:ring-teal-100">
+                        <SelectValue placeholder="Select data plan" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {bundles
+                          .find((b) => b.NETWORK === formData.network)?.BUNDLE
+                          .filter((plan) => plan.status === "Active")
+                          .map((plan) => (
+                            <SelectItem key={plan.dataPlan} value={plan.dataPlan}>
+                              <div className="flex items-center justify-between w-full min-w-[240px]">
+                                <span>{plan.dataBundle} {plan.duration} ({plan.type})</span>
+                                <span className="font-semibold text-teal-600">₦{plan.price}</span>
+                              </div>
+                            </SelectItem>
+                          ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+
+                {selectedPlan && (
+                  <div className="bg-teal-50/50 p-4 rounded-xl border border-teal-100">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium text-gray-900">Total Amount</span>
+                      <span className="text-xl font-bold text-teal-700">₦{selectedPlan.price}</span>
+                    </div>
+                  </div>
+                )}
+
                 <Button
                   type="submit"
                   disabled={isLoading || !formData.network || !formData.phone || !formData.plan}
-                  className="flex-1 rounded-xl bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 text-white font-bold text-lg shadow-lg hover:shadow-teal-500/25 transition-all duration-200 border-0 disabled:opacity-50"
+                  className="w-full h-12 rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white font-bold text-lg shadow-xl shadow-teal-200 transition-all duration-200 disabled:opacity-70 mt-4"
                 >
                   {isLoading ? (
                     <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                       Processing...
                     </>
                   ) : (
-                    `Buy Data - ₦${selectedPlan?.price || 0}`
+                    "Buy Data Bundle"
                   )}
                 </Button>
-              </div>
-            </>
-          )}
-        </form>
-      </DialogContent>
-    </Dialog>
+              </>
+            )}
+          </form>
+        </DialogContent>
+      </Dialog>
 
-    {/* Success Modal */}
-    {transactionData && (
-      <SuccessModal
-        isOpen={successModalOpen}
-        onClose={() => {
-          setSuccessModalOpen(false)
-          setTransactionData(null)
-        }}
-        title={transactionData.title}
-        description={transactionData.description}
-        transactionId={transactionData.transactionId}
-        amount={transactionData.amount}
-        service={transactionData.service}
-      />
-    )}
+      {/* Success Modal */}
+      {transactionData && (
+        <SuccessModal
+          isOpen={successModalOpen}
+          onClose={() => {
+            setSuccessModalOpen(false)
+            setTransactionData(null)
+          }}
+          title={transactionData.title}
+          description={transactionData.description}
+          transactionId={transactionData.transactionId}
+          amount={transactionData.amount}
+          service={transactionData.service}
+        />
+      )}
 
-    {/* Error Modal */}
-    {transactionData && (
-      <ErrorModal
-        isOpen={errorModalOpen}
-        onClose={() => {
-          setErrorModalOpen(false)
-          setTransactionData(null)
-        }}
-        title={transactionData.title}
-        description={transactionData.description}
-        errorCode={transactionData.errorCode}
-      />
-    )}
+      {/* Error Modal */}
+      {transactionData && (
+        <ErrorModal
+          isOpen={errorModalOpen}
+          onClose={() => {
+            setErrorModalOpen(false)
+            setTransactionData(null)
+          }}
+          title={transactionData.title}
+          description={transactionData.description}
+          errorCode={transactionData.errorCode}
+        />
+      )}
     </>
   )
 }

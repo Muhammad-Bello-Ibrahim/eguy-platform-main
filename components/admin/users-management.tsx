@@ -15,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Search, MoreHorizontal, UserCheck, UserX, Eye, Edit, CheckCircle, XCircle, User, Filter, Download, RefreshCw, EyeOff, Eye as EyeIcon, History, Users, DollarSign, TrendingUp, Star, Shield, Key, UserCog, Ban, AlertTriangle, ChevronDown, Calendar, Wallet, Phone, Mail, ArrowUpRight } from "lucide-react"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { useToast } from "@/components/ui/use-toast"
 
 interface User {
   id: string
@@ -82,6 +83,13 @@ export function UsersManagement({ searchTerm }: { searchTerm?: string }) {
   const [filterKyc, setFilterKyc] = useState<string>("all")
   const [localSearchTerm, setLocalSearchTerm] = useState("")
   const [activeTab, setActiveTab] = useState("overview")
+  const { toast } = useToast()
+  const [formData, setFormData] = useState({
+    fullName: "",
+    email: "",
+    phone: "",
+    role: "user"
+  })
 
   // Prevent hydration mismatch by only checking session after client-side mount
   React.useEffect(() => {
@@ -138,6 +146,12 @@ export function UsersManagement({ searchTerm }: { searchTerm?: string }) {
 
   const handleEditUser = (user: User) => {
     setSelectedUser(user)
+    setFormData({
+      fullName: user.fullName || "",
+      email: user.email || "",
+      phone: user.phone || "",
+      role: "user" // Default, as it might not be in the user object yet or we might want to edit it
+    })
     setIsEditDialogOpen(true)
   }
 
@@ -169,21 +183,113 @@ export function UsersManagement({ searchTerm }: { searchTerm?: string }) {
     setIsReferrerDialogOpen(true)
   }
 
-  // Simulating API calls for actions
-  const performAction = async (actionName: string) => {
-    // In a real app, this would be an API call
-    alert(`${actionName} action simulated for ${selectedUser?.fullName}`)
+  // Action handlers
+  const performAction = async (actionType: string) => {
+    if (!selectedUser) return
 
-    // Close dialogs
-    setIsEditDialogOpen(false)
-    setIsKycDialogOpen(false)
-    setIsSuspendDialogOpen(false)
-    setIsPasswordResetDialogOpen(false)
-    setIsReferrerDialogOpen(false)
-    setIsImpersonateDialogOpen(false)
+    setIsLoading(true)
+    try {
+      let updates: any = {}
+      let successMessage = ""
 
-    // Refresh list
-    fetchUsers()
+      if (actionType === 'Update User') {
+        const fullNameInput = document.querySelector('input[name="fullName"]') as HTMLInputElement
+        // We need to capture the form state better, but for now let's assume we can get it or we update the state
+        // Since the previous implementation didn't fully wire up the form state to performAction, 
+        // let's look at how we can get the data.
+        // Actually, let's update the Edit Dialog to use state properly first.
+        return // handled in improved dialog
+      }
+
+      if (actionType === 'Update KYC') {
+        updates = { kycStatus: selectedKycStatus }
+        successMessage = "KYC status updated successfully"
+      } else if (actionType === 'Suspend') {
+        updates = { status: "suspended" } // In a real app we might want to store the reason too
+        successMessage = "User suspended successfully"
+      } else if (actionType === 'Change Referrer') {
+        if (!newReferrerCode) {
+          toast({ title: "Error", description: "Please enter a referrer code", variant: "destructive" })
+          setIsLoading(false)
+          return
+        }
+        // distinct field 'referredBy' using the code
+        updates = { referredBy: newReferrerCode }
+        successMessage = "Referrer updated successfully"
+      }
+
+      if (Object.keys(updates).length > 0) {
+        const response = await fetch(`/api/admin/users/${selectedUser.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updates)
+        })
+
+        if (!response.ok) {
+          throw new Error('Failed to update user')
+        }
+
+        const data = await response.json()
+
+        toast({
+          title: "Success",
+          description: successMessage,
+          variant: "default",
+        })
+
+        // Refresh list
+        fetchUsers()
+      }
+    } catch (error) {
+      console.error("Action failed:", error)
+      toast({
+        title: "Error",
+        description: "Failed to perform action",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
+      // Close dialogs
+      setIsEditDialogOpen(false)
+      setIsKycDialogOpen(false)
+      setIsSuspendDialogOpen(false)
+      setIsPasswordResetDialogOpen(false)
+      setIsReferrerDialogOpen(false)
+      setIsImpersonateDialogOpen(false)
+    }
+  }
+
+  // Separate handler for Edit User to manage form state
+  const saveUserUpdates = async (updates: any) => {
+    if (!selectedUser) return
+    setIsLoading(true)
+    try {
+      const response = await fetch(`/api/admin/users/${selectedUser.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates)
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to update user')
+      }
+
+      toast({
+        title: "Success",
+        description: "User details updated successfully",
+      })
+      fetchUsers()
+      setIsEditDialogOpen(false)
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update user",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   // Enhanced filtering
@@ -707,13 +813,32 @@ export function UsersManagement({ searchTerm }: { searchTerm?: string }) {
             <div className="space-y-4 py-4">
               <div className="space-y-2">
                 <Label>Full Name</Label>
-                <Input defaultValue={selectedUser.fullName} />
+                <Input
+                  value={formData.fullName}
+                  onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Email</Label>
+                <Input
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Phone</Label>
+                <Input
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                />
               </div>
             </div>
           )}
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>Cancel</Button>
-            <Button onClick={() => performAction('Update User')}>Save Changes</Button>
+            <Button onClick={() => saveUserUpdates(formData)} disabled={isLoading}>
+              {isLoading ? "Saving..." : "Save Changes"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -757,6 +882,29 @@ export function UsersManagement({ searchTerm }: { searchTerm?: string }) {
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsSuspendDialogOpen(false)}>Cancel</Button>
             <Button variant="destructive" onClick={() => performAction('Suspend')}>Suspend User</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isReferrerDialogOpen} onOpenChange={setIsReferrerDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Change Referrer</DialogTitle>
+            <DialogDescription>Enter the new referrer code for this user.</DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <Label>New Referrer Code</Label>
+            <Input
+              value={newReferrerCode}
+              onChange={(e) => setNewReferrerCode(e.target.value)}
+              placeholder="REF12345"
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsReferrerDialogOpen(false)}>Cancel</Button>
+            <Button onClick={() => performAction('Change Referrer')} disabled={isLoading}>
+              {isLoading ? "Updating..." : "Update Referrer"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

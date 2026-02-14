@@ -8,6 +8,7 @@ import { Users, Share2, TrendingUp, Copy, Check } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 
 interface ReferralStats {
+  referralCode?: string
   totalReferrals: number
   activeReferrals: number
   totalEarnings: number
@@ -25,10 +26,19 @@ export function ReferralStats() {
   const [isLoading, setIsLoading] = useState(true)
   const [copied, setCopied] = useState(false)
   const { toast } = useToast()
+  const [origin, setOrigin] = useState("")
 
-  // Mock referral code - in production, this would come from user session
-  const referralCode = "EGUY123"
-  const referralLink = `https://eguy.app/signup?ref=${referralCode}`
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setOrigin(window.location.origin)
+    }
+  }, [])
+
+  // Use referral code from stats or fallback
+  const referralCode = stats?.referralCode || "EGUY123"
+  const referralLink = stats?.referralCode
+    ? `${origin}/signup?ref=${referralCode}`
+    : "Loading..."
 
   useEffect(() => {
     fetchReferralStats()

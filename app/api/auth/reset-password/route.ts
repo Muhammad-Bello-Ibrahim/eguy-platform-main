@@ -9,21 +9,19 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Token and new password required" }, { status: 400 })
   }
   // Find token
-  const db = await Database.getDb()
-  const tokenDoc = await db.collection("reset_tokens").findOne({ token, used: false })
-  if (!tokenDoc || tokenDoc.expires < Date.now()) {
+  // Find token
+  const tokenDoc = await Database.getPasswordResetToken(token)
+  if (!tokenDoc || new Date(tokenDoc.expires).getTime() < Date.now()) {
     return NextResponse.json({ error: "Invalid or expired token" }, { status: 400 })
   }
   // Update password
   const passwordHash = await hashPassword(password)
+  const db = await Database.getDb()
   await db.collection("users").updateOne(
     { _id: new ObjectId(tokenDoc.userId) },
     { $set: { passwordHash } }
   )
   // Mark token as used
-  await db.collection("reset_tokens").updateOne(
-    { token },
-    { $set: { used: true } }
-  )
+  await Database.markPasswordResetTokenAsUsed(token)
   return NextResponse.json({ message: "Password reset successful" })
 }
