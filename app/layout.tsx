@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 import { ThemeProvider } from "@/components/theme-provider";
-import { GoogleOAuthProvider } from "@react-oauth/google";
+import { AuthProvider } from "@/components/auth-provider";
 
 export const metadata: Metadata = {
   title: 'eGuy - Simple & Secure Financial Services',
@@ -30,7 +30,7 @@ export default function RootLayout({
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
       </head>
       <body className="font-sans antialiased bg-white text-gray-900">
-        <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ""}>
+        <AuthProvider>
           <ThemeProvider
             attribute="class"
             defaultTheme="light"
@@ -40,7 +40,7 @@ export default function RootLayout({
             {children}
             <MobileNavWrapper />
           </ThemeProvider>
-        </GoogleOAuthProvider>
+        </AuthProvider>
         <Analytics />
       </body>
     </html>
