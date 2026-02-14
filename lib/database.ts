@@ -6,7 +6,7 @@ export interface DatabaseUser {
   fullName: string
   email: string
   phone: string
-  passwordHash: string
+  passwordHash?: string
   walletBalance: number
   referralCode: string
   referredBy?: string
