@@ -18,6 +18,8 @@ export const viewport = {
 import { usePathname } from "next/navigation";
 import BottomNavWrapper from "@/components/dashboard/redesign/BottomNavWrapper";
 
+import { KillServiceWorker } from "@/components/KillServiceWorker";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -40,6 +42,7 @@ export default function RootLayout({
             enableSystem={false}
             disableTransitionOnChange
           >
+            <KillServiceWorker />
             {children}
             <BottomNavWrapper />
           </ThemeProvider>
