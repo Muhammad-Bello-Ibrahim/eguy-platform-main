@@ -1,15 +1,106 @@
 "use client";
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { LinkedAccount } from '@/lib/database';
+import { SelectBankModal } from './SelectBankModal';
 
 export default function BankingPage() {
     const router = useRouter();
+    const [accounts, setAccounts] = useState<LinkedAccount[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    useEffect(() => {
+        fetchAccounts();
+    }, []);
+
+    const fetchAccounts = async () => {
+        try {
+            const res = await fetch('/api/user/banking');
+            const data = await res.json();
+            if (data.linkedAccounts) {
+                setAccounts(data.linkedAccounts);
+            }
+        } catch (error) {
+            console.error("Failed to fetch accounts", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleAddAccount = async (bankName: string, accountNumber: string, accountName: string) => {
+        try {
+            const res = await fetch('/api/user/banking', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    bank: bankName,
+                    accountNumber,
+                    accountName
+                })
+            });
+
+            if (res.ok) {
+                await fetchAccounts();
+            } else {
+                alert("Failed to add account");
+            }
+        } catch (error) {
+            console.error("Error adding account", error);
+            alert("An error occurred");
+        }
+    };
+
+    const handleDelete = async (id: string, isPrimary: boolean) => {
+        if (isPrimary) {
+            alert("Cannot delete primary account. Please set another account as primary first.");
+            return;
+        }
+
+        if (!confirm("Are you sure you want to remove this account?")) return;
+
+        try {
+            const res = await fetch(`/api/user/banking?id=${id}`, { method: 'DELETE' });
+            if (res.ok) {
+                setAccounts(prev => prev.filter(a => a.id !== id));
+            } else {
+                alert("Failed to delete account");
+            }
+        } catch (error) {
+            console.error("Error deleting account", error);
+        }
+    };
+
+    const handleSetPrimary = async (id: string) => {
+        try {
+            // Optimistic update
+            setAccounts(prev => prev.map(a => ({
+                ...a,
+                isPrimary: a.id === id
+            })));
+
+            const res = await fetch('/api/user/banking', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ accountId: id, action: 'setPrimary' })
+            });
+
+            if (!res.ok) {
+                // Revert on failure
+                fetchAccounts();
+                alert("Failed to set primary account");
+            }
+        } catch (error) {
+            console.error("Error setting primary", error);
+            fetchAccounts();
+        }
+    };
 
     return (
-        <div className="bg-primary/20 text-slate-100 font-sans min-h-screen pb-32">
+        <div className="bg-slate-900 text-slate-100 font-sans min-h-screen pb-32">
             {/* Header */}
-            <header className="sticky top-0 z-40 bg-background-dark/80 backdrop-blur-md px-6 pt-14 pb-4 flex items-center justify-between">
+            <header className="sticky top-0 z-40 bg-slate-900/80 backdrop-blur-md px-6 pt-14 pb-4 flex items-center justify-between border-b border-white/5">
                 <button
                     onClick={() => router.back()}
                     className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors"
@@ -17,9 +108,7 @@ export default function BankingPage() {
                     <span className="material-icons-round text-slate-300">chevron_left</span>
                 </button>
                 <h1 className="text-lg font-bold text-white">Linked Accounts</h1>
-                <button className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors">
-                    <span className="material-icons-round text-slate-300">more_horiz</span>
-                </button>
+                <div className="w-10" />
             </header>
 
             <main className="px-5 pt-6 pb-32 space-y-8">
@@ -27,95 +116,68 @@ export default function BankingPage() {
                 <section>
                     <div className="flex items-center justify-between mb-4 px-1">
                         <h2 className="text-xs font-bold uppercase tracking-widest text-slate-500">Connected Banks</h2>
-                        <span className="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">2 ACCOUNTS</span>
+                        <span className="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">{accounts.length} ACCOUNTS</span>
                     </div>
-                    <div className="space-y-4">
-                        {/* Account 1 */}
-                        <div className="bg-slate-800 border border-white/5 rounded-2xl p-5 relative overflow-hidden">
-                            <div className="flex items-start justify-between">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 rounded-xl bg-blue-600/20 flex items-center justify-center">
-                                        <span className="material-icons-round text-blue-400 text-3xl">account_balance</span>
-                                    </div>
-                                    <div>
-                                        <p className="font-bold text-base">Chase Sapphire</p>
-                                        <p className="text-xs text-slate-500 font-medium">Checking •••• 8829</p>
-                                    </div>
-                                </div>
-                                <div className="bg-primary/20 text-primary text-[10px] font-black px-2 py-1 rounded-md uppercase tracking-tighter">Verified</div>
-                            </div>
-                            <div className="mt-6 pt-4 border-t border-white/5 flex items-center justify-between">
-                                <div className="flex flex-col">
-                                    <span className="text-[10px] text-slate-500 font-bold uppercase">Primary Payout</span>
-                                    <span className="text-xs text-primary font-medium">Active for withdrawals</span>
-                                </div>
-                                <div className="relative inline-flex items-center cursor-pointer">
-                                    <div className="w-11 h-6 bg-primary rounded-full"></div>
-                                    <div className="absolute left-[22px] top-1 bg-white w-4 h-4 rounded-full shadow-sm"></div>
-                                </div>
-                            </div>
-                        </div>
 
-                        {/* Account 2 */}
-                        <div className="bg-slate-800 border border-white/5 rounded-2xl p-5">
-                            <div className="flex items-start justify-between">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 rounded-xl bg-orange-500/20 flex items-center justify-center">
-                                        <span className="material-icons-round text-orange-400 text-3xl">account_balance</span>
-                                    </div>
-                                    <div>
-                                        <p className="font-bold text-base">Goldman Sachs</p>
-                                        <p className="text-xs text-slate-500 font-medium">Savings •••• 4401</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="mt-6 pt-4 border-t border-white/5 flex items-center justify-between">
-                                <div className="flex flex-col text-slate-400">
-                                    <span className="text-[10px] font-bold uppercase">Set as Primary</span>
-                                </div>
-                                <div className="relative inline-flex items-center cursor-pointer">
-                                    <div className="w-11 h-6 bg-slate-500 rounded-full"></div>
-                                    <div className="absolute left-1 top-1 bg-white w-4 h-4 rounded-full shadow-sm"></div>
-                                </div>
-                            </div>
+                    {loading ? (
+                        <div className="text-center py-10 text-slate-500">Loading accounts...</div>
+                    ) : accounts.length === 0 ? (
+                        <div className="text-center py-10 text-slate-500 bg-white/5 rounded-2xl border border-white/5">
+                            <p>No linked accounts found.</p>
                         </div>
-                    </div>
+                    ) : (
+                        <div className="space-y-4">
+                            {accounts.map((account) => (
+                                <div key={account.id} className="bg-slate-800 border border-white/5 rounded-2xl p-5 relative overflow-hidden group">
+                                    <div className="flex items-start justify-between">
+                                        <div className="flex items-center gap-4">
+                                            <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${account.isPrimary ? 'bg-blue-600/20' : 'bg-slate-700/50'}`}>
+                                                <span className={`material-icons-round text-3xl ${account.isPrimary ? 'text-blue-400' : 'text-slate-400'}`}>account_balance</span>
+                                            </div>
+                                            <div>
+                                                <p className="font-bold text-base">{account.bank}</p>
+                                                <p className="text-xs text-slate-500 font-medium">{account.accountName}</p>
+                                                <p className="text-xs text-slate-400 font-mono mt-0.5">••• {account.accountNumber.slice(-4)}</p>
+                                            </div>
+                                        </div>
+                                        {account.isPrimary && (
+                                            <div className="bg-blue-500/20 text-blue-400 text-[10px] font-black px-2 py-1 rounded-md uppercase tracking-tighter">Primary</div>
+                                        )}
+                                        {!account.isPrimary && (
+                                            <button
+                                                onClick={() => handleDelete(account.id, account.isPrimary)}
+                                                className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-red-500/20 text-slate-400 hover:text-red-500 transition-all opacity-0 group-hover:opacity-100"
+                                            >
+                                                <span className="material-icons-round text-lg">delete</span>
+                                            </button>
+                                        )}
+                                    </div>
+                                    <div className="mt-6 pt-4 border-t border-white/5 flex items-center justify-between">
+                                        <div className="flex flex-col">
+                                            <span className="text-[10px] text-slate-500 font-bold uppercase">{account.isPrimary ? 'Primary Payout' : 'Set as Primary'}</span>
+                                            <span className={`text-xs font-medium ${account.isPrimary ? 'text-blue-400' : 'text-slate-400'}`}>
+                                                {account.isPrimary ? 'Active for withdrawals' : 'Tap switch to activate'}
+                                            </span>
+                                        </div>
+                                        <div
+                                            onClick={() => !account.isPrimary && handleSetPrimary(account.id)}
+                                            className={`relative inline-flex items-center cursor-pointer ${account.isPrimary ? '' : 'hover:opacity-80'}`}
+                                        >
+                                            <div className={`w-11 h-6 rounded-full transition-colors ${account.isPrimary ? 'bg-blue-500' : 'bg-slate-600'}`}></div>
+                                            <div className={`absolute top-1 bg-white w-4 h-4 rounded-full shadow-sm transition-all ${account.isPrimary ? 'left-[22px]' : 'left-1'}`}></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </section>
 
-                {/* Cards */}
-                <section>
-                    <h2 className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-4 px-1">Debit & Credit Cards</h2>
-                    <div className="bg-slate-800 border border-white/5 rounded-2xl overflow-hidden divide-y divide-white/5">
-                        <div className="p-4 flex items-center justify-between hover:bg-white/5 transition-colors cursor-pointer">
-                            <div className="flex items-center gap-4">
-                                <div className="w-10 h-7 bg-slate-800 rounded flex items-center justify-center overflow-hidden">
-                                    <div className="w-full h-full flex items-center justify-center gap-0.5">
-                                        <div className="w-3 h-3 rounded-full bg-red-500 opacity-80"></div>
-                                        <div className="w-3 h-3 rounded-full bg-yellow-500 -ml-1.5 opacity-80"></div>
-                                    </div>
-                                </div>
-                                <div>
-                                    <p className="text-sm font-semibold">Mastercard Premium</p>
-                                    <p className="text-[11px] text-slate-500">Expires 09/27</p>
-                                </div>
-                            </div>
-                            <span className="material-icons-round text-slate-600 text-lg">chevron_right</span>
-                        </div>
-                        <div className="p-4 flex items-center justify-between hover:bg-white/5 transition-colors cursor-pointer">
-                            <div className="flex items-center gap-4">
-                                <div className="w-10 h-7 bg-[#1A1F71] rounded flex items-center justify-center italic font-black text-[10px] text-white tracking-tighter">VISA</div>
-                                <div>
-                                    <p className="text-sm font-semibold">Visa Business Platinum</p>
-                                    <p className="text-[11px] text-slate-500">Expires 12/25</p>
-                                </div>
-                            </div>
-                            <span className="material-icons-round text-slate-600 text-lg">chevron_right</span>
-                        </div>
-                    </div>
-                </section>
-
-                {/* Add New */}
-                <button className="w-full py-6 rounded-2xl border-2 border-dashed border-primary/20 flex flex-col items-center justify-center gap-2 group hover:bg-primary/5 transition-all">
+                {/* Add New Button */}
+                <button
+                    onClick={() => setIsModalOpen(true)}
+                    className="w-full py-6 rounded-2xl border-2 border-dashed border-primary/20 flex flex-col items-center justify-center gap-2 group hover:bg-primary/5 transition-all"
+                >
                     <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
                         <span className="material-icons-round">add</span>
                     </div>
@@ -133,6 +195,12 @@ export default function BankingPage() {
                     </div>
                 </div>
             </main>
+
+            <SelectBankModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onSelect={handleAddAccount}
+            />
         </div>
     );
 }

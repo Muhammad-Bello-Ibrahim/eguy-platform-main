@@ -23,9 +23,19 @@ export interface DatabaseUser {
     accountName: string;
     recipientCode?: string;
   };
+  linkedAccounts?: LinkedAccount[];
   elevatexActivated?: boolean;
   createdAt: Date
   updatedAt: Date
+}
+
+export interface LinkedAccount {
+  id: string;
+  bank: string;
+  accountNumber: string;
+  accountName: string;
+  isPrimary: boolean;
+  type?: "savings" | "checking";
 }
 
 export interface Transaction {
@@ -104,6 +114,20 @@ export class Database {
       { $set: { payoutAccount, updatedAt: new Date() } }
     );
     const user = await db.collection("users").findOne({ email });
+    if (!user) return null;
+    return {
+      ...user,
+      id: user._id.toString(),
+    };
+  }
+
+  static async updateUserPayoutAccountById(userId: string, payoutAccount: { bank: string; accountNumber: string; accountName: string }): Promise<DatabaseUser | null> {
+    const db = await Database.getDb();
+    await db.collection("users").updateOne(
+      { _id: new ObjectId(userId) },
+      { $set: { payoutAccount, updatedAt: new Date() } }
+    );
+    const user = await db.collection("users").findOne({ _id: new ObjectId(userId) });
     if (!user) return null;
     return {
       ...user,
@@ -780,5 +804,120 @@ export class Database {
       { token },
       { $set: { used: true, updatedAt: new Date() } }
     );
+  }
+  static async deleteUser(userId: string): Promise<boolean> {
+    try {
+      const db = await Database.getDb();
+      const userObjectId = new ObjectId(userId);
+
+      // 1. Delete Transactions
+      await db.collection("transactions").deleteMany({ userId });
+
+      // 2. Delete Notifications
+      await this.connectMongoose();
+      await Notification.deleteMany({ userId: userObjectId });
+
+      // 3. Delete Referrals
+      await db.collection("referrals").deleteMany({ referrerId: userId });
+      await db.collection("referrals").deleteMany({ referredId: userId });
+
+      // 4. Delete Tokens
+      await db.collection("verification_tokens").deleteMany({ userId });
+      await db.collection("password_reset_tokens").deleteMany({ userId });
+
+      // 5. Delete User
+      const result = await db.collection("users").deleteOne({ _id: userObjectId });
+
+      return result.deletedCount > 0;
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      throw error;
+    }
+  }
+
+  static async addLinkedAccount(userId: string, account: Omit<LinkedAccount, "id">): Promise<LinkedAccount> {
+    const db = await Database.getDb();
+    const newAccount: LinkedAccount = {
+      ...account,
+      id: new ObjectId().toString(),
+    };
+
+    // If this is the first account or set as primary, update other accounts
+    if (newAccount.isPrimary) {
+      await db.collection("users").updateOne(
+        { _id: new ObjectId(userId) },
+        { $set: { "linkedAccounts.$[].isPrimary": false } }
+      );
+    }
+
+    await db.collection("users").updateOne(
+      { _id: new ObjectId(userId) },
+      {
+        $push: { linkedAccounts: newAccount },
+        $set: { updatedAt: new Date() }
+      }
+    );
+
+    // If primary, update the main payoutAccount for compatibility
+    if (newAccount.isPrimary) {
+      await this.updateUserPayoutAccountById(userId, {
+        bank: newAccount.bank,
+        accountNumber: newAccount.accountNumber,
+        accountName: newAccount.accountName
+      });
+    }
+
+    return newAccount;
+  }
+
+  static async removeLinkedAccount(userId: string, accountId: string): Promise<void> {
+    const db = await Database.getDb();
+    await db.collection("users").updateOne(
+      { _id: new ObjectId(userId) },
+      {
+        $pull: { linkedAccounts: { id: accountId } },
+        $set: { updatedAt: new Date() }
+      }
+    );
+  }
+
+  static async setPrimaryLinkedAccount(userId: string, accountId: string): Promise<void> {
+    const db = await Database.getDb();
+
+    // 1. Unset primary for all
+    await db.collection("users").updateOne(
+      { _id: new ObjectId(userId) },
+      { $set: { "linkedAccounts.$[].isPrimary": false } }
+    );
+
+    // 2. Set primary for selected
+    await db.collection("users").updateOne(
+      { _id: new ObjectId(userId), "linkedAccounts.id": accountId },
+      { $set: { "linkedAccounts.$.isPrimary": true } }
+    );
+
+    // 3. Update root payoutAccount
+    const user = await this.findUserById(userId);
+    const account = user?.linkedAccounts?.find(a => a.id === accountId);
+
+    if (account) {
+      await this.updateUserPayoutAccountById(userId, {
+        bank: account.bank,
+        accountNumber: account.accountNumber,
+        accountName: account.accountName
+      });
+    }
+  }
+
+  // Overloaded to support ID or email
+  static async updateUserPayoutAccount(identifier: string, payoutAccount: { bank: string; accountNumber: string; accountName: string }, isId: boolean = false): Promise<DatabaseUser | null> {
+    const db = await Database.getDb();
+    const filter = isId ? { _id: new ObjectId(identifier) } : { email: identifier };
+
+    await db.collection("users").updateOne(
+      filter,
+      { $set: { payoutAccount, updatedAt: new Date() } }
+    );
+    return null; // Simplified return
   }
 }

@@ -220,7 +220,29 @@ export default function ProfilePage() {
                         <span className="material-icons-round text-lg">logout</span>
                         LOG OUT
                     </button>
-                    <p className="text-slate-600 dark:text-slate-500 text-[10px] uppercase tracking-[0.2em] font-bold">eGuy Fintech v2.4.1</p>
+
+                    <button
+                        onClick={async () => {
+                            if (confirm("Are you sure you want to delete your account? This action is permanent and cannot be undone.")) {
+                                try {
+                                    const res = await fetch("/api/user/delete", { method: "DELETE" });
+                                    if (res.ok) {
+                                        await handleSignOut();
+                                    } else {
+                                        alert("Failed to delete account. Please try again.");
+                                    }
+                                } catch (error) {
+                                    console.error("Delete account error", error);
+                                    alert("An error occurred.");
+                                }
+                            }
+                        }}
+                        className="text-xs text-slate-400 hover:text-red-500 font-medium transition-colors mt-2"
+                    >
+                        Deactivate / Delete Account
+                    </button>
+
+                    <p className="text-slate-600 dark:text-slate-500 text-[10px] uppercase tracking-[0.2em] font-bold mt-4">eGuy Fintech v2.4.1</p>
                 </div>
             </main>
         </div>
