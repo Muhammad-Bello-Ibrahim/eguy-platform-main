@@ -2,13 +2,21 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 export default function RegisterStep1() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [fullName, setFullName] = useState('');
     const [email, setEmail] = useState('');
     const [referralCode, setReferralCode] = useState('');
+
+    React.useEffect(() => {
+        const ref = searchParams.get('ref');
+        if (ref) {
+            setReferralCode(ref);
+        }
+    }, [searchParams]);
 
     const handleNext = (e: React.FormEvent) => {
         e.preventDefault();
