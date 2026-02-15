@@ -14,6 +14,8 @@ export interface DatabaseUser {
   status: "active" | "suspended" | "inactive"
   role: "user" | "admin"
   avatar?: string
+  dob?: string;
+  address?: string;
   payoutAccount?: {
     bank: string;
     accountNumber: string;

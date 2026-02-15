@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>eGuy - Reset Password</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#47f0d1",
+                        "background-light": "#f6f8f8",
+                        "background-dark": "#10221e", // Optimized based on user's #131321 request but following theme rules
+                        "eguy-dark": "#131321", // Specific user requested neutral
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "2xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Manrope', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .ios-blur {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .glow-effect {
+            box-shadow: 0 0 40px rgba(71, 240, 209, 0.15);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-[#131321] text-slate-900 dark:text-white min-h-screen flex items-center justify-center font-display antialiased">
+<!-- Main Mobile Container -->
+<div class="relative w-full max-w-[400px] h-screen sm:h-[844px] bg-background-light dark:bg-[#131321] overflow-hidden flex flex-col px-8 pt-16 pb-12 shadow-2xl sm:rounded-xl">
+<!-- Status Bar Decoration (iOS Style) -->
+<div class="absolute top-0 left-0 w-full h-12 flex items-center justify-between px-8 text-xs font-semibold opacity-60">
+<span>9:41</span>
+<div class="flex items-center space-x-1.5">
+<span class="material-icons text-[14px]">signal_cellular_alt</span>
+<span class="material-icons text-[14px]">wifi</span>
+<span class="material-icons text-[16px]">battery_full</span>
+</div>
+</div>
+<!-- Back Button Area -->
+<div class="mb-12">
+<button class="w-10 h-10 flex items-center justify-center rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors">
+<span class="material-icons">arrow_back_ios_new</span>
+</button>
+</div>
+<!-- Central Icon/Hero Section -->
+<div class="flex flex-col items-center justify-center mb-10">
+<div class="relative group">
+<!-- Soft Glow Background -->
+<div class="absolute inset-0 bg-primary/20 blur-[50px] rounded-full group-hover:bg-primary/30 transition-all"></div>
+<!-- Icon Container -->
+<div class="relative w-24 h-24 bg-[#1a1a2e] border border-primary/20 rounded-full flex items-center justify-center glow-effect overflow-hidden">
+<!-- Subtle Mesh Pattern -->
+<div class="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-primary via-transparent to-transparent"></div>
+<span class="material-icons text-5xl text-primary drop-shadow-[0_0_10px_rgba(71,240,209,0.5)]">lock_reset</span>
+</div>
+</div>
+<h1 class="mt-8 text-3xl font-extrabold tracking-tight text-center bg-gradient-to-b from-white to-white/70 bg-clip-text text-transparent">
+                Reset Password
+            </h1>
+<p class="mt-4 text-center text-slate-400 font-medium px-4 leading-relaxed">
+                Enter your registered email below to receive secure recovery instructions.
+            </p>
+</div>
+<!-- Form Section -->
+<div class="flex-grow flex flex-col space-y-6">
+<div class="space-y-2">
+<label class="block text-sm font-semibold text-primary/80 ml-1" for="email">Email Address</label>
+<div class="relative group">
+<div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+<span class="material-icons text-slate-500 text-xl group-focus-within:text-primary transition-colors">alternate_email</span>
+</div>
+<input class="block w-full pl-12 pr-4 py-5 bg-[#1a1a2e] border-0 ring-1 ring-white/10 rounded-2xl focus:ring-2 focus:ring-primary focus:bg-[#1f1f3a] text-white placeholder-slate-600 transition-all duration-300 outline-none" id="email" placeholder="name@example.com" type="email"/>
+</div>
+</div>
+<button class="w-full bg-primary hover:bg-primary/90 active:scale-[0.98] text-[#131321] font-bold py-5 rounded-full shadow-lg shadow-primary/20 transition-all duration-300 flex items-center justify-center space-x-2">
+<span>Send Recovery Link</span>
+<span class="material-icons text-lg">arrow_forward</span>
+</button>
+</div>
+<!-- Footer -->
+<div class="mt-auto pt-8 text-center">
+<a class="inline-flex items-center text-sm font-semibold text-slate-400 hover:text-primary transition-colors" href="#">
+<span class="material-icons text-base mr-1">keyboard_return</span>
+                Back to Login
+            </a>
+</div>
+<!-- Home Indicator (iOS Style) -->
+<div class="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-32 h-1.5 bg-white/20 rounded-full"></div>
+<!-- Abstract Background Decoration -->
+<div class="absolute -bottom-24 -left-24 w-64 h-64 bg-primary/5 rounded-full blur-[80px] pointer-events-none"></div>
+<div class="absolute -top-24 -right-24 w-64 h-64 bg-primary/5 rounded-full blur-[80px] pointer-events-none"></div>
+</div>
+</body></html>

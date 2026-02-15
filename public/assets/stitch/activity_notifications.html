@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Activity &amp; Notifications - eGuy</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              colors: {
+                "primary": "#47f0d1",
+                "background-light": "#f6f8f8",
+                "background-dark": "#10221e",
+                "card-dark": "#162e29",
+                "border-dark": "#1e3d36",
+              },
+              fontFamily: {
+                "display": ["Manrope", "sans-serif"]
+              },
+              borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+            },
+          },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Manrope', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .ios-blur {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 0px;
+            background: transparent;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display selection:bg-primary/30">
+<!-- Phone Container -->
+<div class="max-w-[430px] mx-auto min-h-screen relative flex flex-col bg-background-light dark:bg-background-dark shadow-2xl">
+<!-- Status Bar Spacer (iOS Style) -->
+<div class="h-12 w-full flex items-center justify-between px-8 pt-4">
+<span class="text-sm font-semibold">9:41</span>
+<div class="flex items-center space-x-2">
+<span class="material-icons-round text-sm">signal_cellular_alt</span>
+<span class="material-icons-round text-sm">wifi</span>
+<span class="material-icons-round text-sm">battery_full</span>
+</div>
+</div>
+<!-- Header -->
+<header class="sticky top-0 z-50 bg-background-light/80 dark:bg-background-dark/80 ios-blur px-6 pt-6 pb-4">
+<div class="flex items-center justify-between mb-2">
+<h1 class="text-3xl font-bold tracking-tight">Activity</h1>
+<div class="flex items-center gap-3">
+<button class="w-10 h-10 rounded-full flex items-center justify-center bg-primary/10 text-primary hover:bg-primary/20 transition-colors">
+<span class="material-icons-round text-2xl">settings</span>
+</button>
+</div>
+</div>
+<div class="flex items-center justify-between mt-6">
+<div class="flex gap-4">
+<button class="text-sm font-bold border-b-2 border-primary pb-1">All</button>
+<button class="text-sm font-medium text-slate-500 dark:text-slate-400 pb-1">Money</button>
+<button class="text-sm font-medium text-slate-500 dark:text-slate-400 pb-1">Network</button>
+</div>
+<button class="text-sm font-semibold text-primary hover:opacity-80 transition-opacity">
+                    Mark all as read
+                </button>
+</div>
+</header>
+<!-- Notification Feed -->
+<main class="flex-1 px-4 py-4 space-y-3 custom-scrollbar overflow-y-auto">
+<!-- Notification Item: Security Alert -->
+<div class="relative p-4 rounded-lg bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark flex gap-4 items-start group active:scale-[0.98] transition-all">
+<div class="absolute right-4 top-4 w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_rgba(71,240,209,0.8)]"></div>
+<div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+<span class="material-icons-round text-primary">security</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start mb-1">
+<p class="font-bold text-sm">Security Alert</p>
+<span class="text-[10px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Just Now</span>
+</div>
+<p class="text-sm text-slate-600 dark:text-slate-300 leading-snug">New login detected from iPhone 15 near London, UK. If this wasn't you, secure your account.</p>
+</div>
+</div>
+<!-- Notification Item: Earnings Received -->
+<div class="p-4 rounded-lg bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark flex gap-4 items-start group active:scale-[0.98] transition-all">
+<div class="w-12 h-12 rounded-full bg-primary flex items-center justify-center shrink-0">
+<span class="material-icons-round text-background-dark">payments</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start mb-1">
+<p class="font-bold text-sm">Earnings Received</p>
+<span class="text-[10px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">12m ago</span>
+</div>
+<p class="text-sm text-slate-600 dark:text-slate-300 leading-snug">+$50.00 added to your eGuy wallet from the Q3 Network Bonus.</p>
+</div>
+</div>
+<!-- Notification Item: New Referral Joined -->
+<div class="p-4 rounded-lg bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark flex gap-4 items-start group active:scale-[0.98] transition-all">
+<div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+<span class="material-icons-round text-primary">person_add</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start mb-1">
+<p class="font-bold text-sm">New Referral Joined</p>
+<span class="text-[10px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">2h ago</span>
+</div>
+<p class="text-sm text-slate-600 dark:text-slate-300 leading-snug">Welcome <span class="text-primary font-semibold">Sarah Jenkins</span> to your network! You've earned a growth point.</p>
+</div>
+</div>
+<div class="py-2 px-2">
+<p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Yesterday</p>
+</div>
+<!-- Notification Item: Subscription Renewed -->
+<div class="p-4 rounded-lg bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark flex gap-4 items-start opacity-70 group active:scale-[0.98] transition-all">
+<div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+<span class="material-icons-round text-primary">auto_renew</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start mb-1">
+<p class="font-bold text-sm">Subscription Renewed</p>
+<span class="text-[10px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Yesterday</span>
+</div>
+<p class="text-sm text-slate-600 dark:text-slate-300 leading-snug">Your Premium Plan is active for another month. Next billing: Oct 24.</p>
+</div>
+</div>
+<!-- Notification Item: System Update -->
+<div class="p-4 rounded-lg bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark flex gap-4 items-start opacity-70 group active:scale-[0.98] transition-all">
+<div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+<span class="material-icons-round text-primary">info</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start mb-1">
+<p class="font-bold text-sm">eGuy v2.4 Update</p>
+<span class="text-[10px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Yesterday</span>
+</div>
+<p class="text-sm text-slate-600 dark:text-slate-300 leading-snug">We've enhanced the network visualization tools. Check out the new dashboard features.</p>
+</div>
+</div>
+<!-- Placeholder for scrolling room -->
+<div class="h-20"></div>
+</main>
+<!-- Fixed Bottom Action Navigation -->
+<nav class="absolute bottom-0 left-0 right-0 px-6 py-4 bg-background-light/95 dark:bg-background-dark/95 ios-blur border-t border-slate-200 dark:border-border-dark flex justify-around items-center rounded-t-lg">
+<button class="flex flex-col items-center gap-1 text-slate-400">
+<span class="material-icons-round">dashboard</span>
+<span class="text-[10px] font-bold">Home</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-400">
+<span class="material-icons-round">account_balance_wallet</span>
+<span class="text-[10px] font-bold">Wallet</span>
+</button>
+<div class="relative -mt-12">
+<button class="w-16 h-16 rounded-full bg-primary text-background-dark shadow-[0_0_20px_rgba(71,240,209,0.4)] flex items-center justify-center border-4 border-background-light dark:border-background-dark">
+<span class="material-icons-round text-3xl">add</span>
+</button>
+</div>
+<button class="flex flex-col items-center gap-1 text-primary">
+<span class="material-icons-round">notifications</span>
+<span class="text-[10px] font-bold">Activity</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-400">
+<span class="material-icons-round">person</span>
+<span class="text-[10px] font-bold">Profile</span>
+</button>
+</nav>
+<!-- Home Indicator (iOS Style) -->
+<div class="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-32 h-1 bg-slate-400/30 rounded-full"></div>
+</div>
+<!-- Background Decoration -->
+<div class="fixed top-0 left-1/2 -translate-x-1/2 w-full h-full -z-10 pointer-events-none overflow-hidden max-w-[430px]">
+<div class="absolute -top-[10%] -right-[20%] w-[80%] h-[40%] bg-primary/5 blur-[120px] rounded-full"></div>
+<div class="absolute top-[40%] -left-[20%] w-[60%] h-[30%] bg-primary/5 blur-[100px] rounded-full"></div>
+</div>
+</body></html>

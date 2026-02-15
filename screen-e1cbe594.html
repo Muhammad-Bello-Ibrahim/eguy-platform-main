@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Notification Preferences - eGuy</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              colors: {
+                "primary": "#46F0D2",
+                "background-light": "#f6f8f8",
+                "background-dark": "#10221e",
+                "surface-dark": "#131321",
+                "neutral-dark": "#1e302c",
+              },
+              fontFamily: {
+                "display": ["Manrope"]
+              },
+              borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "2xl": "2rem", "full": "9999px"},
+            },
+          },
+        }
+    </script>
+<style type="text/tailwindcss">
+        body {
+            font-family: 'Manrope', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .ios-blur {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .safe-bottom {
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+        .toggle-checked .toggle-dot {
+            transform: translateX(1.25rem);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-dark text-slate-100 font-display min-h-screen">
+<header class="sticky top-0 z-50 bg-background-dark/80 ios-blur px-6 pt-14 pb-4 flex items-center justify-between border-b border-white/5">
+<button class="w-10 h-10 flex items-center justify-start text-slate-400">
+<span class="material-icons-round">arrow_back_ios</span>
+</button>
+<h1 class="text-lg font-bold">Notification Preferences</h1>
+<div class="w-10"></div>
+</header>
+<main class="px-5 pt-6 space-y-8 pb-32">
+<section>
+<div class="flex items-center gap-2 mb-3 px-1">
+<span class="material-symbols-outlined text-primary text-xl">notifications_active</span>
+<h2 class="text-xs font-bold uppercase tracking-widest text-slate-500">Push Notifications</h2>
+</div>
+<div class="bg-surface-dark border border-white/5 rounded-2xl overflow-hidden">
+<div class="flex items-center justify-between p-4 border-b border-white/5">
+<div class="flex flex-col">
+<p class="text-[15px] font-semibold">Network Activity</p>
+<p class="text-xs text-slate-500">New followers and interactions</p>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-slate-700 peer-checked:bg-primary rounded-full transition-colors"></div>
+<div class="absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform peer-checked:translate-x-5"></div>
+</label>
+</div>
+<div class="flex items-center justify-between p-4 border-b border-white/5">
+<div class="flex flex-col">
+<p class="text-[15px] font-semibold">Earnings &amp; Payouts</p>
+<p class="text-xs text-slate-500">Direct deposits and bonuses</p>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-slate-700 peer-checked:bg-primary rounded-full transition-colors"></div>
+<div class="absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform peer-checked:translate-x-5"></div>
+</label>
+</div>
+<div class="flex items-center justify-between p-4 border-b border-white/5">
+<div class="flex flex-col">
+<p class="text-[15px] font-semibold">Security Alerts</p>
+<p class="text-xs text-slate-500">Logins and account changes</p>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-slate-700 peer-checked:bg-primary rounded-full transition-colors"></div>
+<div class="absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform peer-checked:translate-x-5"></div>
+</label>
+</div>
+<div class="flex items-center justify-between p-4">
+<div class="flex flex-col">
+<p class="text-[15px] font-semibold">Marketing</p>
+<p class="text-xs text-slate-500">New features and promotions</p>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-slate-700 peer-checked:bg-primary rounded-full transition-colors"></div>
+<div class="absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform peer-checked:translate-x-5"></div>
+</label>
+</div>
+</div>
+</section>
+<section>
+<div class="flex items-center gap-2 mb-3 px-1">
+<span class="material-symbols-outlined text-primary text-xl">mail</span>
+<h2 class="text-xs font-bold uppercase tracking-widest text-slate-500">Email Notifications</h2>
+</div>
+<div class="bg-surface-dark border border-white/5 rounded-2xl overflow-hidden">
+<div class="flex items-center justify-between p-4 border-b border-white/5">
+<div class="flex flex-col">
+<p class="text-[15px] font-semibold">Network Activity</p>
+<p class="text-xs text-slate-500">Weekly network summary</p>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-slate-700 peer-checked:bg-primary rounded-full transition-colors"></div>
+<div class="absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform peer-checked:translate-x-5"></div>
+</label>
+</div>
+<div class="flex items-center justify-between p-4 border-b border-white/5">
+<div class="flex flex-col">
+<p class="text-[15px] font-semibold">Earnings &amp; Payouts</p>
+<p class="text-xs text-slate-500">Monthly tax invoices</p>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-slate-700 peer-checked:bg-primary rounded-full transition-colors"></div>
+<div class="absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform peer-checked:translate-x-5"></div>
+</label>
+</div>
+<div class="flex items-center justify-between p-4 border-b border-white/5">
+<div class="flex flex-col">
+<p class="text-[15px] font-semibold">Security Alerts</p>
+<p class="text-xs text-slate-500">Critical account changes</p>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-slate-700 peer-checked:bg-primary rounded-full transition-colors"></div>
+<div class="absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform peer-checked:translate-x-5"></div>
+</label>
+</div>
+<div class="flex items-center justify-between p-4">
+<div class="flex flex-col">
+<p class="text-[15px] font-semibold">Marketing</p>
+<p class="text-xs text-slate-500">Product updates &amp; insights</p>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-slate-700 peer-checked:bg-primary rounded-full transition-colors"></div>
+<div class="absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform peer-checked:translate-x-5"></div>
+</label>
+</div>
+</div>
+</section>
+<section>
+<div class="flex items-center gap-2 mb-3 px-1">
+<span class="material-symbols-outlined text-primary text-xl">chat_bubble</span>
+<h2 class="text-xs font-bold uppercase tracking-widest text-slate-500">SMS Notifications</h2>
+</div>
+<div class="bg-surface-dark border border-white/5 rounded-2xl overflow-hidden">
+<div class="flex items-center justify-between p-4 border-b border-white/5">
+<div class="flex flex-col">
+<p class="text-[15px] font-semibold">Network Activity</p>
+<p class="text-xs text-slate-500">Urgent connection requests</p>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-slate-700 peer-checked:bg-primary rounded-full transition-colors"></div>
+<div class="absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform peer-checked:translate-x-5"></div>
+</label>
+</div>
+<div class="flex items-center justify-between p-4 border-b border-white/5">
+<div class="flex flex-col">
+<p class="text-[15px] font-semibold">Earnings &amp; Payouts</p>
+<p class="text-xs text-slate-500">Transaction confirmations</p>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-slate-700 peer-checked:bg-primary rounded-full transition-colors"></div>
+<div class="absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform peer-checked:translate-x-5"></div>
+</label>
+</div>
+<div class="flex items-center justify-between p-4 border-b border-white/5">
+<div class="flex flex-col">
+<p class="text-[15px] font-semibold">Security Alerts</p>
+<p class="text-xs text-slate-500">Login verification codes</p>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-slate-700 peer-checked:bg-primary rounded-full transition-colors"></div>
+<div class="absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform peer-checked:translate-x-5"></div>
+</label>
+</div>
+<div class="flex items-center justify-between p-4">
+<div class="flex flex-col">
+<p class="text-[15px] font-semibold">Marketing</p>
+<p class="text-xs text-slate-500">Limited time offers</p>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-slate-700 peer-checked:bg-primary rounded-full transition-colors"></div>
+<div class="absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform peer-checked:translate-x-5"></div>
+</label>
+</div>
+</div>
+</section>
+<p class="text-center text-slate-600 text-[10px] uppercase tracking-[0.2em] font-bold py-4">
+            Changes are saved automatically
+        </p>
+</main>
+<nav class="fixed bottom-0 left-0 right-0 bg-background-dark/80 ios-blur border-t border-white/5 safe-bottom z-50">
+<div class="flex justify-around items-center h-20 px-4">
+<button class="flex flex-col items-center gap-1 text-slate-500">
+<span class="material-icons-round">dashboard</span>
+<span class="text-[10px] font-bold">HOME</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-500">
+<span class="material-icons-round">account_balance_wallet</span>
+<span class="text-[10px] font-bold">WALLET</span>
+</button>
+<div class="relative -top-8">
+<button class="w-14 h-14 bg-primary text-background-dark rounded-2xl flex items-center justify-center shadow-lg shadow-primary/30 border-4 border-background-dark">
+<span class="material-icons-round text-3xl">add</span>
+</button>
+</div>
+<button class="flex flex-col items-center gap-1 text-slate-500">
+<span class="material-icons-round">insights</span>
+<span class="text-[10px] font-bold">GROWTH</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-primary">
+<span class="material-icons-round">person</span>
+<span class="text-[10px] font-bold">PROFILE</span>
+</button>
+</div>
+</nav>
+
+</body></html>

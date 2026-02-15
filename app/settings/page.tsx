@@ -73,7 +73,7 @@ export default function SettingsPage() {
   async function handleLogout() {
     await fetch("/api/auth/signout", { method: "POST" });
     window.sessionStorage.clear();
-    router.push("/signin");
+    router.push("/login");
   }
 
   if (loading) {

@@ -159,7 +159,7 @@ function VerifyPromptContent() {
             </div>
           </div>
 
-          <Link href="/signin" className="block w-full">
+          <Link href="/login" className="block w-full">
             <Button className="w-full h-12 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white font-medium shadow-lg hover:shadow-zinc-500/20 transition-all">
               Back to Login <ArrowRight className="ml-2 h-4 w-4" />
             </Button>

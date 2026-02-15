@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Buy Airtime and Data - eGuy</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#47f0d1",
+                        "background-light": "#f6f8f8",
+                        "background-dark": "#10221e", // Neutral derived from primary hue
+                        "surface-dark": "#162b26",    // Lighter dark for cards
+                        "input-dark": "#1d3831",      // Input fields
+                    },
+                    fontFamily: {
+                        "display": ["Manrope"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "2xl": "2rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Manrope', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen flex justify-center">
+<!-- Mobile Container (iPhone Pro Max Aspect) -->
+<div class="w-full max-w-[430px] min-h-screen bg-background-light dark:bg-background-dark relative overflow-hidden flex flex-col">
+<!-- Header -->
+<header class="pt-12 pb-6 px-6 flex items-center justify-between sticky top-0 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md z-20">
+<button class="w-10 h-10 flex items-center justify-center rounded-full bg-slate-200/50 dark:bg-primary/10 text-slate-900 dark:text-primary">
+<span class="material-icons">arrow_back_ios_new</span>
+</button>
+<h1 class="text-xl font-bold tracking-tight">Airtime &amp; Data</h1>
+<button class="w-10 h-10 flex items-center justify-center rounded-full bg-slate-200/50 dark:bg-primary/10 text-slate-900 dark:text-primary">
+<span class="material-icons">history</span>
+</button>
+</header>
+<!-- Main Scrollable Content -->
+<main class="flex-1 px-6 pb-32 overflow-y-auto no-scrollbar">
+<!-- Segmented Control -->
+<div class="bg-slate-200/50 dark:bg-surface-dark p-1.5 rounded-xl flex mb-8">
+<button class="flex-1 py-2.5 rounded-lg bg-white dark:bg-primary text-slate-900 font-bold shadow-sm transition-all">Airtime</button>
+<button class="flex-1 py-2.5 rounded-lg text-slate-500 dark:text-slate-400 font-medium transition-all">Data Bundle</button>
+</div>
+<!-- Provider Selection -->
+<section class="mb-8">
+<label class="text-sm font-semibold text-slate-500 dark:text-primary/60 uppercase tracking-wider mb-4 block">Select Network</label>
+<div class="flex gap-4 overflow-x-auto no-scrollbar pb-2">
+<!-- MTN -->
+<div class="flex-shrink-0 flex flex-col items-center gap-2 group">
+<div class="w-16 h-16 rounded-2xl bg-white dark:bg-surface-dark p-0.5 border-2 border-primary shadow-[0_0_15px_rgba(71,240,209,0.2)]">
+<div class="w-full h-full rounded-xl overflow-hidden bg-yellow-400 flex items-center justify-center">
+<img class="w-10 h-10 object-contain" data-alt="Yellow MTN Network Logo Icon" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAp4yIYJPjoON8-v5ltIZ3VYDYZigeln4mKHp-_O3ZIoHUH34nuM63UioryR-1hgMjQX8ujc1CZncHR4nxxTL7wwBA0W7SlbQdvtgl_vo9xf0p2bCjULdw4PwCmgeVBCBmwRdthUOQTYpwXlN7PA48gSOpilsA3OXr_JXEly_p6PBg0pXeU4LJbAcdkLLgOJE4xKdhj65nRzBv-L4XjyxGM-LDdmJ2V3aRvgSVanYPMo8fEFZiE4XrJPgVEjPDjdwKARVo6d6sView"/>
+</div>
+</div>
+<span class="text-xs font-bold text-primary">MTN</span>
+</div>
+<!-- Airtel -->
+<div class="flex-shrink-0 flex flex-col items-center gap-2">
+<div class="w-16 h-16 rounded-2xl bg-white dark:bg-surface-dark p-0.5 border-2 border-transparent hover:border-primary/30 transition-all">
+<div class="w-full h-full rounded-xl overflow-hidden bg-red-600 flex items-center justify-center">
+<img class="w-10 h-10 object-contain" data-alt="Red Airtel Network Logo Icon" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDuKygW1haUGU9lTEY_Vb0fobA2bS2gv39IdBTdTESvaQoxahn_rNDNQgaiLq0YMyAOER56rdPYWoqvsi3jNi5r5EvRP9PYiLrH3tnb30y5pw03fO2TYkKiZHzAF-VktCXjYZe_U-VFSfrlZvxHSLIv-BFZIyNUeLoIumfWnWxa7VhBZXpAvOaYxr2fIKpMeg6lP25carEL_73v8XjthICt21_Srn-_Td1yEs9IW7MBBbqkSmrcfPZ_d1BLI_MeKo8SnnF1QbzjzYI"/>
+</div>
+</div>
+<span class="text-xs font-medium text-slate-500">Airtel</span>
+</div>
+<!-- Glo -->
+<div class="flex-shrink-0 flex flex-col items-center gap-2">
+<div class="w-16 h-16 rounded-2xl bg-white dark:bg-surface-dark p-0.5 border-2 border-transparent hover:border-primary/30 transition-all">
+<div class="w-full h-full rounded-xl overflow-hidden bg-green-600 flex items-center justify-center">
+<img class="w-10 h-10 object-contain" data-alt="Green Glo Network Logo Icon" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBZYyswYfQHgXdBzCmuyTK_rhO6d9iZKQBSAveqS46p_kH4J5ALUyE4iLVNPXRqFtddWUMEZREq6uP9c05_ejCpyhTJG28if2rZREiiJDUS-nuIqL6CDu6TyKreyTRBZd45p4Tx_hvtAgW_fjyoob6Mi5InHLHSotQpFQMUlGp1lF7ss6UmwTkjVQoXvfXBujel51LLjAVJzFxQyRVVU7LFJbl2nw0OTTSQfpYb7F-WD8UOcoGK7WMna4EeS3ECRz2x08Dho8dhu4Q"/>
+</div>
+</div>
+<span class="text-xs font-medium text-slate-500">Glo</span>
+</div>
+<!-- 9Mobile -->
+<div class="flex-shrink-0 flex flex-col items-center gap-2">
+<div class="w-16 h-16 rounded-2xl bg-white dark:bg-surface-dark p-0.5 border-2 border-transparent hover:border-primary/30 transition-all">
+<div class="w-full h-full rounded-xl overflow-hidden bg-emerald-900 flex items-center justify-center">
+<img class="w-10 h-10 object-contain" data-alt="Dark Green 9mobile Network Logo Icon" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD1ocbowfTYFwy-5lNNBTTJdiH4b-Hh4RMX1m9_fqX1I0L_gVlmh0O-gZr7elRNIh_wCc4HPhmHl7gctOUcGUCXIlw99KFkWBuSLEtNv5NwzVJ8ZhUzW4DeP2nCQ2MXTTkdo_s7Nt0D-DMYRopdDrxxlUJ5yzMWUcCh1XW1MmFpKPCM293NbVxv7C1HpkBo1dCEu4JC3CVw0VhO6twVlesbumI0BWc_LQC_TEGJ-1AVDQ4tXWsoD324EHer178OuM5NDKbIKxCucX8"/>
+</div>
+</div>
+<span class="text-xs font-medium text-slate-500">9Mobile</span>
+</div>
+</div>
+</section>
+<!-- Input Fields Card -->
+<section class="space-y-6">
+<!-- Phone Number -->
+<div class="space-y-2">
+<label class="text-sm font-semibold text-slate-500 dark:text-slate-400 ml-1">Phone Number</label>
+<div class="relative group">
+<input class="w-full bg-slate-100 dark:bg-input-dark border-none rounded-2xl py-4 px-5 text-lg font-bold placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:ring-2 focus:ring-primary transition-all" placeholder="0801 234 5678" type="tel"/>
+<button class="absolute right-4 top-1/2 -translate-y-1/2 text-primary bg-primary/10 p-2 rounded-xl">
+<span class="material-icons text-xl">contact_phone</span>
+</button>
+</div>
+</div>
+<!-- Amount Selection -->
+<div class="space-y-4">
+<div class="flex items-center justify-between ml-1">
+<label class="text-sm font-semibold text-slate-500 dark:text-slate-400">Select Amount</label>
+<span class="text-xs text-primary font-bold">Balance: $1,240.50</span>
+</div>
+<div class="grid grid-cols-3 gap-3">
+<button class="py-4 rounded-2xl bg-slate-100 dark:bg-surface-dark text-slate-900 dark:text-slate-100 font-bold border-2 border-transparent hover:border-primary transition-all">$5</button>
+<button class="py-4 rounded-2xl bg-primary/20 dark:bg-primary/20 text-primary font-bold border-2 border-primary transition-all">$10</button>
+<button class="py-4 rounded-2xl bg-slate-100 dark:bg-surface-dark text-slate-900 dark:text-slate-100 font-bold border-2 border-transparent hover:border-primary transition-all">$20</button>
+<button class="py-4 rounded-2xl bg-slate-100 dark:bg-surface-dark text-slate-900 dark:text-slate-100 font-bold border-2 border-transparent hover:border-primary transition-all">$50</button>
+<button class="py-4 rounded-2xl bg-slate-100 dark:bg-surface-dark text-slate-900 dark:text-slate-100 font-bold border-2 border-transparent hover:border-primary transition-all">$100</button>
+<button class="py-4 rounded-2xl bg-slate-100 dark:bg-surface-dark text-slate-900 dark:text-slate-100 font-bold border-2 border-transparent hover:border-primary transition-all">Other</button>
+</div>
+</div>
+</section>
+<!-- Recent Top-ups -->
+<section class="mt-10">
+<div class="flex items-center justify-between mb-4">
+<h3 class="font-bold text-lg">Recent Top-ups</h3>
+<button class="text-sm font-bold text-primary">View all</button>
+</div>
+<div class="space-y-3">
+<!-- Recent 1 -->
+<div class="flex items-center justify-between p-4 bg-slate-100 dark:bg-surface-dark rounded-2xl border border-white/5">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold">M</div>
+<div>
+<p class="font-bold text-sm">Mom</p>
+<p class="text-xs text-slate-500">0803 456 7890 • MTN</p>
+</div>
+</div>
+<button class="px-3 py-1.5 rounded-lg bg-primary/10 text-primary text-xs font-bold">Repeat</button>
+</div>
+<!-- Recent 2 -->
+<div class="flex items-center justify-between p-4 bg-slate-100 dark:bg-surface-dark rounded-2xl border border-white/5">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-slate-300 dark:bg-slate-700 flex items-center justify-center text-slate-500 font-bold overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="User profile photo avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6NIdLe7ImEvENbYaLhYxumDOlLF21LAt1V5i24QJErY6x5ms4mtAC5ZxmhTCQ9-iVnX-BwCCFaUdipDp04pSi45jw8A4CnhnLvX7Gh32JSO-BzwAYqHv1fb24ITbPMEoipn9LR_yBAw5WuR0473aNsLjEhe3Zva46CRDlFkqU9iv95dbCzCa7wfcbRl1QCOwsMiPwOHc6I1OlG2cV6Ed6n7evX1Zzvn6b8nIl_njxAf1SexdHVlBEuw8GYINAzaST3dyxWVwjaD8"/>
+</div>
+<div>
+<p class="font-bold text-sm">Self</p>
+<p class="text-xs text-slate-500">0901 888 2211 • Airtel</p>
+</div>
+</div>
+<button class="px-3 py-1.5 rounded-lg bg-primary/10 text-primary text-xs font-bold">Repeat</button>
+</div>
+</div>
+</section>
+</main>
+<!-- Fixed Footer Action -->
+<footer class="absolute bottom-0 left-0 w-full p-6 pt-10 bg-gradient-to-t from-background-light dark:from-background-dark via-background-light dark:via-background-dark to-transparent z-30">
+<div class="flex items-center justify-between mb-4 px-2">
+<span class="text-sm font-medium text-slate-500">Transaction Fee</span>
+<span class="text-sm font-bold text-slate-900 dark:text-slate-100">$0.10</span>
+</div>
+<button class="w-full bg-primary text-background-dark py-4 rounded-2xl font-extrabold text-lg shadow-[0_10px_30px_rgba(71,240,209,0.3)] active:scale-95 transition-transform flex items-center justify-center gap-2">
+                Buy Now — $10.10
+                <span class="material-icons">arrow_forward</span>
+</button>
+<div class="h-6 mt-4 flex justify-center">
+<div class="w-32 h-1.5 bg-slate-400/20 dark:bg-white/10 rounded-full"></div>
+</div>
+</footer>
+<!-- Floating Abstract Background Elements -->
+<div class="absolute -top-24 -right-24 w-64 h-64 bg-primary/5 rounded-full blur-3xl pointer-events-none"></div>
+<div class="absolute top-1/2 -left-32 w-80 h-80 bg-primary/5 rounded-full blur-3xl pointer-events-none"></div>
+</div>
+</body></html>

@@ -4,7 +4,7 @@ import { hashPassword, createSession, generateReferralCode } from "@/lib/auth"
 
 export async function POST(request: NextRequest) {
   try {
-    const { fullName, email, phone, password, referralCode } = await request.json()
+    const { fullName, email, phone, password, referralCode, dob, address } = await request.json()
 
     // Validate input
     if (!fullName || !email || !phone || !password) {
@@ -40,6 +40,8 @@ export async function POST(request: NextRequest) {
       email,
       phone,
       passwordHash,
+      dob,
+      address,
       walletBalance: 0,
       referralCode: generateReferralCode(),
       referredBy,
@@ -69,16 +71,16 @@ export async function POST(request: NextRequest) {
 
     // Create session
     await createSession({
-  id: user.id,
-  fullName: user.fullName,
-  email: user.email,
-  phone: user.phone,
-  walletBalance: user.walletBalance,
-  referralCode: user.referralCode,
-  referredBy: user.referredBy,
-  kycStatus: user.kycStatus,
-  status: user.status,
-  role: user.role,
+      id: user.id,
+      fullName: user.fullName,
+      email: user.email,
+      phone: user.phone,
+      walletBalance: user.walletBalance,
+      referralCode: user.referralCode,
+      referredBy: user.referredBy,
+      kycStatus: user.kycStatus,
+      status: user.status,
+      role: user.role,
     })
 
     return NextResponse.json({

@@ -37,7 +37,7 @@ export function ReferralStats() {
   // Use referral code from stats or fallback
   const referralCode = stats?.referralCode || "EGUY123"
   const referralLink = stats?.referralCode
-    ? `${origin}/signup?ref=${referralCode}`
+    ? `${origin}/register?ref=${referralCode}`
     : "Loading..."
 
   useEffect(() => {

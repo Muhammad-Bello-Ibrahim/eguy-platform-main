@@ -203,4 +203,35 @@
       padding-right: 1rem !important;
     }
   }
+
+  /* Stitch Landing Page Utilities */
+  .network-bg {
+    background-image: radial-gradient(circle at 2px 2px, rgba(70, 240, 210, 0.05) 1px, transparent 0);
+    background-size: 24px 24px;
+  }
+  .glass-card {
+    background: rgba(28, 28, 45, 0.7);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+@theme inline {
+  /* ... existing theme ... */
+  --color-primary: #46F0D2; /* Overriding primary for landing page mostly, check impact */
+  /* If we want to keep existing primary, we should name this something else or scope it */
+  /* The Stitch design uses #46F0D2 as primary. */
+  
+  --color-landing-primary: #46F0D2;
+  --color-landing-background-light: #F9FAFB;
+  --color-landing-background-dark: #131321;
+  --color-landing-card-dark: #1C1C2D;
+  --color-landing-accent-cream: #FBE2B4;
 }

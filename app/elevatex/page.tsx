@@ -62,7 +62,7 @@ export default function ElevatexPage() {
 	const [referralsPerLevel, setReferralsPerLevel] = useState<number[]>([0, 0, 0, 0, 0]);
 	const [progressPercent, setProgressPercent] = useState(0);
 
-	const referralLink = referralCode ? `${window.location.origin}/signup?ref=${referralCode}` : "";
+	const referralLink = referralCode ? `${window.location.origin}/register?ref=${referralCode}` : "";
 	const [copied, setCopied] = useState(false);
 
 	const handleCopyReferral = () => {

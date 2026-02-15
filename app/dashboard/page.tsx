@@ -258,13 +258,13 @@ export default function DashboardPage() {
                   icon: AirtimeIcon,
                   label: "Airtime",
                   color: "bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 border border-blue-100",
-                  onClick: () => setIsAirtimeModalOpen(true)
+                  onClick: () => router.push('/services/airtime')
                 },
                 {
                   icon: DataIcon,
                   label: "Data",
                   color: "bg-purple-500/10 hover:bg-purple-500/20 text-purple-600 border border-purple-100",
-                  onClick: () => setIsDataModalOpen(true)
+                  onClick: () => router.push('/services/airtime')
                 },
                 {
                   icon: ElectricityIcon,
@@ -276,7 +276,7 @@ export default function DashboardPage() {
                   icon: ExamPinIcon,
                   label: "Cable TV",
                   color: "bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 border border-emerald-100",
-                  onClick: () => setIsBillsModalOpen(true)
+                  onClick: () => router.push('/services/cable')
                 },
                 {
                   icon: CableIcon,
@@ -318,7 +318,7 @@ export default function DashboardPage() {
         onClose={() => setIsDepositModalOpen(false)}
         onSuccess={handleTransactionSuccess}
       />
-      <AirtimeModal
+      {/* <AirtimeModal
         isOpen={isAirtimeModalOpen}
         onClose={() => setIsAirtimeModalOpen(false)}
         onSuccess={handleTransactionSuccess}
@@ -327,7 +327,7 @@ export default function DashboardPage() {
         isOpen={isDataModalOpen}
         onClose={() => setIsDataModalOpen(false)}
         onSuccess={handleTransactionSuccess}
-      />
+      /> */}
       <BillsModal
         isOpen={isBillsModalOpen}
         onClose={() => setIsBillsModalOpen(false)}
