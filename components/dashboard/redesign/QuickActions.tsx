@@ -3,11 +3,17 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 
+import { QuickActionsSkeleton } from '@/components/dashboard/skeletons';
+
 interface QuickActionsProps {
     onAction: (actionType: string) => void;
+    isLoading?: boolean;
 }
 
-export function QuickActions({ onAction }: QuickActionsProps) {
+export function QuickActions({ onAction, isLoading }: QuickActionsProps) {
+    if (isLoading) {
+        return <QuickActionsSkeleton />;
+    }
     const router = useRouter();
 
     const actions = [

@@ -175,6 +175,7 @@ export default function DashboardPage() {
         <BalanceCard
           balance={user?.walletBalance || 0}
           onWithdraw={() => setIsWithdrawModalOpen(true)}
+          isLoading={isLoadingUser}
         />
 
         {/* Quick Actions Horizontal Scroll */}
@@ -184,6 +185,7 @@ export default function DashboardPage() {
               // Handle more actions logic or routing
             }
           }}
+          isLoading={isLoadingUser}
         />
 
         {/* ElevateX Stats Section */}

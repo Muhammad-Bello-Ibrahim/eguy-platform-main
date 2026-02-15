@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
+import { TransactionItemSkeleton } from '@/components/dashboard/skeletons';
 
 interface Transaction {
     id: string;
@@ -82,15 +83,7 @@ export function RecentActivity({ transactions, isLoading }: RecentActivityProps)
                 {isLoading ? (
                     // Skeleton loading
                     [...Array(3)].map((_, i) => (
-                        <div key={i} className="flex items-center justify-between p-4 bg-white dark:bg-card-dark rounded-xl border border-slate-200 dark:border-slate-800/30 animate-pulse">
-                            <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 rounded-full bg-slate-200 dark:bg-slate-800"></div>
-                                <div className="space-y-2">
-                                    <div className="h-4 w-24 bg-slate-200 dark:bg-slate-800 rounded"></div>
-                                    <div className="h-3 w-32 bg-slate-200 dark:bg-slate-800 rounded"></div>
-                                </div>
-                            </div>
-                        </div>
+                        <TransactionItemSkeleton key={i} />
                     ))
                 ) : transactions.length === 0 ? (
                     <div className="text-center py-8 text-slate-500 text-sm bg-white dark:bg-card-dark rounded-xl border border-dashed border-slate-200 dark:border-slate-800">

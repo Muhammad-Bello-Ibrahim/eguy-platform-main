@@ -228,7 +228,7 @@ export class Database {
 
   static async getUserTransactions(userId: string): Promise<Transaction[]> {
     const db = await Database.getDb()
-    const transactions = await db.collection("transactions").find({ userId }).toArray()
+    const transactions = await db.collection("transactions").find({ userId }).sort({ createdAt: -1 }).toArray()
     return transactions.map((t: any) => ({ ...t, id: t._id.toString() }))
   }
 

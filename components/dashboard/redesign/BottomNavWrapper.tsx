@@ -9,7 +9,6 @@ export default function BottomNavWrapper() {
     // Define paths where BottomNav should be visible
     // Includes /dashboard, /profile, /elevatex, /wallet (if it exists or just for safety)
     const showBottomNav =
-        pathname === '/' || // Home might redirect to dashboard, but good to have
         pathname.startsWith('/dashboard') ||
         pathname.startsWith('/profile') ||
         pathname.startsWith('/elevatex') ||

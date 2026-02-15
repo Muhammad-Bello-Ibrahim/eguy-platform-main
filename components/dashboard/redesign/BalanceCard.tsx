@@ -1,13 +1,36 @@
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+
+import { BalanceCardSkeleton } from '@/components/dashboard/skeletons';
 
 interface BalanceCardProps {
     balance: number;
     onWithdraw: () => void;
+    isLoading?: boolean;
 }
 
-export function BalanceCard({ balance, onWithdraw }: BalanceCardProps) {
+export function BalanceCard({ balance, onWithdraw, isLoading }: BalanceCardProps) {
+    if (isLoading) {
+        return <BalanceCardSkeleton />;
+    }
+    const [showBalance, setShowBalance] = useState(true);
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+        const saved = localStorage.getItem('showBalance');
+        if (saved !== null) {
+            setShowBalance(JSON.parse(saved));
+        }
+    }, []);
+
+    const toggleBalance = () => {
+        const newState = !showBalance;
+        setShowBalance(newState);
+        localStorage.setItem('showBalance', JSON.stringify(newState));
+    };
+
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('en-NG', {
             style: 'currency',
@@ -24,8 +47,20 @@ export function BalanceCard({ balance, onWithdraw }: BalanceCardProps) {
             <div className="relative z-10 flex flex-col gap-4">
                 <div className="flex justify-between items-start">
                     <div>
-                        <p className="text-slate-400 text-sm font-medium mb-1">Total Balance</p>
-                        <h2 className="text-3xl font-extrabold text-primary">{formatCurrency(balance)}</h2>
+                        <div className="flex items-center gap-2 mb-1">
+                            <p className="text-slate-400 text-sm font-medium">Total Balance</p>
+                            <button
+                                onClick={toggleBalance}
+                                className="text-slate-400 hover:text-primary transition-colors flex items-center justify-center ml-1"
+                            >
+                                <span className="material-icons-round text-sm">
+                                    {showBalance ? 'visibility' : 'visibility_off'}
+                                </span>
+                            </button>
+                        </div>
+                        <h2 className="text-3xl font-extrabold text-primary">
+                            {mounted && !showBalance ? '₦ ****' : formatCurrency(balance)}
+                        </h2>
 
                         {/* Static trend for now, can be dynamic later */}
                         <div className="flex items-center gap-1 mt-1 text-emerald-400 text-xs font-bold">

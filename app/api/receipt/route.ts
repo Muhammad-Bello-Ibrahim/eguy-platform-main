@@ -85,7 +85,10 @@ const createTransporter = () => {
 export async function GET(request: NextRequest) {
   try {
     const session = await getSession()
-    if (!session || !session.user?.email) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const userEmail = (session?.user as any)?.email;
+
+    if (!session || !userEmail) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
@@ -96,7 +99,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Transaction ID required" }, { status: 400 })
     }
 
-    const user = await Database.findUserByEmail(session.user.email)
+    const user = await Database.findUserByEmail(userEmail)
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 })
     }
@@ -145,7 +148,10 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const session = await getSession()
-    if (!session || !session.user?.email) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const userEmail = (session?.user as any)?.email;
+
+    if (!session || !userEmail) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
@@ -156,7 +162,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Transaction ID required" }, { status: 400 })
     }
 
-    const user = await Database.findUserByEmail(session.user.email)
+    const user = await Database.findUserByEmail(userEmail)
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 })
     }
@@ -273,7 +279,7 @@ export async function POST(request: NextRequest) {
       // Generate receipt for download
       const pdfBuffer = await generateReceiptPDF(transactionId, user, transaction)
 
-      return new NextResponse(pdfBuffer, {
+      return new NextResponse(pdfBuffer as any, {
         headers: {
           'Content-Type': 'application/pdf',
           'Content-Disposition': `attachment; filename=eGuy-Digital-Wallet-receipt-${transactionId}.pdf`
@@ -297,237 +303,230 @@ async function generateReceiptPDF(transactionId: string, user: any, transaction:
   const pageWidth = pdf.internal.pageSize.getWidth();
   const pageHeight = pdf.internal.pageSize.getHeight();
   const margin = 20;
-  let yPosition = margin;
 
-  // Add watermark background (subtle text across the page)
-  pdf.setTextColor(220, 220, 220); // Very light gray
-  pdf.setFontSize(30);
-  pdf.setFont('helvetica', 'bold');
-
-  // Watermark text repeated across the page
-  const watermarkText = 'eGuy';
-  const watermarkWidth = pdf.getTextWidth(watermarkText);
-
-  // Position watermarks diagonally across the page (simpler approach)
-  for (let i = 50; i < pageHeight; i += 100) {
-    for (let j = 0; j < pageWidth; j += watermarkWidth + 150) {
-      pdf.text(watermarkText, j, i, { angle: 45 });
-    }
-  }
-
-  // Helper function to add text with styling
-  const addStyledText = (text: string, x: number, y: number, options: any = {}) => {
-    pdf.setFont(options.font || 'helvetica', options.style || 'normal');
-    pdf.setFontSize(options.size || 10);
-
-    if (Array.isArray(options.color)) {
-      // RGB array
-      pdf.setTextColor(options.color[0], options.color[1], options.color[2]);
-    } else if (typeof options.color === 'string') {
-      // Hex color string
-      pdf.setTextColor(options.color);
-    } else {
-      // Default black
-      pdf.setTextColor(options.color || 0);
-    }
-
-    pdf.text(text, x, y);
+  // --- Theme Colors ---
+  const colors = {
+    primary: [71, 240, 209], // #47f0d1 (Teal/Greenish) - Your primary color
+    secondary: [15, 23, 42], // Slate 900 - Dark background
+    text: {
+      dark: [15, 23, 42],
+      light: [100, 116, 139], // Slate 500
+      white: [255, 255, 255]
+    },
+    success: [34, 197, 94],
+    error: [239, 68, 68],
+    warning: [245, 158, 11],
+    gray: [241, 245, 249] // Slate 100
   };
 
-  // Header - eGuy Logo and Title
-  yPosition += 10;
+  // --- Header Background ---
+  // Create a curved header background
+  pdf.setFillColor(colors.secondary[0], colors.secondary[1], colors.secondary[2]);
+  pdf.rect(0, 0, pageWidth, 50, 'F');
 
-  // Logo background circle (larger for watermark effect)
-  pdf.setFillColor(59, 130, 246, 0.1); // Light blue with transparency for watermark
-  pdf.circle(margin + 15, yPosition + 8, 12, 'F');
+  // Add a subtle glow/accent line
+  pdf.setDrawColor(colors.primary[0], colors.primary[1], colors.primary[2]);
+  pdf.setLineWidth(1);
+  pdf.line(0, 49, pageWidth, 49);
 
-  // Main logo circle (solid)
-  pdf.setFillColor(59, 130, 246); // Blue color
-  pdf.circle(margin + 15, yPosition + 8, 10, 'F');
+  // --- Header Content ---
+  let yPosition = 25;
 
-  // Logo text (white "eG")
-  addStyledText('eG', margin + 10, yPosition + 12, {
-    size: 20,
-    color: 255,
-    font: 'helvetica',
-    style: 'bold'
-  });
+  // Logo Circle
+  pdf.setFillColor(255, 255, 255);
+  pdf.circle(margin + 10, yPosition, 12, 'F');
 
-  // Company name
-  addStyledText('eGuy', margin + 30, yPosition + 10, {
-    size: 22,
-    color: 0,
-    font: 'helvetica',
-    style: 'bold'
-  });
+  // Logo Text "eG"
+  pdf.setFont('helvetica', 'bold');
+  pdf.setFontSize(14);
+  pdf.setTextColor(colors.secondary[0], colors.secondary[1], colors.secondary[2]);
+  pdf.text('eG', margin + 6, yPosition + 1.5);
 
-  // Digital Wallet subtitle
-  yPosition += 8;
-  addStyledText('Digital Wallet', margin + 30, yPosition + 10, {
-    size: 12,
-    color: 107,
-    font: 'helvetica',
-    style: 'normal'
-  });
+  // App Name
+  pdf.setFont('helvetica', 'bold');
+  pdf.setFontSize(24);
+  pdf.setTextColor(255, 255, 255);
+  pdf.text('eGuy', margin + 30, yPosition + 2);
 
-  // Receipt title and date
-  yPosition += 25;
-  addStyledText('Transaction Receipt', margin, yPosition, {
-    size: 16,
-    color: 0,
-    font: 'helvetica',
-    style: 'bold'
-  });
+  // Subtitle
+  pdf.setFont('helvetica', 'normal');
+  pdf.setFontSize(10);
+  pdf.setTextColor(148, 163, 184); // Slate 400
+  pdf.text('Digital Wallet', margin + 30, yPosition + 7);
 
-  yPosition += 8;
-  addStyledText(new Date(transaction.createdAt).toLocaleDateString(), margin, yPosition, {
-    size: 10,
-    color: 107
-  });
+  // Title "Receipt" on the right
+  pdf.setFont('helvetica', 'bold');
+  pdf.setFontSize(24);
+  pdf.setTextColor(255, 255, 255);
+  pdf.text('RECEIPT', pageWidth - margin - 5, yPosition + 2, { align: 'right' });
 
-  // Decorative line
-  yPosition += 10;
-  pdf.setDrawColor(148, 163, 184); // Gray color
-  pdf.line(margin, yPosition, pageWidth - margin, yPosition);
 
-  // Transaction details
-  yPosition += 15;
+  // --- Main Content Box ---
+  yPosition = 70;
 
-  // Main transaction info
-  addStyledText(transaction.description || `${transaction.type.replace("_", " ").toUpperCase()}`, margin, yPosition, {
-    size: 14,
-    color: 0,
-    font: 'helvetica',
-    style: 'bold'
-  });
+  // Amount Section
+  pdf.setFont('helvetica', 'normal');
+  pdf.setFontSize(12);
+  pdf.setTextColor(colors.text.light[0], colors.text.light[1], colors.text.light[2]);
+  pdf.text('Total Amount', pageWidth / 2, yPosition, { align: 'center' });
 
-  yPosition += 8;
-  const amountText = `${transaction.type === "deposit" || transaction.type === "referral_bonus" ? "+" : "-"}₦${transaction.amount.toLocaleString()}`;
-  addStyledText(amountText, margin, yPosition, {
-    size: 16,
-    color: transaction.type === "deposit" || transaction.type === "referral_bonus" ? [34, 197, 94] : [239, 68, 68],
-    font: 'helvetica',
-    style: 'bold'
-  });
+  yPosition += 12;
+  const isPositive = transaction.type === "deposit" || transaction.type === "referral_bonus";
+  const amountText = `${isPositive ? "+" : "-"}₦${transaction.amount.toLocaleString('en-NG', { minimumFractionDigits: 2 })}`;
 
-  // Status badge
+  pdf.setFont('helvetica', 'bold');
+  pdf.setFontSize(36);
+  if (isPositive) {
+    pdf.setTextColor(colors.success[0], colors.success[1], colors.success[2]);
+  } else {
+    pdf.setTextColor(colors.text.dark[0], colors.text.dark[1], colors.text.dark[2]);
+  }
+  pdf.text(amountText, pageWidth / 2, yPosition, { align: 'center' });
+
+  // Status Badge
   yPosition += 10;
   const statusColor = getStatusColor(transaction.status);
-  pdf.setFillColor(statusColor.r, statusColor.g, statusColor.b);
   const statusText = transaction.status.toUpperCase();
-  const statusWidth = pdf.getTextWidth(statusText) + 8;
-  pdf.rect(pageWidth - margin - statusWidth, yPosition - 3, statusWidth + 4, 8, 'F');
 
-  addStyledText(statusText, pageWidth - margin - statusWidth + 2, yPosition + 3, {
-    size: 8,
-    color: 255
-  });
+  pdf.setFillColor(statusColor.r, statusColor.g, statusColor.b);
+  // Calculate width for centered badge
+  const statusWidth = pdf.getTextWidth(statusText) + 12;
+  const badgeX = (pageWidth - statusWidth) / 2;
 
-  // Transaction details section
-  yPosition += 20;
+  // Rounded rect for badge
+  roundedRect(pdf, badgeX, yPosition, statusWidth, 7, 3, 'F');
 
-  // Section title
-  addStyledText('Transaction Details', margin, yPosition, {
-    size: 12,
-    color: 0,
-    font: 'helvetica',
-    style: 'bold'
-  });
+  pdf.setFont('helvetica', 'bold');
+  pdf.setFontSize(8);
+  pdf.setTextColor(255, 255, 255);
+  pdf.text(statusText, pageWidth / 2, yPosition + 4.5, { align: 'center' });
 
-  yPosition += 10;
 
-  // Details in two columns
-  const leftColumnX = margin;
-  const rightColumnX = pageWidth / 2 + 10;
-  let leftY = yPosition;
+  // --- Details Grid ---
+  yPosition += 25;
+  const boxPadding = 6;
+  const rowHeight = 12;
+  let currentY = yPosition;
 
-  // Left column
-  addStyledText('Transaction ID:', leftColumnX, leftY, { size: 10, color: 107 });
-  addStyledText(transaction.id, leftColumnX + 35, leftY, { size: 10, color: 0 });
-  leftY += 6;
+  // Helper for rows
+  const addRow = (label: string, value: string, isMono: boolean = false) => {
+    // Label
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(10);
+    pdf.setTextColor(colors.text.light[0], colors.text.light[1], colors.text.light[2]);
+    pdf.text(label, margin, currentY + boxPadding);
 
-  addStyledText('Date & Time:', leftColumnX, leftY, { size: 10, color: 107 });
-  addStyledText(new Date(transaction.createdAt).toLocaleString(), leftColumnX + 35, leftY, { size: 10, color: 0 });
-  leftY += 6;
+    // Value
+    pdf.setFont(isMono ? 'courier' : 'helvetica', isMono ? 'normal' : 'bold');
+    pdf.setFontSize(10);
+    pdf.setTextColor(colors.text.dark[0], colors.text.dark[1], colors.text.dark[2]);
+    pdf.text(value, pageWidth - margin, currentY + boxPadding, { align: 'right' });
 
-  addStyledText('Type:', leftColumnX, leftY, { size: 10, color: 107 });
-  addStyledText(transaction.type.replace("_", " ").toUpperCase(), leftColumnX + 35, leftY, { size: 10, color: 0 });
-  leftY += 6;
+    // Dotted Line
+    pdf.setDrawColor(226, 232, 240); // Slate 200
+    pdf.setLineWidth(0.5);
+    dashedLine(pdf, margin, currentY + rowHeight, pageWidth - margin, currentY + rowHeight);
 
-  if (transaction.reference) {
-    addStyledText('Reference:', leftColumnX, leftY, { size: 10, color: 107 });
-    addStyledText(transaction.reference, leftColumnX + 35, leftY, { size: 10, color: 0 });
-    leftY += 6;
-  }
+    currentY += rowHeight + 2;
+  };
 
-  // Right column - Service info
   const serviceInfo = getServiceInfo(transaction);
 
-  if (serviceInfo.provider && serviceInfo.provider !== "Unknown") {
-    addStyledText('Provider:', rightColumnX, yPosition, { size: 10, color: 107 });
-    addStyledText(serviceInfo.provider, rightColumnX + 25, yPosition, { size: 10, color: 0 });
-    yPosition += 6;
+  addRow('Transaction Date', new Date(transaction.createdAt).toLocaleString());
+  addRow('Transaction Reference', transaction.reference || transaction.id, true);
+  addRow('Transaction Type', transaction.type.replace(/_/g, " ").toUpperCase());
+
+  if (transaction.description) {
+    // Truncate if too long
+    const desc = transaction.description.length > 40 ? transaction.description.substring(0, 37) + '...' : transaction.description;
+    addRow('Description', desc);
   }
 
   if (serviceInfo.recipient) {
-    addStyledText('Recipient:', rightColumnX, yPosition, { size: 10, color: 107 });
-    addStyledText(serviceInfo.recipient, rightColumnX + 25, yPosition, { size: 10, color: 0 });
-    yPosition += 6;
+    addRow('Recipient / Details', serviceInfo.recipient, true);
   }
 
-  addStyledText('Amount:', rightColumnX, yPosition, { size: 10, color: 107 });
-  addStyledText(`₦${transaction.amount.toLocaleString()}`, rightColumnX + 25, yPosition, { size: 10, color: 0 });
+  if (serviceInfo.provider && serviceInfo.provider !== "Unknown") {
+    addRow('Provider', serviceInfo.provider);
+  }
 
-  // Footer section
-  yPosition += 30;
+  // --- Additional Info Box ---
+  currentY += 10;
+  pdf.setFillColor(248, 250, 252); // Slate 50
+  pdf.setDrawColor(226, 232, 240); // Slate 200
+  roundedRect(pdf, margin, currentY, pageWidth - (margin * 2), 40, 4, 'FD');
 
-  // Decorative line
-  pdf.setDrawColor(148, 163, 184);
-  pdf.line(margin, yPosition, pageWidth - margin, yPosition);
+  const infoY = currentY + 10;
+  pdf.setFont('helvetica', 'bold');
+  pdf.setFontSize(10);
+  pdf.setTextColor(colors.text.dark[0], colors.text.dark[1], colors.text.dark[2]);
+  pdf.text('Important Information', margin + 10, infoY);
 
-  yPosition += 10;
+  pdf.setFont('helvetica', 'normal');
+  pdf.setFontSize(9);
+  pdf.setTextColor(colors.text.light[0], colors.text.light[1], colors.text.light[2]);
 
-  // Footer logo (smaller version)
-  const footerLogoY = yPosition + 5;
+  const infoText = [
+    "• This transaction receipt is generated automatically.",
+    "• Please keep this reference number for any disputes.",
+    "• Funds transfer checks generally clear within 24 hours."
+  ];
 
-  // Footer logo background circle
-  pdf.setFillColor(59, 130, 246, 0.15); // Light blue with transparency
-  pdf.circle(pageWidth - margin - 10, footerLogoY, 8, 'F');
-
-  // Footer logo circle (solid)
-  pdf.setFillColor(59, 130, 246); // Blue color
-  pdf.circle(pageWidth - margin - 10, footerLogoY, 6, 'F');
-
-  // Footer logo text
-  addStyledText('eG', pageWidth - margin - 15, footerLogoY + 4, {
-    size: 12,
-    color: 255,
-    font: 'helvetica',
-    style: 'bold'
+  let lineY = infoY + 6;
+  infoText.forEach(line => {
+    pdf.text(line, margin + 10, lineY);
+    lineY += 5;
   });
 
-  // Footer text
-  addStyledText('This receipt is generated electronically and is valid without signature.', margin, yPosition, {
-    size: 8,
-    color: 107
-  });
 
-  yPosition += 6;
-  addStyledText('For support, contact us at support@eguy.app', margin, yPosition, {
-    size: 8,
-    color: 107
-  });
+  // --- Watermark (Subtle) ---
+  pdf.setTextColor(241, 245, 249); // Very light gray
+  pdf.setFontSize(60);
+  pdf.setFont('helvetica', 'bold');
+  const watermarkText = "eGuy";
 
-  yPosition += 6;
-  addStyledText('Thank you for using eGuy!', margin, yPosition, {
-    size: 10,
-    color: 0,
-    font: 'helvetica',
-    style: 'bold'
-  });
+  // Center watermark
+  const textWidth = pdf.getTextWidth(watermarkText);
+  // Save graphics state
+  // jsPDF doesn't support save/restore clearly in TS typings always, but we can just rotate back
 
-  // Return PDF as buffer
+  // Simple centered watermark without rotation to be safe/clean
+  pdf.text(watermarkText, (pageWidth / 2), (pageHeight / 2), { align: 'center' });
+
+
+  // --- Footer ---
+  const footerY = pageHeight - 30;
+
+  // Divider
+  pdf.setDrawColor(226, 232, 240);
+  pdf.setLineWidth(0.5);
+  pdf.line(margin, footerY, pageWidth - margin, footerY);
+
+  // Footer Text
+  pdf.setFont('helvetica', 'bold');
+  pdf.setFontSize(10);
+  pdf.setTextColor(colors.primary[0], colors.primary[1], colors.primary[2]);
+  pdf.text('eGuy Digital Wallet', pageWidth / 2, footerY + 8, { align: 'center' });
+
+  pdf.setFont('helvetica', 'normal');
+  pdf.setFontSize(8);
+  pdf.setTextColor(colors.text.light[0], colors.text.light[1], colors.text.light[2]);
+  pdf.text('support@eguy.app  •  www.eguy.app', pageWidth / 2, footerY + 13, { align: 'center' });
+
+
   return Buffer.from(pdf.output('arraybuffer'));
+}
+
+// Helper to draw rounded rect
+function roundedRect(pdf: any, x: number, y: number, w: number, h: number, r: number, style: string) {
+  pdf.roundedRect(x, y, w, h, r, r, style);
+}
+
+// Helper for dashed line
+function dashedLine(pdf: any, x1: number, y1: number, x2: number, y2: number, dashLen = 1) {
+  pdf.setLineDash([dashLen, dashLen], 0);
+  pdf.line(x1, y1, x2, y2);
+  pdf.setLineDash([], 0); // Restore solid
 }
 
 function getStatusColor(status: string) {

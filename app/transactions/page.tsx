@@ -1,12 +1,15 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Search, Calendar } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  ArrowLeft, Search, Download, ArrowDownLeft, ArrowUpRight,
+  Wifi, Smartphone, CreditCard, Zap, Tv, Gift, HelpCircle
+} from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ReceiptModal } from "@/components/receipt/receipt-modal";
+import { cn } from "@/lib/utils";
+import { TransactionsListSkeleton } from "@/components/dashboard/skeletons";
 
 interface Transaction {
   id: string;
@@ -26,19 +29,9 @@ export default function AllTransactionsPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [expandedTransaction, setExpandedTransaction] = useState<string | null>(null);
+  const [filter, setFilter] = useState<"All" | "Inflow" | "Outflow" | "Service">("All");
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
-
-  const openReceipt = (transaction: Transaction) => {
-    setSelectedTransaction(transaction);
-    setIsReceiptModalOpen(true);
-  };
-
-  const closeReceipt = () => {
-    setIsReceiptModalOpen(false);
-    setSelectedTransaction(null);
-  };
 
   useEffect(() => {
     fetchTransactions();
@@ -58,6 +51,16 @@ export default function AllTransactionsPage() {
     }
   };
 
+  const openReceipt = (transaction: Transaction) => {
+    setSelectedTransaction(transaction);
+    setIsReceiptModalOpen(true);
+  };
+
+  const closeReceipt = () => {
+    setIsReceiptModalOpen(false);
+    setSelectedTransaction(null);
+  };
+
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("en-NG", {
       style: "currency",
@@ -65,271 +68,189 @@ export default function AllTransactionsPage() {
     }).format(amount);
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-GB", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
+  const formatTime = (dateString: string) => {
+    return new Date(dateString).toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
+
+  const isDeposit = (type: string) => ["deposit", "referral_bonus"].includes(type);
+  const isService = (type: string) => ["airtime", "data", "electricity", "cable", "payment"].includes(type);
 
   const getTransactionIcon = (type: string) => {
     switch (type) {
       case "deposit":
-        return (
-          <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-            <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-          </div>
-        );
-      case "withdrawal":
-        return (
-          <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
-            <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4M12 4v16" />
-            </svg>
-          </div>
-        );
-      case "airtime":
-        return (
-          <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-            <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-            </svg>
-          </div>
-        );
-      case "data":
-        return (
-          <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-            <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
-          </div>
-        );
       case "referral_bonus":
-        return (
-          <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
-            <svg className="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-            </svg>
-          </div>
-        );
+        return <ArrowDownLeft className="w-6 h-6" />;
+      case "withdrawal":
+      case "transfer":
+        return <ArrowUpRight className="w-6 h-6" />;
+      case "airtime":
+      case "data":
+        return <Smartphone className="w-6 h-6" />;
+      case "electricity":
+        return <Zap className="w-6 h-6" />;
+      case "cable":
+        return <Tv className="w-6 h-6" />;
       default:
-        return (
-          <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
-            <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-            </svg>
-          </div>
-        );
+        return <CreditCard className="w-6 h-6" />;
     }
   };
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "completed":
-        return <Badge className="bg-green-100 text-green-800 border-green-300">Completed</Badge>;
-      case "pending":
-        return <Badge className="bg-yellow-100 text-yellow-800 border-yellow-300">Pending</Badge>;
-      case "failed":
-        return <Badge className="bg-red-100 text-red-800 border-red-300">Failed</Badge>;
-      default:
-        return <Badge variant="outline">{status}</Badge>;
-    }
+  const getTransactionColor = (type: string) => {
+    if (isDeposit(type)) return "text-primary bg-primary/20";
+    if (type === "withdrawal" || type === "transfer") return "text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800";
+    return "text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800";
   };
 
   const filteredTransactions = transactions
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-    .filter((transaction) =>
-      transaction.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (transaction.reference && transaction.reference.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (transaction.category && transaction.category.toLowerCase().includes(searchTerm.toLowerCase()))
-    );
+    .filter((t) => {
+      // Search filter
+      const matchesSearch =
+        t.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (t.amount.toString().includes(searchTerm)) ||
+        (t.reference && t.reference.toLowerCase().includes(searchTerm.toLowerCase()));
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading transactions...</p>
-        </div>
-      </div>
-    );
-  }
+      // Category filter
+      let matchesCategory = true;
+      if (filter === "Inflow") matchesCategory = isDeposit(t.type);
+      else if (filter === "Outflow") matchesCategory = ["withdrawal", "transfer"].includes(t.type);
+      else if (filter === "Service") matchesCategory = isService(t.type);
+
+      return matchesSearch && matchesCategory;
+    })
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+  // Group by date
+  const groupedTransactions: Record<string, Transaction[]> = {};
+  filteredTransactions.forEach((t) => {
+    const dateClient = new Date(t.createdAt);
+    // Reset hours to compare dates only
+    dateClient.setHours(0, 0, 0, 0);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    let key = dateClient.toDateString();
+    if (dateClient.getTime() === today.getTime()) key = "Today";
+    else if (dateClient.getTime() === yesterday.getTime()) key = "Yesterday";
+    else key = dateClient.toLocaleDateString("en-GB", { day: "numeric", month: "long" });
+
+    if (!groupedTransactions[key]) groupedTransactions[key] = [];
+    groupedTransactions[key].push(t);
+  });
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-center h-16">
-            <h1 className="text-xl font-bold text-gray-900">All Transactions</h1>
-          </div>
+    <div className="min-h-screen bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display pb-24">
+      {/* Search & Header */}
+      <header className="sticky top-0 z-40 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md pt-8 pb-4 px-6 border-b border-slate-200 dark:border-primary/10">
+        <div className="flex items-center justify-between mb-6">
+          <button
+            onClick={() => router.back()}
+            className="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 dark:bg-card-dark text-slate-600 dark:text-primary transition-transform active:scale-90"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <h1 className="text-xl font-extrabold tracking-tight">Transactions</h1>
+          <button className="w-10 h-10 flex items-center justify-center rounded-full bg-primary/10 text-primary transition-transform active:scale-90">
+            <Download className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Search Bar */}
+        <div className="relative group">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 w-5 h-5 group-focus-within:text-primary transition-colors" />
+          <input
+            className="w-full bg-slate-100 dark:bg-card-dark border-none rounded-full py-3.5 pl-12 pr-4 text-sm font-medium focus:ring-2 focus:ring-primary/40 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none"
+            placeholder="Search by name, service or amount"
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+
+        {/* Filter Chips */}
+        <div className="flex gap-2 mt-5 overflow-x-auto no-scrollbar -mx-2 px-2 pb-2">
+          {["All", "Inflow", "Outflow", "Service"].map((f) => (
+            <button
+              key={f}
+              onClick={() => setFilter(f as any)}
+              className={cn(
+                "px-6 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all",
+                filter === f
+                  ? "bg-primary text-background-dark shadow-lg shadow-primary/20"
+                  : "bg-slate-100 dark:bg-card-dark text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-primary/20"
+              )}
+            >
+              {f}
+            </button>
+          ))}
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Search Bar */}
-        <div className="mb-8">
-          <div className="relative max-w-md mx-auto">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-            <Input
-              placeholder="Search all transactions..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-            />
-          </div>
-        </div>
-
-        {/* Transaction Count */}
-        <div className="mb-6 text-center">
-          <p className="text-gray-600">
-            Showing {filteredTransactions.length} of {transactions.length} transactions
-          </p>
-        </div>
-
-        {/* Transactions List */}
-        {filteredTransactions.length === 0 ? (
-          <div className="text-center py-16">
-            <svg className="h-16 w-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-            </svg>
-            <p className="text-gray-500 mb-2">
-              {searchTerm ? "No transactions match your search" : "No transactions found"}
-            </p>
-            <p className="text-sm text-gray-400">
-              {searchTerm
-                ? "Try adjusting your search criteria"
-                : "All your transactions will appear here"
-              }
-            </p>
+      <main className="px-6 pt-4">
+        {loading ? (
+          <TransactionsListSkeleton />
+        ) : Object.keys(groupedTransactions).length === 0 ? (
+          <div className="text-center py-20 text-slate-500">
+            <div className="w-16 h-16 bg-slate-100 dark:bg-card-dark rounded-full flex items-center justify-center mx-auto mb-4">
+              <Search className="w-8 h-8 opacity-50" />
+            </div>
+            <p>No transactions found</p>
           </div>
         ) : (
-          <div className="space-y-4">
-            {filteredTransactions.map((transaction) => (
-              <div
-                key={transaction.id}
-                className="group bg-white hover:bg-gray-50 rounded-lg p-6 border border-gray-200 hover:border-gray-300 transition-all duration-200 cursor-pointer"
-                onClick={() => setExpandedTransaction(
-                  expandedTransaction === transaction.id ? null : transaction.id
-                )}
-              >
-                <div className="flex items-center space-x-4">
-                  <div className="flex-shrink-0">
-                    {getTransactionIcon(transaction.type)}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                      <div className="min-w-0">
-                        <p className="font-medium text-gray-900 truncate">{transaction.description}</p>
-                        <div className="flex flex-wrap items-center gap-2 mt-1">
-                          <span className="text-sm text-gray-500 flex items-center gap-1">
-                            <Calendar className="w-3 h-3" />
-                            {formatDate(transaction.createdAt)}
-                          </span>
-                          {transaction.category && (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
-                              {transaction.category}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        {getStatusBadge(transaction.status)}
-                        <div className="text-right">
-                          <p
-                            className={`font-semibold text-lg ${
-                              transaction.type === "deposit" || transaction.type === "referral_bonus"
-                                ? "text-green-600"
-                                : "text-red-600"
-                            }`}
-                          >
-                            {transaction.type === "deposit" || transaction.type === "referral_bonus" ? "+" : "-"}
-                            {formatCurrency(transaction.amount)}
-                          </p>
-                        </div>
-                        <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                          {expandedTransaction === transaction.id ? (
-                            <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-                            </svg>
-                          ) : (
-                            <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                            </svg>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Expanded Details */}
-                {expandedTransaction === transaction.id && (
-                  <div className="mt-6 pt-6 border-t border-gray-200">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm">
-                      <div>
-                        <p className="text-gray-500 mb-1">Transaction Type</p>
-                        <p className="font-medium text-gray-900 capitalize">{transaction.type.replace("_", " ")}</p>
-                      </div>
-                      <div>
-                        <p className="text-gray-500 mb-1">Status</p>
-                        <div className="flex items-center gap-1">
-                          {getStatusBadge(transaction.status)}
-                        </div>
-                      </div>
-                      {transaction.reference && (
-                        <div>
-                          <p className="text-gray-500 mb-1">Reference</p>
-                          <p className="font-mono text-xs bg-gray-100 px-2 py-1 rounded text-gray-700">
-                            {transaction.reference}
-                          </p>
-                        </div>
-                      )}
-                      {transaction.provider && (
-                        <div>
-                          <p className="text-gray-500 mb-1">Provider</p>
-                          <p className="font-medium text-gray-900">{transaction.provider}</p>
-                        </div>
-                      )}
-                      {transaction.recipient && (
-                        <div className="sm:col-span-2">
-                          <p className="text-gray-500 mb-1">Recipient</p>
-                          <p className="font-medium text-gray-900">{transaction.recipient}</p>
-                        </div>
-                      )}
+          Object.entries(groupedTransactions).map(([date, dateTransactions]) => (
+            <div key={date} className="mb-8">
+              <h3 className="text-xs font-extrabold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500 mb-4 px-1">
+                {date}
+              </h3>
+              <div className="space-y-3">
+                {dateTransactions.map((transaction) => (
+                  <div
+                    key={transaction.id}
+                    onClick={() => openReceipt(transaction)}
+                    className="flex items-center p-4 bg-white dark:bg-card-dark/40 border border-slate-100 dark:border-primary/5 rounded-2xl active:scale-[0.98] transition-all cursor-pointer hover:border-primary/20"
+                  >
+                    <div className={cn(
+                      "w-12 h-12 rounded-full flex items-center justify-center shrink-0",
+                      getTransactionColor(transaction.type)
+                    )}>
+                      {getTransactionIcon(transaction.type)}
                     </div>
 
-                    {/* Receipt Button */}
-                    <div className="mt-6 pt-6 border-t border-gray-200">
-                      <Button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          openReceipt(transaction);
-                        }}
-                        variant="outline"
-                        size="sm"
-                        className="w-full sm:w-auto"
-                      >
-                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                        </svg>
-                        View Receipt
-                      </Button>
+                    <div className="ml-4 flex-1 min-w-0">
+                      <h4 className="text-[15px] font-bold text-slate-800 dark:text-slate-100 truncate">
+                        {transaction.description}
+                      </h4>
+                      <p className="text-[12px] font-medium text-slate-500 dark:text-slate-400 mt-0.5">
+                        {formatTime(transaction.createdAt)} • {transaction.category || transaction.type}
+                      </p>
+                    </div>
+
+                    <div className="text-right whitespace-nowrap">
+                      <span className={cn(
+                        "text-[16px] font-extrabold",
+                        isDeposit(transaction.type) ? "text-primary" : "text-slate-800 dark:text-slate-100"
+                      )}>
+                        {isDeposit(transaction.type) ? "+" : "-"}{formatCurrency(transaction.amount)}
+                      </span>
                     </div>
                   </div>
-                )}
+                ))}
               </div>
-            ))}
-          </div>
+            </div>
+          ))
         )}
       </main>
 
-      {/* Receipt Modal */}
+      {/* Floating Background Elements */}
+      <div className="fixed top-0 left-1/2 -translate-x-1/2 w-full h-full pointer-events-none overflow-hidden -z-10">
+        <div className="absolute top-[-10%] right-[-10%] w-[300px] h-[300px] bg-primary/5 rounded-full blur-[100px]"></div>
+        <div className="absolute bottom-[5%] left-[-20%] w-[400px] h-[400px] bg-primary/5 rounded-full blur-[120px]"></div>
+      </div>
+
       <ReceiptModal
         transaction={selectedTransaction}
         isOpen={isReceiptModalOpen}

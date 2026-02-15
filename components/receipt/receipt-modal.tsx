@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   Download,
@@ -16,14 +15,14 @@ import {
   Plus,
   Minus,
   ArrowUpRight,
-  Users,
   CreditCard,
   Smartphone,
   Zap,
   GraduationCap,
   ArrowDownLeft,
+  Users
 } from "lucide-react";
-import jsPDF from "jspdf";
+import { cn } from "@/lib/utils";
 
 interface Transaction {
   id: string;
@@ -61,37 +60,36 @@ export function ReceiptModal({ transaction, isOpen, onClose }: ReceiptModalProps
     const date = new Date(dateString);
     return date.toLocaleString("en-NG", {
       year: "numeric",
-      month: "long",
+      month: "short",
       day: "numeric",
       hour: "2-digit",
       minute: "2-digit",
-      second: "2-digit",
     });
   };
 
   const getTransactionIcon = (type: string) => {
-    const iconClass = "h-6 w-6";
+    const iconClass = "h-5 w-5";
     switch (type) {
       case "deposit":
-        return <div className={`p-2 bg-green-100 rounded-full`}><Plus className={`${iconClass} text-green-600`} /></div>;
+        return <div className="p-3 bg-green-500/10 rounded-full text-green-500"><Plus className={iconClass} /></div>;
       case "withdrawal":
-        return <div className={`p-2 bg-red-100 rounded-full`}><Minus className={`${iconClass} text-red-600`} /></div>;
+        return <div className="p-3 bg-red-500/10 rounded-full text-red-500"><Minus className={iconClass} /></div>;
       case "transfer":
-        return <div className={`p-2 bg-blue-100 rounded-full`}><ArrowUpRight className={`${iconClass} text-blue-600`} /></div>;
+        return <div className="p-3 bg-blue-500/10 rounded-full text-blue-500"><ArrowUpRight className={iconClass} /></div>;
       case "payment":
-        return <div className={`p-2 bg-orange-100 rounded-full`}><CreditCard className={`${iconClass} text-orange-600`} /></div>;
+        return <div className="p-3 bg-orange-500/10 rounded-full text-orange-500"><CreditCard className={iconClass} /></div>;
       case "referral_bonus":
-        return <div className={`p-2 bg-purple-100 rounded-full`}><Users className={`${iconClass} text-purple-600`} /></div>;
+        return <div className="p-3 bg-purple-500/10 rounded-full text-purple-500"><Users className={iconClass} /></div>;
       case "airtime":
-        return <div className={`p-2 bg-cyan-100 rounded-full`}><Smartphone className={`${iconClass} text-cyan-600`} /></div>;
+        return <div className="p-3 bg-cyan-500/10 rounded-full text-cyan-500"><Smartphone className={iconClass} /></div>;
       case "data":
-        return <div className={`p-2 bg-indigo-100 rounded-full`}><Smartphone className={`${iconClass} text-indigo-600`} /></div>;
+        return <div className="p-3 bg-indigo-500/10 rounded-full text-indigo-500"><Smartphone className={iconClass} /></div>;
       case "electricity":
-        return <div className={`p-2 bg-yellow-100 rounded-full`}><Zap className={`${iconClass} text-yellow-600`} /></div>;
+        return <div className="p-3 bg-yellow-500/10 rounded-full text-yellow-500"><Zap className={iconClass} /></div>;
       case "cable":
-        return <div className={`p-2 bg-pink-100 rounded-full`}><GraduationCap className={`${iconClass} text-pink-600`} /></div>;
+        return <div className="p-3 bg-pink-500/10 rounded-full text-pink-500"><GraduationCap className={iconClass} /></div>;
       default:
-        return <div className={`p-2 bg-gray-100 rounded-full`}><ArrowDownLeft className={`${iconClass} text-gray-600`} /></div>;
+        return <div className="p-3 bg-slate-500/10 rounded-full text-slate-500"><ArrowDownLeft className={iconClass} /></div>;
     }
   };
 
@@ -99,31 +97,31 @@ export function ReceiptModal({ transaction, isOpen, onClose }: ReceiptModalProps
     switch (status) {
       case "completed":
         return (
-          <Badge className="bg-green-100 text-green-800 border-green-300">
-            <CheckCircle className="w-3 h-3 mr-1" />
-            Completed
-          </Badge>
+          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-500/10 text-green-500 text-xs font-bold border border-green-500/20">
+            <CheckCircle className="w-3.5 h-3.5" />
+            <span>Success</span>
+          </div>
         );
       case "pending":
         return (
-          <Badge className="bg-yellow-100 text-yellow-800 border-yellow-300">
-            <Clock className="w-3 h-3 mr-1" />
-            Pending
-          </Badge>
+          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-yellow-500/10 text-yellow-500 text-xs font-bold border border-yellow-500/20">
+            <Clock className="w-3.5 h-3.5" />
+            <span>Pending</span>
+          </div>
         );
       case "failed":
         return (
-          <Badge className="bg-red-100 text-red-800 border-red-300">
-            <XCircle className="w-3 h-3 mr-1" />
-            Failed
-          </Badge>
+          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-500/10 text-red-500 text-xs font-bold border border-red-500/20">
+            <XCircle className="w-3.5 h-3.5" />
+            <span>Failed</span>
+          </div>
         );
       case "cancelled":
         return (
-          <Badge className="bg-gray-100 text-gray-800 border-gray-300">
-            <AlertCircle className="w-3 h-3 mr-1" />
-            Cancelled
-          </Badge>
+          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-500/10 text-slate-500 text-xs font-bold border border-slate-500/20">
+            <AlertCircle className="w-3.5 h-3.5" />
+            <span>Cancelled</span>
+          </div>
         );
       default:
         return <Badge variant="secondary">{status}</Badge>;
@@ -147,12 +145,11 @@ export function ReceiptModal({ transaction, isOpen, onClose }: ReceiptModalProps
         throw new Error(errorData.error || "Failed to generate PDF receipt");
       }
 
-      // Create blob from response and download
       const blob = await response.blob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `eGuy-Digital-Wallet-receipt-${transaction.id}.pdf`;
+      a.download = `eGuy-Receipt-${transaction.id}.pdf`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -160,71 +157,9 @@ export function ReceiptModal({ transaction, isOpen, onClose }: ReceiptModalProps
 
     } catch (error: any) {
       console.error("Error generating PDF receipt:", error);
-      alert(error.message || "Failed to generate PDF receipt. Please try again.");
+      alert(error.message || "Failed to generate PDF receipt.");
     } finally {
       setIsGeneratingPDF(false);
-    }
-  };
-
-  const getTransactionIconColor = (type: string) => {
-    switch (type) {
-      case "deposit":
-      case "referral_bonus":
-        return "#10B981"; // Green
-      case "withdrawal":
-        return "#EF4444"; // Red
-      case "transfer":
-        return "#3B82F6"; // Blue
-      case "payment":
-        return "#F59E0B"; // Orange
-      case "airtime":
-      case "data":
-        return "#06B6D4"; // Cyan
-      case "electricity":
-        return "#EAB308"; // Yellow
-      case "cable":
-        return "#EC4899"; // Pink
-      default:
-        return "#6B7280"; // Gray
-    }
-  };
-
-  const getTransactionIconText = (type: string) => {
-    switch (type) {
-      case "deposit":
-      case "referral_bonus":
-        return "+";
-      case "withdrawal":
-        return "-";
-      case "transfer":
-        return "→";
-      case "payment":
-        return "💳";
-      case "airtime":
-        return "📱";
-      case "data":
-        return "📶";
-      case "electricity":
-        return "⚡";
-      case "cable":
-        return "📺";
-      default:
-        return "?";
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "completed":
-        return "#10B981"; // Green
-      case "pending":
-        return "#F59E0B"; // Yellow
-      case "failed":
-        return "#EF4444"; // Red
-      case "cancelled":
-        return "#6B7280"; // Gray
-      default:
-        return "#6B7280"; // Gray
     }
   };
 
@@ -241,145 +176,123 @@ export function ReceiptModal({ transaction, isOpen, onClose }: ReceiptModalProps
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to send receipt email");
+        throw new Error("Failed to send receipt email");
       }
 
       const result = await response.json();
-      alert(result.message || "Receipt sent to your email successfully!");
+      alert(result.message || "Receipt sent successfully!");
     } catch (error: any) {
       console.error("Error sending email:", error);
-      alert(error.message || "Failed to send receipt email. Please try again.");
+      alert("Failed to send receipt email.");
     } finally {
       setIsSendingEmail(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <Card className="w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto bg-slate-900 border-slate-700">
-        <CardHeader className="pb-4">
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2 text-white">
-              <ReceiptIcon className="w-5 h-5" />
-              Transaction Receipt
-            </CardTitle>
-            <Button variant="ghost" size="icon" onClick={onClose} className="text-white hover:bg-slate-800">
-              <X className="w-5 h-5" />
-            </Button>
-          </div>
-        </CardHeader>
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-background-dark/80 backdrop-blur-sm animate-in fade-in duration-200">
+      <div
+        className="w-full max-w-md bg-card-dark rounded-3xl shadow-2xl border border-slate-800/50 overflow-hidden animate-in zoom-in-95 duration-200 relative"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Glow Effect */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-32 bg-primary/20 blur-[80px] rounded-full pointer-events-none" />
 
-        <CardContent className="space-y-6">
-          {/* Receipt Header */}
-          <div className="text-center border-b border-slate-700 pb-6">
-            <div className="flex items-center justify-center gap-2 mb-2">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">eG</span>
-              </div>
-              <span className="text-xl font-bold text-white">eGuy</span>
+        {/* Header */}
+        <div className="relative p-6 pb-0 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+              <ReceiptIcon className="w-4 h-4" />
             </div>
-            <h2 className="text-lg font-semibold text-white">Transaction Receipt</h2>
-            <p className="text-sm text-slate-300">{formatDate(transaction.createdAt)}</p>
+            <h3 className="text-lg font-bold text-white">Receipt</h3>
+          </div>
+          <button
+            onClick={onClose}
+            className="w-8 h-8 rounded-full bg-slate-800/50 text-slate-400 hover:text-white hover:bg-slate-700 flex items-center justify-center transition-all"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="p-6 space-y-6 relative">
+
+          {/* Amount Section */}
+          <div className="text-center space-y-2 py-4 border-b border-slate-800/50">
+            <p className="text-slate-400 text-sm font-medium">Total Amount</p>
+            <h1 className={cn(
+              "text-3xl font-extrabold tracking-tight",
+              transaction.type === 'deposit' || transaction.type === 'referral_bonus' ? "text-green-500" : "text-white"
+            )}>
+              {transaction.type === 'deposit' || transaction.type === 'referral_bonus' ? '+' : '-'}
+              {formatCurrency(transaction.amount)}
+            </h1>
+            <div className="flex justify-center pt-1">
+              {getStatusBadge(transaction.status)}
+            </div>
           </div>
 
-          {/* Transaction Details */}
+          {/* Details List */}
           <div className="space-y-4">
-            <div className="flex items-center gap-4 p-4 bg-slate-800 rounded-lg">
-              {getTransactionIcon(transaction.type)}
-              <div className="flex-1">
-                <h3 className="font-semibold text-white">{transaction.description}</h3>
-                <p className="text-sm text-slate-300 capitalize">{transaction.type.replace("_", " ")}</p>
-              </div>
-              <div className="text-right">
-                <p className={`text-xl font-bold ${transaction.type === "deposit" || transaction.type === "referral_bonus" ? "text-green-400" : "text-red-400"}`}>
-                  {transaction.type === "deposit" || transaction.type === "referral_bonus" ? "+" : "-"}
-                  {formatCurrency(transaction.amount)}
-                </p>
-                {getStatusBadge(transaction.status)}
-              </div>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-slate-400">Transaction Type</span>
+              <span className="text-white font-semibold capitalize">{transaction.type.replace(/_/g, " ")}</span>
             </div>
 
-            {/* Transaction Information */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <h4 className="font-medium text-white mb-2">Transaction Details</h4>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-slate-300">Transaction ID:</span>
-                    <span className="font-mono text-white">{transaction.id}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-300">Date & Time:</span>
-                    <span className="text-white">{formatDate(transaction.createdAt)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-300">Type:</span>
-                    <span className="text-white capitalize">{transaction.type.replace("_", " ")}</span>
-                  </div>
-                  {transaction.reference && (
-                    <div className="flex justify-between">
-                      <span className="text-slate-300">Reference:</span>
-                      <span className="font-mono text-white">{transaction.reference}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div>
-                <h4 className="font-medium text-white mb-2">Additional Information</h4>
-                <div className="space-y-2 text-sm">
-                  {transaction.provider && (
-                    <div className="flex justify-between">
-                      <span className="text-slate-300">Provider:</span>
-                      <span className="text-white">{transaction.provider}</span>
-                    </div>
-                  )}
-                  {transaction.recipient && (
-                    <div className="flex justify-between">
-                      <span className="text-slate-300">Recipient:</span>
-                      <span className="text-white">{transaction.recipient}</span>
-                    </div>
-                  )}
-                  {transaction.category && (
-                    <div className="flex justify-between">
-                      <span className="text-slate-300">Category:</span>
-                      <span className="text-white">{transaction.category}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-slate-400">Date & Time</span>
+              <span className="text-white font-medium">{formatDate(transaction.createdAt)}</span>
             </div>
+
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-slate-400">Reference</span>
+              <span className="text-white font-mono text-xs bg-slate-800/50 px-2 py-1 rounded select-all">
+                {transaction.reference || transaction.id.slice(0, 18) + '...'}
+              </span>
+            </div>
+
+            {transaction.description && (
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-slate-400">Description</span>
+                <span className="text-white font-medium text-right max-w-[60%] truncate">{transaction.description}</span>
+              </div>
+            )}
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-slate-700">
+          {/* Actions */}
+          <div className="grid grid-cols-2 gap-3 pt-2">
             <Button
               onClick={generatePDF}
               disabled={isGeneratingPDF}
-              className="flex-1 bg-slate-800 text-white hover:bg-slate-700"
+              className="bg-slate-800 hover:bg-slate-700 text-white border-0 h-10 rounded-xl"
             >
-              <Download className="w-4 h-4 mr-2" />
-              {isGeneratingPDF ? "Generating PDF..." : "Download PDF"}
+              {isGeneratingPDF ? (
+                <span className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin mr-2" />
+              ) : (
+                <Download className="w-4 h-4 mr-2" />
+              )}
+              Save PDF
             </Button>
+
             <Button
-              variant="outline"
               onClick={sendReceiptEmail}
               disabled={isSendingEmail}
-              className="flex-1 border-slate-600 text-white hover:bg-slate-800"
+              className="bg-primary hover:bg-primary/90 text-background-dark font-bold h-10 rounded-xl"
             >
-              <Mail className="w-4 h-4 mr-2" />
-              {isSendingEmail ? "Sending..." : "Email Receipt"}
+              {isSendingEmail ? (
+                <span className="w-4 h-4 border-2 border-background-dark/20 border-t-background-dark rounded-full animate-spin mr-2" />
+              ) : (
+                <Mail className="w-4 h-4 mr-2" />
+              )}
+              Email
             </Button>
           </div>
 
-          {/* Footer */}
-          <div className="text-center text-xs text-slate-400 pt-4 border-t border-slate-700">
-            <p>This receipt is generated electronically and is valid without signature.</p>
-            <p>For support, contact us at support@eguy.app</p>
-          </div>
-        </CardContent>
-      </Card>
+          <p className="text-center text-[10px] text-slate-500 font-medium pt-2">
+            eGuy Digital Wallet • Transaction Receipt
+          </p>
+        </div>
+      </div>
     </div>
   );
 }

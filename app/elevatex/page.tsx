@@ -12,6 +12,7 @@ import { DepositModal } from "@/components/dashboard/deposit-modal";
 import { WithdrawModal } from "@/components/dashboard/withdraw-modal";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { NetworkTree } from "@/components/elevatex/NetworkTree";
 
 // Format currency
 const formatCurrency = (amount: number) => {
@@ -265,37 +266,18 @@ export default function ElevatexPage() {
 							<span className="text-[10px] bg-white/10 px-2 py-0.5 rounded text-white/60">Live</span>
 						</div>
 
-						<div className="flex flex-col items-center">
+						<div className="flex flex-col items-center overflow-x-auto pb-4 pt-2">
 							{/* Root Node (User) */}
-							<div className="relative z-10">
-								<div className="w-20 h-20 rounded-2xl bg-[#131321] border-4 border-[#47f0d1] p-1 relative shadow-[0_0_30px_rgba(71,240,209,0.2)] flex items-center justify-center">
+							<div className="relative z-10 flex flex-col items-center">
+								<div className="w-20 h-20 rounded-2xl bg-[#131321] border-4 border-[#47f0d1] p-1 relative shadow-[0_0_30px_rgba(71,240,209,0.2)] flex items-center justify-center mb-0 z-20">
 									<span className="text-2xl font-bold text-white">You</span>
 									<div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-[#47f0d1] text-[#131321] px-3 py-1 rounded-full text-[9px] font-black italic shadow-lg">CORE</div>
 								</div>
-								<div className="h-12 w-0.5 bg-[#47f0d1] mx-auto"></div>
 							</div>
 
-							{/* Direct Referrals (L1) */}
-							<div className="w-full relative">
-								<div className="absolute top-0 left-[15%] right-[15%] h-0.5 bg-[#47f0d1]/30"></div>
-
-								<div className="flex justify-center gap-4 mt-0.5">
-									{/* Map through first 3 referrals or show placeholders */}
-									{(referralTree.length > 0 ? referralTree.slice(0, 3) : [1, 2, 3]).map((ref, idx) => (
-										<div key={idx} className="flex flex-col items-center">
-											<div className="h-6 w-0.5 bg-[#47f0d1]/30"></div>
-											<div className={cn(
-												"w-16 h-16 rounded-2xl bg-[#131321] border p-1 relative mb-2 flex items-center justify-center",
-												referralTree[idx] ? "border-[#47f0d1]/40" : "border-white/10 dashed opacity-50"
-											)}>
-												<span className="text-xs text-slate-500">{referralTree[idx] ? "Ref" : "Empty"}</span>
-												{referralTree[idx] && (
-													<div className="absolute -top-2 -right-2 bg-slate-900 border border-white/20 w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-bold text-[#47f0d1]">L1</div>
-												)}
-											</div>
-										</div>
-									))}
-								</div>
+							{/* Recursive Tree */}
+							<div className="w-full mt-0">
+								<NetworkTree data={referralTree} />
 							</div>
 						</div>
 					</section>
