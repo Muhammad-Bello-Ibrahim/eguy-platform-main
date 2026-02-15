@@ -77,10 +77,10 @@ export function VerifyEmailPrompt() {
         <div className="space-y-4">
           {status === 'success' && (
             <Button
-              onClick={() => router.push("/signin")}
+              onClick={() => router.push("/welcome")}
               className="w-full h-12 rounded-xl bg-primary hover:bg-primary/90 text-white font-medium shadow-lg hover:shadow-primary/20 transition-all"
             >
-              Continue to Sign In <ArrowRight className="ml-2 h-4 w-4" />
+              Continue to Welcome <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           )}
 

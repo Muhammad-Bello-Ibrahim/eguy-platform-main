@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>eGuy Notifications Redesign</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#47f0d1",
+                        "background-light": "#f6f8f8",
+                        "background-dark": "#10221e",
+                        "surface-dark": "#162b27",
+                        "card-dark": "#1b3530"
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "2xl": "2rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Manrope', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .ios-blur {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen font-display">
+<!-- iOS Status Bar Spacer -->
+<div class="h-12 w-full"></div>
+<!-- Main Container (Phone Form Factor) -->
+<main class="max-w-md mx-auto px-6 pb-24">
+<!-- Header Section -->
+<header class="flex justify-between items-end pt-4 pb-6">
+<div>
+<h1 class="text-3xl font-extrabold tracking-tight">Notifications</h1>
+</div>
+<button class="text-primary font-semibold text-sm mb-1 hover:opacity-80 transition-opacity">
+                Mark all as read
+            </button>
+</header>
+<!-- Tabbed Interface (Segmented Control) -->
+<nav class="bg-surface-dark/50 p-1.5 rounded-xl mb-8 flex items-center">
+<button class="flex-1 bg-primary text-background-dark font-bold py-2 rounded-lg text-sm transition-all">
+                All
+            </button>
+<button class="flex-1 text-slate-400 font-semibold py-2 rounded-lg text-sm hover:text-white transition-all">
+                Earnings
+            </button>
+<button class="flex-1 text-slate-400 font-semibold py-2 rounded-lg text-sm hover:text-white transition-all">
+                Network
+            </button>
+</nav>
+<!-- Notifications List -->
+<div class="space-y-4">
+<!-- Notification Card: Earnings -->
+<div class="bg-card-dark border border-white/5 p-5 rounded-2xl shadow-xl flex gap-4 items-start relative overflow-hidden group">
+<div class="absolute top-0 left-0 w-1 h-full bg-primary"></div>
+<div class="bg-primary/20 p-3 rounded-xl">
+<span class="material-icons text-primary text-2xl">account_balance_wallet</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start mb-1">
+<h3 class="font-bold text-base leading-tight">Payout Successful</h3>
+<span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">2m ago</span>
+</div>
+<p class="text-sm text-slate-400 leading-relaxed">Your withdrawal of <span class="text-white font-semibold">$1,240.00</span> has been processed to your bank.</p>
+</div>
+</div>
+<!-- Notification Card: Network -->
+<div class="bg-card-dark border border-white/5 p-5 rounded-2xl shadow-xl flex gap-4 items-start relative overflow-hidden group">
+<div class="absolute top-0 left-0 w-1 h-full bg-primary"></div>
+<div class="bg-primary/20 p-3 rounded-xl text-primary">
+<span class="material-icons text-2xl">person_add</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start mb-1">
+<h3 class="font-bold text-base leading-tight">New Referral Joined</h3>
+<span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">45m ago</span>
+</div>
+<p class="text-sm text-slate-400 leading-relaxed">User <span class="text-white font-semibold">@alex_fintech</span> just joined using your referral link.</p>
+</div>
+</div>
+<!-- Notification Card: Earnings -->
+<div class="bg-card-dark/40 border border-white/5 p-5 rounded-2xl flex gap-4 items-start transition-opacity opacity-70">
+<div class="bg-primary/10 p-3 rounded-xl">
+<span class="material-icons text-primary/60 text-2xl">payments</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start mb-1">
+<h3 class="font-bold text-base leading-tight">Commission Received</h3>
+<span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">2h ago</span>
+</div>
+<p class="text-sm text-slate-400 leading-relaxed">You earned <span class="text-white font-semibold">$42.50</span> from a direct sales transaction.</p>
+</div>
+</div>
+<!-- Notification Card: Network -->
+<div class="bg-card-dark/40 border border-white/5 p-5 rounded-2xl flex gap-4 items-start transition-opacity opacity-70">
+<div class="bg-primary/10 p-3 rounded-xl">
+<span class="material-icons text-primary/60 text-2xl">trending_up</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start mb-1">
+<h3 class="font-bold text-base leading-tight">Team Member Leveled Up</h3>
+<span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">5h ago</span>
+</div>
+<p class="text-sm text-slate-400 leading-relaxed">Sarah Jenkins reached <span class="text-primary font-semibold">Gold Status</span>. Your multiplier increased.</p>
+</div>
+</div>
+<!-- Date Separator -->
+<div class="py-4 flex items-center gap-4">
+<div class="h-[1px] flex-1 bg-white/10"></div>
+<span class="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-600">Yesterday</span>
+<div class="h-[1px] flex-1 bg-white/10"></div>
+</div>
+<!-- Notification Card: Network -->
+<div class="bg-card-dark/40 border border-white/5 p-5 rounded-2xl flex gap-4 items-start transition-opacity opacity-70">
+<div class="bg-primary/10 p-3 rounded-xl">
+<span class="material-icons text-primary/60 text-2xl">verified</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start mb-1">
+<h3 class="font-bold text-base leading-tight">Direct Invite Accepted</h3>
+<span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">1d ago</span>
+</div>
+<p class="text-sm text-slate-400 leading-relaxed">Marcus V. successfully completed the verification process.</p>
+</div>
+</div>
+<!-- Notification Card: Bonus -->
+<div class="bg-card-dark/40 border border-white/5 p-5 rounded-2xl flex gap-4 items-start transition-opacity opacity-70">
+<div class="bg-primary/10 p-3 rounded-xl">
+<span class="material-icons text-primary/60 text-2xl">stars</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start mb-1">
+<h3 class="font-bold text-base leading-tight">Bonus Unlocked</h3>
+<span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">1d ago</span>
+</div>
+<p class="text-sm text-slate-400 leading-relaxed">Consistency pays off! You've unlocked the <span class="text-white font-semibold">Weekly Streak Bonus</span>.</p>
+</div>
+</div>
+</div>
+<!-- Scroll Indicator for iOS -->
+<div class="mt-12 flex flex-col items-center">
+<div class="w-16 h-1 bg-white/10 rounded-full mb-2"></div>
+<p class="text-slate-600 text-xs font-semibold">End of recent updates</p>
+</div>
+</main>
+<!-- Bottom Navigation Bar (iOS Style) -->
+<nav class="fixed bottom-0 left-0 right-0 ios-blur bg-background-dark/80 border-t border-white/5 px-8 pb-8 pt-4 z-50">
+<div class="max-w-md mx-auto flex justify-between items-center">
+<button class="flex flex-col items-center gap-1 text-slate-500">
+<span class="material-icons text-2xl">home</span>
+<span class="text-[10px] font-bold">Home</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-500">
+<span class="material-icons text-2xl">insights</span>
+<span class="text-[10px] font-bold">Growth</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-primary">
+<span class="material-icons text-2xl">notifications</span>
+<span class="text-[10px] font-bold">Alerts</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-500">
+<span class="material-icons text-2xl">wallet</span>
+<span class="text-[10px] font-bold">Wallet</span>
+</button>
+<div class="flex flex-col items-center gap-1">
+<img class="w-6 h-6 rounded-full object-cover border border-primary/40" data-alt="User profile picture in a circle" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAgfZNzSsA2hQZeYhwsCsL0ghBypXp7-u5w4s2ICGWsZt4FRLvGL0aCZBwl3lY6z2RGIIviMKB-U-UAyDWTtcZ4wVa50MXEaHq3Jf22vZ3-nglzpT3y6pCOG2WDdz3RSmPIkEsxFHkuJZ8L8OvCSR3xS0mbBYSyD-duilR0Uv4ffbNsGRHn9PXpSPyVoZxPp0ZLskNUJa5KETrFIvKEfrT6vgP8ckbiw-NrOAkNgI9H9UPsnnDUjFvMVZ3S0Gl7E_fLa8kM58OXvxw"/>
+<span class="text-[10px] font-bold text-slate-500">Profile</span>
+</div>
+</div>
+<!-- iOS Home Indicator -->
+<div class="mt-4 flex justify-center">
+<div class="w-32 h-1 bg-white/20 rounded-full"></div>
+</div>
+</nav>
+</body></html>

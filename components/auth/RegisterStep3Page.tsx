@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 
 export default function RegisterStep3Page() {
     const router = useRouter();
@@ -17,6 +18,11 @@ export default function RegisterStep3Page() {
 
         if (password !== confirmPassword) {
             setError('Passwords do not match');
+            return;
+        }
+
+        if (pin.length !== 6) {
+            setError('Please enter a 6-digit Transaction PIN');
             return;
         }
 
@@ -39,6 +45,7 @@ export default function RegisterStep3Page() {
                     email,
                     phone: phone || '',
                     password,
+                    transactionPin: pin,
                     referralCode,
                     dob,
                     address
@@ -54,7 +61,7 @@ export default function RegisterStep3Page() {
                 sessionStorage.removeItem('register_phone');
                 sessionStorage.removeItem('register_address');
 
-                router.push('/welcome');
+                router.push(`/verify-prompt?email=${encodeURIComponent(email || '')}`);
             } else {
                 const data = await res.json();
                 setError(data.error || 'Registration failed');
@@ -105,22 +112,25 @@ export default function RegisterStep3Page() {
                     </header>
 
                     <form onSubmit={handleRegister}>
-                        {/* 6-Digit PIN Section (Visual only for now, mapped to state) */}
+                        {/* 6-Digit PIN Section */}
                         <section className="mb-8">
                             <label className="block text-sm font-bold mb-4 uppercase tracking-wider text-slate-400 dark:text-primary/40">Transaction PIN</label>
-                            <p className="text-xs text-slate-500 mb-4">Used for authorization (Simulated)</p>
-                            <div className="flex justify-between gap-2">
-                                {[1, 2, 3, 4, 5, 6].map((idx) => (
-                                    <input
-                                        key={idx}
-                                        className="w-10 h-14 bg-white dark:bg-surface-dark/50 border-2 border-primary/20 focus:border-primary rounded-lg text-center text-xl font-bold outline-none transition-colors"
-                                        maxLength={1}
-                                        type="password"
-                                        placeholder="•"
-                                        // In a real app, logic to handle PIN input focus would be here
-                                        onChange={(e) => setPin(prev => prev + e.target.value)}
-                                    />
-                                ))}
+                            <p className="text-xs text-slate-500 mb-4">Create a 6-digit PIN for authorizing transactions.</p>
+                            <div className="flex justify-center">
+                                <InputOTP
+                                    maxLength={6}
+                                    value={pin}
+                                    onChange={(value) => setPin(value)}
+                                >
+                                    <InputOTPGroup>
+                                        <InputOTPSlot index={0} className="w-10 h-14 text-lg font-bold border-2 border-primary/20 rounded-l-lg" />
+                                        <InputOTPSlot index={1} className="w-10 h-14 text-lg font-bold border-y-2 border-r-2 border-primary/20" />
+                                        <InputOTPSlot index={2} className="w-10 h-14 text-lg font-bold border-y-2 border-r-2 border-primary/20" />
+                                        <InputOTPSlot index={3} className="w-10 h-14 text-lg font-bold border-y-2 border-r-2 border-primary/20" />
+                                        <InputOTPSlot index={4} className="w-10 h-14 text-lg font-bold border-y-2 border-r-2 border-primary/20" />
+                                        <InputOTPSlot index={5} className="w-10 h-14 text-lg font-bold border-y-2 border-r-2 border-primary/20 rounded-r-lg" />
+                                    </InputOTPGroup>
+                                </InputOTP>
                             </div>
                         </section>
 

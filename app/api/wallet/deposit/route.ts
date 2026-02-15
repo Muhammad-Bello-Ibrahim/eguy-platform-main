@@ -5,9 +5,11 @@ import { Database } from "@/lib/database"
 export async function POST(request: NextRequest) {
   try {
     const session = await getSession()
-    if (!session) {
+    if (!session || !session.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
+
+    const user = session.user as any;
 
     const { amount } = await request.json()
 
@@ -22,14 +24,11 @@ export async function POST(request: NextRequest) {
     }
 
     const reference = `DEP_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`
-    const email = session.user.email
+    const email = user.email
 
-    // Build absolute callback URL
-    const baseUrl =
-      process.env.APP_URL ||
-      (process.env.VERCEL_URL
-        ? `https://${process.env.VERCEL_URL}`
-        : 'http://localhost:3000')
+    // Build callback URL dynamically based on the request origin
+    // This allows it to work on localhost, network IPs, and production automatically
+    const baseUrl = request.nextUrl.origin;
     const callbackUrl = `${baseUrl}/dashboard`
 
     // Initialize Paystack transaction
@@ -54,7 +53,7 @@ export async function POST(request: NextRequest) {
 
     // Optionally, create a pending transaction record here
     await Database.createTransaction({
-      userId: session.user.id,
+      userId: user.id,
       type: "deposit",
       amount: Number(amount),
       description: `Deposit`,

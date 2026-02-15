@@ -1,15 +1,15 @@
 "use client"
 import { useEffect } from "react"
-import type React from "react"
 import { useState } from "react"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Loader2, Banknote, Wallet, ExternalLink } from "lucide-react"
+import { Loader2, ShieldCheck, ChevronDown, ExternalLink } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { useRouter } from "next/navigation"
+import { cn } from "@/lib/utils"
 
 interface WithdrawModalProps {
   isOpen: boolean
@@ -98,122 +98,135 @@ export function WithdrawModal({ isOpen, onClose, onSuccess }: WithdrawModalProps
     }).format(amount)
   }
 
+  const handleMaxClick = () => {
+    setAmount(userBalance.toString());
+  }
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md bg-white border border-gray-200 shadow-lg">
-        <DialogHeader className="pb-4">
-          <DialogTitle className="flex items-center gap-3 text-xl font-bold text-gray-900">
-            <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
-              <Banknote className="w-5 h-5 text-red-600" />
-            </div>
-            Withdraw Funds
-          </DialogTitle>
-          <DialogDescription className="text-gray-600">
-            Withdraw money from your wallet to your payout account
-          </DialogDescription>
-        </DialogHeader>
+      <DialogContent className="sm:max-w-md bg-[#131321] border border-white/10 text-white rounded-3xl p-0 overflow-hidden shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
+        {/* iOS Grabber */}
+        <div className="w-12 h-1.5 bg-zinc-700 rounded-full mx-auto mt-3 mb-4"></div>
 
-        <form className="space-y-6" onSubmit={handleSubmit}>
+        {/* Header */}
+        <div className="flex justify-between items-center px-6 mb-6">
+          <DialogTitle className="text-xl font-bold text-white">Withdraw Funds</DialogTitle>
+          {/* Close button handled by DialogPrimitive typically, but added for visual match if needed, though standard close X is usually fine */}
+        </div>
+
+        <form className="space-y-6 px-6 pb-10" onSubmit={handleSubmit}>
+          {/* Balance Display */}
+          <div className="text-center mb-6">
+            <p className="text-zinc-400 text-sm font-medium mb-2">Available Balance</p>
+            <h3 className="text-[#47f0d1] text-3xl font-extrabold tracking-tight">
+              {isLoadingData ? "..." : formatCurrency(userBalance)}
+            </h3>
+          </div>
+
           {error && (
-            <Alert variant="destructive" className="rounded-lg border-red-200 bg-red-50">
-              <AlertDescription className="font-medium text-red-800">{error}</AlertDescription>
+            <Alert variant="destructive" className="rounded-xl border-red-500/20 bg-red-500/10 text-red-400">
+              <AlertDescription className="font-medium text-center">{error}</AlertDescription>
             </Alert>
           )}
 
-          {/* Available Balance Display */}
-          <div className="bg-blue-50 p-4 rounded-xl border border-blue-200">
-            <div className="flex items-center gap-2 mb-2">
-              <Wallet className="w-4 h-4 text-blue-600" />
-              <span className="text-sm font-medium text-blue-900">Available Balance</span>
-            </div>
-            <p className="text-2xl font-bold text-blue-900">
-              {isLoadingData ? "..." : formatCurrency(userBalance)}
-            </p>
-          </div>
-
-          <div className="space-y-3">
-            <Label htmlFor="amount" className="text-sm font-semibold text-gray-900">Amount (₦)</Label>
-            <div className="flex items-center gap-3 bg-gray-50 rounded-xl px-4 py-3 border border-gray-200">
+          {/* Amount Input */}
+          <div>
+            <Label htmlFor="amount" className="text-zinc-400 text-xs font-bold uppercase tracking-widest mb-3 block">Amount to Withdraw</Label>
+            <div className="relative">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/50 text-xl font-bold">₦</span>
               <Input
                 id="amount"
                 type="number"
-                placeholder="Enter amount"
+                placeholder="0.00"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 min={100}
                 step={100}
                 required
-                className="bg-transparent outline-none w-full text-lg font-semibold placeholder:text-gray-400"
+                className="w-full bg-zinc-800/50 border-2 border-transparent focus:border-[#47f0d1] focus:ring-0 text-white text-2xl font-bold rounded-xl py-6 pl-10 pr-20 transition-all outline-none h-auto placeholder:text-zinc-700"
               />
-            </div>
-            <p className="text-xs text-gray-600">Minimum withdrawal: ₦100</p>
-          </div>
-
-          {/* Transaction Fee Display */}
-          {amount && Number.parseFloat(amount) >= 100 && (
-            <div className="bg-orange-50 p-4 rounded-xl border border-orange-200">
-              <div className="flex justify-between items-center">
-                <div>
-                  <p className="text-sm font-medium text-orange-900">Transaction Fee (2.5%)</p>
-                  <p className="text-xs text-orange-700">Fee will be deducted from withdrawal amount</p>
-                </div>
-                <p className="text-lg font-bold text-orange-900">{formatCurrency(transactionFee)}</p>
-              </div>
-              <div className="mt-2 pt-2 border-t border-orange-200">
-                <div className="flex justify-between items-center">
-                  <p className="text-sm font-medium text-orange-900">You'll receive</p>
-                  <p className="text-lg font-bold text-orange-900">{formatCurrency(amountAfterFee)}</p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Show payout account details if available */}
-          {payoutAccount ? (
-            <div className="bg-gray-50 p-4 rounded-xl space-y-2 border border-gray-200">
-              <h4 className="font-semibold text-sm text-gray-900 mb-1">Payout Account</h4>
-              <div className="text-xs text-gray-600">
-                <p><strong>Bank:</strong> {payoutAccount.bank}</p>
-                <p><strong>Account Number:</strong> {payoutAccount.accountNumber}</p>
-                <p><strong>Account Name:</strong> {payoutAccount.accountName}</p>
-              </div>
-            </div>
-          ) : (
-            <div className="bg-red-50 p-4 rounded-xl border border-red-200">
-              <p className="text-sm text-red-800 mb-3">
-                No payout account found. Please add your bank details in your profile settings.
-              </p>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  router.push('/profile')
-                  onClose()
-                }}
-                className="w-full border-red-300 text-red-700 hover:bg-red-50"
+              <button
+                type="button"
+                onClick={handleMaxClick}
+                className="absolute right-3 top-1/2 -translate-y-1/2 px-4 py-1.5 bg-[#47f0d1]/20 hover:bg-[#47f0d1]/30 text-[#47f0d1] text-xs font-bold rounded-full transition-colors"
               >
-                <ExternalLink className="w-4 h-4 mr-2" />
-                Go to Profile Settings
-              </Button>
+                MAX
+              </button>
+            </div>
+            <p className="text-xs text-zinc-600 mt-2 text-right">Min: ₦100</p>
+          </div>
+
+          {/* Bank Selection / Payout Account */}
+          <div>
+            <Label className="text-zinc-400 text-xs font-bold uppercase tracking-widest mb-3 block">Send to</Label>
+            {payoutAccount ? (
+              <div className="flex items-center gap-4 bg-zinc-800/50 border border-white/5 p-4 rounded-xl hover:bg-zinc-800 transition-colors group">
+                <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
+                  <span className="text-zinc-900 font-bold text-xl">{payoutAccount.bank.substring(0, 2).toUpperCase()}</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-white font-semibold truncate">{payoutAccount.bank}</p>
+                  <p className="text-zinc-500 text-sm truncate">{payoutAccount.accountNumber} • {payoutAccount.accountName}</p>
+                </div>
+                {/* <ChevronDown className="text-zinc-600 group-hover:text-[#47f0d1] transition-colors" /> */}
+              </div>
+            ) : (
+              <div className="bg-red-500/10 border border-red-500/20 p-4 rounded-xl text-center">
+                <p className="text-sm text-red-400 mb-3">No payout account added.</p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  type="button"
+                  onClick={() => {
+                    router.push('/profile')
+                    onClose()
+                  }}
+                  className="bg-transparent border-red-500/50 text-red-400 hover:bg-red-500/20 hover:text-red-300 w-full"
+                >
+                  <ExternalLink className="w-4 h-4 mr-2" />
+                  Add Bank Details
+                </Button>
+              </div>
+            )}
+          </div>
+
+          {/* Summary Card */}
+          {amount && Number.parseFloat(amount) >= 100 && (
+            <div className="bg-zinc-900/40 rounded-xl p-5 border border-white/5 space-y-3">
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-zinc-500">Transaction Fee</span>
+                <span className="text-zinc-300">{formatCurrency(transactionFee)}</span>
+              </div>
+              <div className="h-px bg-white/5"></div>
+              <div className="flex justify-between items-center">
+                <span className="text-zinc-300 font-medium">Final Amount</span>
+                <span className="text-[#47f0d1] text-lg font-bold">{formatCurrency(amountAfterFee)}</span>
+              </div>
             </div>
           )}
 
-          <div className="flex gap-3 pt-2">
-            <Button
-              type="submit"
-              disabled={isLoading || !payoutAccount || !amount || Number.parseFloat(amount) > userBalance}
-              className="flex-1 rounded-xl bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-bold text-lg shadow-lg hover:shadow-red-500/25 transition-all duration-200 border-0 disabled:opacity-50"
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Processing...
-                </>
-              ) : (
-                "Withdraw"
-              )}
-            </Button>
+          {/* Primary CTA */}
+          <Button
+            type="submit"
+            disabled={isLoading || !payoutAccount || !amount || Number.parseFloat(amount) > userBalance}
+            className="w-full bg-[#47f0d1] hover:bg-[#47f0d1]/90 text-[#131321] font-extrabold py-6 rounded-xl transition-all shadow-[0_4px_20px_rgba(71,240,209,0.3)] active:scale-[0.98] text-lg h-auto disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                Processing...
+              </>
+            ) : (
+              "Withdraw to Bank"
+            )}
+          </Button>
+
+          {/* Trust Badge */}
+          <div className="flex items-center justify-center gap-2 pt-2">
+            <ShieldCheck className="text-[#47f0d1]/60 w-5 h-5" />
+            <span className="text-zinc-500 text-xs font-medium uppercase tracking-widest">Secured by eGuy</span>
           </div>
+
         </form>
       </DialogContent>
     </Dialog>

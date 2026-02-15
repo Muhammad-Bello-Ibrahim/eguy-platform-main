@@ -43,7 +43,7 @@ function VerifyPromptContent() {
         const data = await res.json();
         if (data.verified) {
           setPolling(false);
-          router.push("/dashboard");
+          router.push("/welcome");
         }
       } catch { }
     }, 3000);

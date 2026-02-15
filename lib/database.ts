@@ -13,6 +13,7 @@ export interface DatabaseUser {
   kycStatus: "pending" | "verified" | "rejected"
   status: "active" | "suspended" | "inactive"
   role: "user" | "admin"
+  transactionPin?: string
   avatar?: string
   dob?: string;
   address?: string;

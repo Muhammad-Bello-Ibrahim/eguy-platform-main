@@ -80,17 +80,13 @@ export default function RegisterStep2Page() {
                             <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-primary/60 ml-1">
                                 Phone Number
                             </label>
-                            <div className="flex gap-3">
-                                <div className="w-28 relative">
-                                    <div className="h-14 bg-white dark:bg-surface-dark rounded-2xl flex items-center justify-center gap-2 px-3 border-0 cursor-pointer">
-                                        <span className="text-xl">🇺🇸</span>
-                                        <span className="text-sm font-medium">+1</span>
-                                        <span className="material-icons-round text-sm text-slate-400">expand_more</span>
-                                    </div>
+                            <div className="relative">
+                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                    <span className="material-icons-round text-slate-400 text-xl">phone</span>
                                 </div>
                                 <input
-                                    className="flex-1 h-14 bg-white dark:bg-surface-dark border-0 rounded-2xl px-5 text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-primary outline-none"
-                                    placeholder="201 555 0123"
+                                    className="w-full h-14 bg-white dark:bg-surface-dark border-0 rounded-2xl pl-12 pr-5 text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-primary outline-none"
+                                    placeholder="080 123 45678"
                                     type="tel"
                                     value={phone}
                                     onChange={(e) => setPhone(e.target.value)}

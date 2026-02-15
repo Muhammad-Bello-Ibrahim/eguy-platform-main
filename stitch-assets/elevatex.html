@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ElevateX Network &amp; Wallet Hub</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#47f0d1",
+                        "background-dark": "#10221e",
+                        "navy-deep": "#131321",
+                        "card-bg": "rgba(19, 35, 33, 0.7)",
+                    },
+                    fontFamily: {
+                        "display": ["Spline Sans"]
+                    },
+                    borderRadius: {
+                        "2xl": "2rem",
+                    },
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        @layer base {
+            body {
+                @apply bg-navy-deep text-slate-100 font-display antialiased;
+                -webkit-tap-highlight-color: transparent;
+            }
+        }
+        .glass-panel {
+            background: rgba(19, 19, 33, 0.85);
+            backdrop-filter: blur(16px);
+            border-top: 1px solid rgba(71, 240, 209, 0.15);
+        }
+        .neon-glow {
+            box-shadow: 0 0 20px rgba(71, 240, 209, 0.15);
+        }
+        .node-line-gradient {
+            background: linear-gradient(180deg, #47f0d1 0%, rgba(71, 240, 209, 0) 100%);
+        }
+        ::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="min-h-screen flex flex-col">
+<header class="px-6 pt-14 pb-4 sticky top-0 z-50 bg-navy-deep/80 backdrop-blur-lg flex justify-between items-center">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full border-2 border-primary/50 p-0.5">
+<img alt="Profile" class="w-full h-full rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCRMgt5REfqq-vIzALg4UPragAxQTrmKcJGhJMuSzSkP8lmphkD7EjGpMyA63RfC9KzyIlUvdlH_cNozllB5sc9UBE3wBPNojLSRZb_PHp_nBiG9R8i9_Hmq37LHSqPw_n2kTg0XK5cJQJh9R6TkIthzBByh1yX09Qz5wPkQvZdjL3pEjskXN1GDCZGMZlUkO0CXjt_8KouwC25KOM3aIOeDjTj02FNL1j8TuyvzEI2HomHH-z2x0-_J8xjNpM_lkfm_tOVuTdWhn4"/>
+</div>
+<div>
+<h1 class="text-sm font-bold tracking-tight">ElevateX</h1>
+<div class="flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+<p class="text-[10px] text-primary font-bold uppercase tracking-widest">Network Live</p>
+</div>
+</div>
+</div>
+<div class="flex gap-2">
+<button class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-xl">share</span>
+</button>
+<button class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-xl">notifications</span>
+</button>
+</div>
+</header>
+<main class="flex-1 overflow-y-auto px-5 pt-2 pb-44 space-y-6">
+<div class="bg-primary/10 border border-primary/20 rounded-2xl p-4 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="bg-primary/20 p-2 rounded-lg">
+<span class="material-symbols-outlined text-primary text-sm">link</span>
+</div>
+<div>
+<p class="text-[10px] text-primary/70 uppercase font-bold tracking-wider">Invite Code</p>
+<p class="text-xs font-mono font-bold text-white">ELEVATEX-9921</p>
+</div>
+</div>
+<button class="bg-primary text-navy-deep px-4 py-2 rounded-xl text-xs font-black uppercase tracking-tight flex items-center gap-2 active:scale-95 transition-transform">
+<span>Copy</span>
+</button>
+</div>
+<section class="bg-gradient-to-br from-primary/20 to-transparent border border-primary/30 rounded-[2rem] p-6 neon-glow">
+<div class="flex justify-between items-start mb-6">
+<div>
+<p class="text-slate-400 text-xs font-medium uppercase tracking-widest mb-1">Wallet Balance</p>
+<div class="flex items-baseline gap-1">
+<span class="text-lg font-bold text-primary">$</span>
+<h2 class="text-4xl font-bold tracking-tight text-white">42,890.50</h2>
+</div>
+</div>
+<button class="bg-white text-navy-deep px-6 py-3 rounded-2xl font-bold text-sm shadow-xl active:scale-95 transition-all">
+                    Withdraw
+                </button>
+</div>
+<div class="grid grid-cols-2 gap-4 pt-4 border-t border-white/10">
+<div class="space-y-1">
+<p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Total Earnings</p>
+<p class="text-xl font-bold text-white">$128,450</p>
+</div>
+<div class="space-y-1 text-right">
+<p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Growth Rank</p>
+<div class="flex items-center justify-end gap-2">
+<span class="text-xl font-black italic text-primary tracking-tighter uppercase">Platinum</span>
+<span class="material-symbols-outlined text-primary text-sm">verified</span>
+</div>
+</div>
+</div>
+</section>
+<section class="relative pt-4">
+<div class="flex items-center justify-between mb-8 px-2">
+<h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Network Hierarchy</h3>
+<span class="text-[10px] bg-white/10 px-2 py-0.5 rounded text-white/60">Level 4 Deep</span>
+</div>
+<div class="flex flex-col items-center">
+<div class="relative z-10">
+<div class="w-20 h-20 rounded-2xl bg-navy-deep border-4 border-primary p-1 relative shadow-[0_0_30px_rgba(71,240,209,0.2)]">
+<img alt="Root" class="w-full h-full rounded-xl object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAUezFtQnbZW7TjZ-PGx2yQAH1b12IpRmzpYAic9AVMLfShH3v3GrWBuFmpfkvrr-dQe1ldQvonuM4QLDiEJ3EZ261NDZT_auVXY0iT3kys58tb12UBi0LwTUY8_-XiCnokgguqNcmPM4ByuTSRmMDyMPjYIwfDeoKk4eQ2vI1H_7PgVSze81o4IQSD8puuPODV9bj3G6AIBLwciHyFRl7xZoTgtfAIh0oPSjBvcE7cRFEonlqkMisFzfc01Jot9AMDMdCZq4nz2wo"/>
+<div class="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-primary text-navy-deep px-3 py-1 rounded-full text-[9px] font-black italic shadow-lg">CORE</div>
+</div>
+<div class="h-12 w-0.5 bg-primary mx-auto"></div>
+</div>
+<div class="w-full flex justify-center gap-4 relative">
+<div class="absolute top-0 left-[15%] right-[15%] h-0.5 bg-primary/30"></div>
+<div class="flex flex-col items-center">
+<div class="h-6 w-0.5 bg-primary/30"></div>
+<div class="w-16 h-16 rounded-2xl bg-navy-deep border border-primary/40 p-1 relative mb-2">
+<img alt="Node 1" class="w-full h-full rounded-xl object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAkFzGhpw3917KQUHQZoZ7l2EgOVNvEQpDYcmzmd3GHwxAXlByvamWnKvHXaTySPhHaMCJFDGJkfKhsi3g0nvGZ9vYnfpX-0syogX-n4W2tu_ypdJfZCym9pUBlCU4lSmY3BD4eBzyVKX1AiVhsm035aWOjeXGrXDze9oqo-02qXirN5EIzIrKb2kMJu1GzxBMdE8Z6eIpHo_yyjL-Gj3FrdlK_N9j0V7EXnkf3ews49KBARq2HkNWClyuHmHU8GsP5anb2DGkF0CU"/>
+<div class="absolute -top-2 -right-2 bg-slate-900 border border-white/20 w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-bold text-primary">L1</div>
+</div>
+<p class="text-[9px] font-bold text-white mb-0.5">Sarah J.</p>
+<div class="bg-primary/10 px-2 py-0.5 rounded-full border border-primary/20">
+<p class="text-[8px] text-primary font-bold">42 people</p>
+</div>
+</div>
+<div class="flex flex-col items-center">
+<div class="h-6 w-0.5 bg-primary/30"></div>
+<div class="w-16 h-16 rounded-2xl bg-navy-deep border border-primary p-1 relative mb-2 neon-glow">
+<img alt="Node 2" class="w-full h-full rounded-xl object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDqso-Bql3QiwoZ4FPPIGLO5qlRzrzbA7vAl_qh4kmKizCoGzz32a2XjWEgXY0_oyVBiZx51SyFZAz3D8XHqon882hdSJ7Nqq7VJw-1kkOykx1wO0t_EgN_AY01DQH2hfs6bXDcAyiyc-fMFT0rVR1LRgWss40b_fWzUKdm6WX3vd5mRxXc7nXOxio5jWbvRs0zMjOS9fhI4JXyG4bbxZrniwwBN54o-hU7SaBzPnBAVedC6hJKLhswYOaQyCSB-qFwFj7BgqUZ9fo"/>
+<div class="absolute -top-2 -right-2 bg-slate-900 border border-white/20 w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-bold text-primary">L1</div>
+</div>
+<p class="text-[9px] font-bold text-white mb-0.5">Alex M.</p>
+<div class="bg-primary/10 px-2 py-0.5 rounded-full border border-primary/20">
+<p class="text-[8px] text-primary font-bold">128 people</p>
+</div>
+</div>
+<div class="flex flex-col items-center opacity-60">
+<div class="h-6 w-0.5 bg-primary/30"></div>
+<div class="w-16 h-16 rounded-2xl bg-navy-deep border border-white/10 p-1 relative mb-2 grayscale">
+<img alt="Node 3" class="w-full h-full rounded-xl object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBp_wcpD_gXW0xl-0wDYzUNW7LqHMXcN7an2kDCxg6tQvb4K6cysPOBS1hS0XDkZu81w5yH9yp6mk0y9vKMlndMQsTj3wkfWkbSYX7z7Ua3_cJ4In4rP9cb4Pr7lL5vrBPH4Z7qq0w7x9a6jSXD7UP3vhUKMt1SgALjJ--WqOu4Pe-EJXnS9kny8b36iInY1U6IFoVu2Px3qpq8D-fQb0kM243zwORrgIDCT-uqp8Y7RklvcJEqT5UYv-wO83QzdAmdZ9qTXy03too"/>
+<div class="absolute -top-2 -right-2 bg-slate-900 border border-white/20 w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-bold text-slate-500">L1</div>
+</div>
+<p class="text-[9px] font-bold text-slate-400 mb-0.5">David K.</p>
+<div class="bg-white/5 px-2 py-0.5 rounded-full border border-white/10">
+<p class="text-[8px] text-slate-400 font-bold">15 people</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="space-y-4">
+<div class="flex justify-between items-center px-1">
+<h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Recent Activity</h3>
+<button class="text-primary text-[10px] font-bold uppercase">View All</button>
+</div>
+<div class="space-y-3">
+<div class="bg-white/5 border border-white/10 rounded-2xl p-4 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">account_tree</span>
+</div>
+<div>
+<p class="text-xs font-bold text-white">L2 Network Commission</p>
+<p class="text-[10px] text-slate-500">From Alex M. Sub-network</p>
+</div>
+</div>
+<div class="text-right">
+<p class="text-sm font-bold text-primary">+$450.00</p>
+<p class="text-[10px] text-slate-500">2h ago</p>
+</div>
+</div>
+<div class="bg-white/5 border border-white/10 rounded-2xl p-4 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">group_add</span>
+</div>
+<div>
+<p class="text-xs font-bold text-white">Direct Referral Bonus</p>
+<p class="text-[10px] text-slate-500">Sarah J. Tier Upgrade</p>
+</div>
+</div>
+<div class="text-right">
+<p class="text-sm font-bold text-primary">+$1,200.00</p>
+<p class="text-[10px] text-slate-500">Yesterday</p>
+</div>
+</div>
+<div class="bg-white/5 border border-white/10 rounded-2xl p-4 flex items-center justify-between opacity-80">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center">
+<span class="material-symbols-outlined text-slate-400">payments</span>
+</div>
+<div>
+<p class="text-xs font-bold text-white">Wallet Withdrawal</p>
+<p class="text-[10px] text-slate-500">Bank Transfer - Completed</p>
+</div>
+</div>
+<div class="text-right">
+<p class="text-sm font-bold text-white">-$5,000.00</p>
+<p class="text-[10px] text-slate-500">3 days ago</p>
+</div>
+</div>
+</div>
+</section>
+</main>
+<div class="fixed bottom-0 left-0 right-0 glass-panel px-6 pt-4 pb-10 rounded-t-[2.5rem] z-50">
+<div class="flex justify-between items-center mb-6">
+<button class="flex flex-col items-center gap-1">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1">hub</span>
+<span class="text-[10px] font-bold text-primary uppercase">Network</span>
+</button>
+<button class="flex flex-col items-center gap-1 opacity-40">
+<span class="material-symbols-outlined text-white">account_balance_wallet</span>
+<span class="text-[10px] font-bold text-white uppercase">Wallet</span>
+</button>
+<div class="w-12 h-12 bg-primary rounded-2xl -mt-10 flex items-center justify-center shadow-[0_8px_20px_rgba(71,240,209,0.4)] active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-navy-deep font-bold text-3xl">add</span>
+</div>
+<button class="flex flex-col items-center gap-1 opacity-40">
+<span class="material-symbols-outlined text-white">bar_chart</span>
+<span class="text-[10px] font-bold text-white uppercase">Stats</span>
+</button>
+<button class="flex flex-col items-center gap-1 opacity-40">
+<span class="material-symbols-outlined text-white">settings</span>
+<span class="text-[10px] font-bold text-white uppercase">Settings</span>
+</button>
+</div>
+<div class="w-32 h-1.5 bg-white/20 rounded-full mx-auto"></div>
+</div>
+
+</body></html>

@@ -9,20 +9,10 @@ export default function RecoveryEmailSentPage() {
 
     return (
         <div className="bg-background-light dark:bg-background-dark font-display text-slate-800 dark:text-slate-100 flex items-center justify-center min-h-screen">
-            {/* iOS Phone Container */}
-            <div className="relative w-[375px] h-[812px] bg-background-light dark:bg-background-dark overflow-hidden flex flex-col items-center px-8 shadow-2xl border-[8px] border-slate-200 dark:border-[#2a423d] rounded-[3rem]">
-                {/* Status Bar Area */}
-                <div className="w-full h-11 flex justify-between items-center px-6 pt-4">
-                    <span className="text-xs font-bold">9:41</span>
-                    <div className="flex items-center space-x-1">
-                        <span className="material-icons-round text-sm">signal_cellular_alt</span>
-                        <span className="material-icons-round text-sm">wifi</span>
-                        <span className="material-icons-round text-sm rotate-90">battery_full</span>
-                    </div>
-                </div>
+            {/* Main Content Wrapper */}
+            <div className="relative w-full max-w-md bg-background-light dark:bg-background-dark overflow-hidden flex flex-col items-center px-8 py-12 shadow-xl sm:border sm:border-slate-200 sm:dark:border-[#2a423d] sm:rounded-3xl">
 
-                {/* Main Content Wrapper */}
-                <div className="flex-1 w-full flex flex-col justify-center items-center text-center">
+                <div className="w-full flex flex-col justify-center items-center text-center">
                     {/* Success Icon Section */}
                     <div className="relative mb-10">
                         {/* Outer Glow */}
@@ -65,9 +55,6 @@ export default function RecoveryEmailSentPage() {
                         </div>
                     </div>
                 </div>
-
-                {/* Bottom Safe Area Indicator */}
-                <div className="w-32 h-1.5 bg-slate-400/20 rounded-full mb-4"></div>
 
                 {/* Background Decorative Elements */}
                 <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-primary/5 rounded-full blur-[100px] pointer-events-none"></div>

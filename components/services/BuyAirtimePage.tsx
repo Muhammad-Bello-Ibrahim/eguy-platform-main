@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 
 interface Plan {
@@ -19,7 +19,14 @@ interface Plan {
 
 const BuyAirtimePage = () => {
     const router = useRouter();
-    const [segment, setSegment] = useState<'airtime' | 'data'>('airtime');
+    const searchParams = useSearchParams();
+    const typeParam = searchParams.get('type');
+
+    // Initialize segment based on URL param
+    const [segment, setSegment] = useState<'airtime' | 'data'>(
+        typeParam === 'data' ? 'data' : 'airtime'
+    );
+
     const [loading, setLoading] = useState(true);
     const [processing, setProcessing] = useState(false);
 
@@ -109,7 +116,7 @@ const BuyAirtimePage = () => {
                 {/* Header */}
                 <header className="pt-12 pb-6 px-6 flex items-center justify-between sticky top-0 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md z-20">
                     <button onClick={() => router.back()} className="w-10 h-10 flex items-center justify-center rounded-full bg-slate-200/50 dark:bg-primary/10 text-slate-900 dark:text-primary cursor-pointer hover:bg-slate-300/50 dark:hover:bg-primary/20 transition-colors">
-                        <span className="material-icons">arrow_back_ios_new</span>
+                        <span className="material-icons-round">arrow_back_ios_new</span>
                     </button>
                     <h1 className="text-xl font-bold tracking-tight">Airtime &amp; Data</h1>
                     <div className="w-10"></div>
@@ -122,8 +129,8 @@ const BuyAirtimePage = () => {
                         <button
                             onClick={() => setSegment('airtime')}
                             className={`flex-1 py-2.5 rounded-lg font-bold shadow-sm transition-all ${segment === 'airtime'
-                                    ? 'bg-white dark:bg-primary text-slate-900'
-                                    : 'text-slate-500 dark:text-slate-400'
+                                ? 'bg-white dark:bg-primary text-slate-900'
+                                : 'text-slate-500 dark:text-slate-400'
                                 }`}
                         >
                             Airtime
@@ -131,8 +138,8 @@ const BuyAirtimePage = () => {
                         <button
                             onClick={() => setSegment('data')}
                             className={`flex-1 py-2.5 rounded-lg font-medium transition-all ${segment === 'data'
-                                    ? 'bg-white dark:bg-primary text-slate-900'
-                                    : 'text-slate-500 dark:text-slate-400'
+                                ? 'bg-white dark:bg-primary text-slate-900'
+                                : 'text-slate-500 dark:text-slate-400'
                                 }`}
                         >
                             Data Bundle
@@ -178,7 +185,7 @@ const BuyAirtimePage = () => {
                                     onChange={(e) => setPhoneNumber(e.target.value)}
                                 />
                                 <button className="absolute right-4 top-1/2 -translate-y-1/2 text-primary bg-primary/10 p-2 rounded-xl">
-                                    <span className="material-icons text-xl">contact_phone</span>
+                                    <span className="material-icons-round text-xl">contact_phone</span>
                                 </button>
                             </div>
                         </div>
@@ -197,8 +204,8 @@ const BuyAirtimePage = () => {
                                             key={amt}
                                             onClick={() => setAmount(amt.toString())}
                                             className={`py-4 rounded-2xl font-bold border-2 transition-all ${amount === amt.toString()
-                                                    ? 'bg-primary/20 dark:bg-primary/20 text-primary border-primary'
-                                                    : 'bg-slate-100 dark:bg-surface-dark text-slate-900 dark:text-slate-100 border-transparent hover:border-primary'
+                                                ? 'bg-primary/20 dark:bg-primary/20 text-primary border-primary'
+                                                : 'bg-slate-100 dark:bg-surface-dark text-slate-900 dark:text-slate-100 border-transparent hover:border-primary'
                                                 }`}
                                         >
                                             ₦{amt}
@@ -234,8 +241,8 @@ const BuyAirtimePage = () => {
                                                     key={plan.dataPlan}
                                                     onClick={() => setSelectedDataPlan(plan.dataPlan)}
                                                     className={`p-4 rounded-2xl border-2 cursor-pointer flex justify-between items-center transition-all ${selectedDataPlan === plan.dataPlan
-                                                            ? 'bg-primary/10 border-primary'
-                                                            : 'bg-slate-100 dark:bg-surface-dark border-transparent hover:border-primary/50'
+                                                        ? 'bg-primary/10 border-primary'
+                                                        : 'bg-slate-100 dark:bg-surface-dark border-transparent hover:border-primary/50'
                                                         }`}
                                                 >
                                                     <div>
@@ -273,7 +280,7 @@ const BuyAirtimePage = () => {
                         {processing ? <Loader2 className="animate-spin" /> : (
                             <>
                                 Buy Now
-                                <span className="material-icons">arrow_forward</span>
+                                <span className="material-icons-round">arrow_forward</span>
                             </>
                         )}
                     </button>

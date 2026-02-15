@@ -16,7 +16,7 @@ export const viewport = {
 };
 
 import { usePathname } from "next/navigation";
-import MobileNavWrapper from "@/components/ui/mobile-nav-wrapper";
+import BottomNavWrapper from "@/components/dashboard/redesign/BottomNavWrapper";
 
 export default function RootLayout({
   children,
@@ -41,7 +41,7 @@ export default function RootLayout({
             disableTransitionOnChange
           >
             {children}
-            <MobileNavWrapper />
+            <BottomNavWrapper />
           </ThemeProvider>
         </AuthProvider>
         <Analytics />

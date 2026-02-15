@@ -8,20 +8,11 @@ export default function EmailVerifiedPage() {
 
     return (
         <div className="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen flex items-center justify-center p-4">
-            {/* iOS Frame Mockup */}
-            <div className="relative w-full max-w-[390px] h-[844px] bg-background-light dark:bg-background-dark rounded-[3rem] shadow-2xl overflow-hidden border-8 border-slate-200 dark:border-slate-800 flex flex-col">
-                {/* Status Bar */}
-                <div className="h-11 flex justify-between items-center px-8 w-full shrink-0">
-                    <span className="text-sm font-semibold">9:41</span>
-                    <div className="flex items-center space-x-1.5">
-                        <span className="material-icons-round text-base">signal_cellular_alt</span>
-                        <span className="material-icons-round text-base">wifi</span>
-                        <span className="material-icons-round text-base rotate-90">battery_full</span>
-                    </div>
-                </div>
+            {/* Main Content Card */}
+            <div className="relative w-full max-w-md bg-background-light dark:bg-background-dark sm:rounded-3xl sm:shadow-xl overflow-hidden sm:border sm:border-slate-200 sm:dark:border-slate-800 flex flex-col">
 
                 {/* Main Content Area */}
-                <div className="flex-1 flex flex-col items-center justify-center px-8 relative">
+                <div className="flex-1 flex flex-col items-center justify-center px-8 py-12 relative">
                     {/* Abstract Background Decorative Elements */}
                     <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-64 h-64 bg-primary/10 rounded-full blur-3xl -z-10"></div>
 
@@ -72,11 +63,6 @@ export default function EmailVerifiedPage() {
                     <button className="w-full py-2 text-slate-500 dark:text-slate-400 text-sm font-medium hover:text-primary transition-colors">
                         Contact Support
                     </button>
-                </div>
-
-                {/* Home Indicator */}
-                <div className="h-2 w-full relative flex justify-center pb-2">
-                    <div className="w-32 h-1 bg-slate-300 dark:bg-white/20 rounded-full"></div>
                 </div>
             </div>
 

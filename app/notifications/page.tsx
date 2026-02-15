@@ -1,9 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Bell, Trash2, Check, CheckCheck } from "lucide-react";
+import {
+  Bell, CheckCheck, Wallet, UserPlus, TrendingUp, ShieldCheck,
+  Award, Trash2, Check
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
 
 interface Notification {
   id: string;
@@ -20,7 +23,8 @@ interface Notification {
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<"all" | "earnings" | "network">("all");
+  const { toast } = useToast();
 
   useEffect(() => {
     fetchNotifications();
@@ -29,18 +33,13 @@ export default function NotificationsPage() {
   const fetchNotifications = async () => {
     try {
       setLoading(true);
-      setError(null);
-
       const response = await fetch("/api/notifications?limit=50");
-      if (!response.ok) {
-        throw new Error("Failed to fetch notifications");
+      if (response.ok) {
+        const data = await response.json();
+        setNotifications(data.notifications || []);
       }
-
-      const data = await response.json();
-      setNotifications(data.notifications || []);
-    } catch (err: any) {
+    } catch (err) {
       console.error("Error fetching notifications:", err);
-      setError(err.message || "Failed to load notifications");
     } finally {
       setLoading(false);
     }
@@ -55,14 +54,12 @@ export default function NotificationsPage() {
       });
 
       if (response.ok) {
-        // Update local state
         setNotifications(prev =>
           prev.map(notif =>
-            notificationIds.includes(notif.id)
-              ? { ...notif, read: true }
-              : notif
+            notificationIds.includes(notif.id) ? { ...notif, read: true } : notif
           )
         );
+        toast({ title: "Marked as read" });
       }
     } catch (err) {
       console.error("Error marking notifications as read:", err);
@@ -78,195 +75,168 @@ export default function NotificationsPage() {
 
   const deleteNotification = async (notificationId: string) => {
     try {
-      const response = await fetch(`/api/notifications?id=${notificationId}`, {
+      // Optimistic update
+      setNotifications(prev => prev.filter(n => n.id !== notificationId));
+
+      await fetch(`/api/notifications?id=${notificationId}`, {
         method: "DELETE",
       });
-
-      if (response.ok) {
-        // Remove from local state
-        setNotifications(prev => prev.filter(n => n.id !== notificationId));
-      }
     } catch (err) {
       console.error("Error deleting notification:", err);
     }
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
-
-    if (diffInHours < 1) {
-      return "Just now";
-    } else if (diffInHours < 24) {
-      return `${diffInHours}h ago`;
-    } else if (diffInHours < 48) {
-      return "Yesterday";
-    } else {
-      return date.toLocaleDateString();
-    }
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "success":
-        return "✅";
-      case "error":
-        return "❌";
-      case "warning":
-        return "⚠️";
+  const getIcon = (type: string) => {
+    switch (type) {
+      case 'withdrawal':
+      case 'deposit':
+      case 'payment':
+        return <Wallet className="w-6 h-6" />;
+      case 'referral':
+      case 'network':
+        return <UserPlus className="w-6 h-6" />;
+      case 'earning':
+      case 'commission':
+        return <TrendingUp className="w-6 h-6" />;
+      case 'verification':
+        return <ShieldCheck className="w-6 h-6" />;
+      case 'bonus':
+        return <Award className="w-6 h-6" />;
       default:
-        return "ℹ️";
+        return <Bell className="w-6 h-6" />;
     }
   };
+
+  const getTimeAgo = (dateString: string) => {
+    const diff = Date.now() - new Date(dateString).getTime();
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+
+    if (minutes < 1) return 'Just now';
+    if (minutes < 60) return `${minutes}m ago`;
+    if (hours < 24) return `${hours}h ago`;
+    return `${days}d ago`;
+  };
+
+  const filteredNotifications = notifications.filter(n => {
+    if (activeTab === "all") return true;
+    if (activeTab === "earnings") return ['earning', 'commission', 'bonus', 'withdrawal', 'deposit'].includes(n.type);
+    if (activeTab === "network") return ['referral', 'network', 'verification'].includes(n.type);
+    return true;
+  });
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 flex flex-col items-center p-4 pb-24">
-        <div className="w-full max-w-md mx-auto">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Bell className="h-6 w-6 text-green-600" /> Notifications
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {[...Array(3)].map((_, i) => (
-                  <div key={i} className="animate-pulse">
-                    <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                    <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+      <div className="min-h-screen bg-[#10221e] flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#47f0d1]"></div>
       </div>
     );
   }
-
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 flex flex-col items-center p-4 pb-24">
-        <div className="w-full max-w-md mx-auto">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Bell className="h-6 w-6 text-green-600" /> Notifications
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center text-red-600 py-8">
-                <p>{error}</p>
-                <Button
-                  onClick={fetchNotifications}
-                  className="mt-4"
-                  variant="outline"
-                >
-                  Retry
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    );
-  }
-
-  const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 flex flex-col items-center p-4 pb-24">
-      <div className="w-full max-w-md mx-auto flex flex-col gap-6">
-        <Card className="mb-4">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2">
-                <Bell className="h-6 w-6 text-green-600" />
-                Notifications
-                {unreadCount > 0 && (
-                  <span className="bg-red-500 text-white text-xs rounded-full px-2 py-1">
-                    {unreadCount}
-                  </span>
-                )}
-              </CardTitle>
-              {unreadCount > 0 && (
-                <Button
-                  onClick={markAllAsRead}
-                  size="sm"
-                  variant="outline"
-                  className="text-xs"
-                >
-                  <CheckCheck className="h-3 w-3 mr-1" />
-                  Mark all read
-                </Button>
+    <div className="min-h-screen bg-[#f6f8f8] dark:bg-[#10221e] pb-24 font-sans text-slate-900 dark:text-slate-100 transition-colors duration-300">
+      <div className="max-w-md mx-auto px-6">
+        {/* Header */}
+        <header className="flex justify-between items-end pt-8 pb-6 sticky top-0 bg-[#f6f8f8]/80 dark:bg-[#10221e]/80 backdrop-blur-xl z-30">
+          <div>
+            <h1 className="text-3xl font-extrabold tracking-tight dark:text-white text-slate-900">Notifications</h1>
+          </div>
+          <button
+            onClick={markAllAsRead}
+            className="text-[#47f0d1] font-semibold text-sm mb-1 hover:opacity-80 transition-opacity flex items-center gap-1"
+          >
+            <CheckCheck className="w-4 h-4" /> Mark all read
+          </button>
+        </header>
+
+        {/* Tabs */}
+        <nav className="bg-slate-200 dark:bg-[#162b27]/50 p-1.5 rounded-xl mb-8 flex items-center sticky top-24 z-20 backdrop-blur-sm">
+          {(["all", "earnings", "network"] as const).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={cn(
+                "flex-1 font-bold py-2 rounded-lg text-sm transition-all capitalize",
+                activeTab === tab
+                  ? "bg-[#47f0d1] text-[#10221e] shadow-md"
+                  : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white"
               )}
+            >
+              {tab}
+            </button>
+          ))}
+        </nav>
+
+        {/* List */}
+        <div className="space-y-4">
+          {filteredNotifications.length === 0 ? (
+            <div className="text-center py-12 opacity-50">
+              <Bell className="w-12 h-12 mx-auto mb-4 text-slate-400" />
+              <p>No notifications found</p>
             </div>
-          </CardHeader>
-          <CardContent>
-            {notifications.length === 0 ? (
-              <div className="text-center text-gray-500 py-8">
-                <Bell className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                <p>No notifications yet</p>
-              </div>
-            ) : (
-              <ul className="divide-y divide-gray-200">
-                {notifications.map((notification) => (
-                  <li key={notification.id} className={`px-2 py-4 ${!notification.read ? 'bg-blue-50' : ''}`}>
-                    <div className="flex items-start gap-3">
-                      <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center mt-1">
-                        <span className="text-sm">{getStatusIcon(notification.status)}</span>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex-1">
-                            <div className={`font-medium text-sm ${!notification.read ? 'font-semibold' : ''}`}>
-                              {notification.title}
-                            </div>
-                            <div className="text-xs text-gray-600 mt-1">
-                              {notification.message}
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            {!notification.read && (
-                              <Button
-                                onClick={() => markAsRead([notification.id])}
-                                size="sm"
-                                variant="ghost"
-                                className="h-6 w-6 p-0"
-                              >
-                                <Check className="h-3 w-3" />
-                              </Button>
-                            )}
-                            <Button
-                              onClick={() => deleteNotification(notification.id)}
-                              size="sm"
-                              variant="ghost"
-                              className="h-6 w-6 p-0 text-red-500 hover:text-red-700"
-                            >
-                              <Trash2 className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        </div>
-                        <div className="flex items-center justify-between mt-2">
-                          <div className="text-xs text-gray-400">
-                            {formatDate(notification.createdAt)}
-                          </div>
-                          {notification.amount && (
-                            <div className="text-xs font-medium text-green-600">
-                              ₦{notification.amount.toLocaleString()}
-                            </div>
-                          )}
-                        </div>
+          ) : (
+            filteredNotifications.map((notif) => (
+              <div
+                key={notif.id}
+                className={cn(
+                  "group relative overflow-hidden rounded-2xl p-5 border shadow-sm transition-all flex gap-4 items-start",
+                  notif.read
+                    ? "bg-white dark:bg-[#1b3530]/40 border-slate-200 dark:border-white/5 opacity-70"
+                    : "bg-white dark:bg-[#1b3530] border-[#47f0d1]/30 dark:border-white/10 shadow-md"
+                )}
+              >
+                {!notif.read && <div className="absolute top-0 left-0 w-1 h-full bg-[#47f0d1]"></div>}
+
+                <div className={cn(
+                  "p-3 rounded-xl flex-shrink-0",
+                  !notif.read ? "bg-[#47f0d1]/20 text-[#47f0d1]" : "bg-slate-100 dark:bg-[#47f0d1]/10 text-slate-400 dark:text-[#47f0d1]/60"
+                )}>
+                  {getIcon(notif.type)}
+                </div>
+
+                <div className="flex-1 min-w-0">
+                  <div className="flex justify-between items-start mb-1">
+                    <h3 className={cn("font-bold text-base leading-tight", !notif.read ? "text-slate-900 dark:text-white" : "text-slate-700 dark:text-slate-300")}>
+                      {notif.title}
+                    </h3>
+                    <div className="flex flex-col items-end gap-1">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                        {getTimeAgo(notif.createdAt)}
+                      </span>
+                      <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        {!notif.read && (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); markAsRead([notif.id]); }}
+                            className="p-1 hover:bg-slate-100 dark:hover:bg-white/10 rounded"
+                            title="Mark read"
+                          >
+                            <Check className="w-3 h-3 text-slate-400" />
+                          </button>
+                        )}
+                        <button
+                          onClick={(e) => { e.stopPropagation(); deleteNotification(notif.id); }}
+                          className="p-1 hover:bg-red-50 dark:hover:bg-red-900/20 rounded"
+                          title="Delete"
+                        >
+                          <Trash2 className="w-3 h-3 text-red-500" />
+                        </button>
                       </div>
                     </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </CardContent>
-        </Card>
+                  </div>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-2">
+                    {notif.message}
+                  </p>
+                  {notif.amount && (
+                    <p className="mt-2 text-sm font-bold text-[#47f0d1]">
+                      ₦{notif.amount.toLocaleString()}
+                    </p>
+                  )}
+                </div>
+              </div>
+            ))
+          )}
+        </div>
       </div>
     </div>
   );

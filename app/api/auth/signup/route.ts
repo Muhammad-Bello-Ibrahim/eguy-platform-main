@@ -4,10 +4,10 @@ import { hashPassword, createSession, generateReferralCode } from "@/lib/auth"
 
 export async function POST(request: NextRequest) {
   try {
-    const { fullName, email, phone, password, referralCode, dob, address } = await request.json()
+    const { fullName, email, phone, password, transactionPin, referralCode, dob, address } = await request.json()
 
     // Validate input
-    if (!fullName || !email || !phone || !password) {
+    if (!fullName || !email || !phone || !password || !transactionPin) {
       return NextResponse.json({ error: "All fields are required" }, { status: 400 })
     }
 
@@ -24,6 +24,8 @@ export async function POST(request: NextRequest) {
 
     // Hash password
     const passwordHash = await hashPassword(password)
+    // Hash PIN (reusing password hashing for secure PIN storage)
+    const pinHash = await hashPassword(transactionPin)
 
     // Find referrer if referral code provided
     let referredBy: string | undefined
@@ -40,6 +42,7 @@ export async function POST(request: NextRequest) {
       email,
       phone,
       passwordHash,
+      transactionPin: pinHash,
       dob,
       address,
       walletBalance: 0,

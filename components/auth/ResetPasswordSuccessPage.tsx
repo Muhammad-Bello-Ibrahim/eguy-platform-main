@@ -14,20 +14,11 @@ export default function ResetPasswordSuccessPage() {
             <div className="fixed -top-20 -right-20 w-64 h-64 bg-primary/5 rounded-full blur-[100px] pointer-events-none"></div>
             <div className="fixed -bottom-20 -left-20 w-64 h-64 bg-primary/5 rounded-full blur-[100px] pointer-events-none"></div>
 
-            {/* Main Content Container (Phone Form Factor) */}
-            <main className="relative w-full max-w-[430px] h-[932px] mx-auto flex flex-col px-8 py-12 justify-between items-center overflow-hidden">
-                {/* Status Bar (Mock) */}
-                <div className="w-full flex justify-between items-center text-sm font-semibold opacity-80 mb-8">
-                    <span>9:41</span>
-                    <div className="flex gap-1.5 items-center">
-                        <span className="material-icons-round text-base">signal_cellular_alt</span>
-                        <span className="material-icons-round text-base">wifi</span>
-                        <span className="material-icons-round text-base rotate-90">battery_full</span>
-                    </div>
-                </div>
+            {/* Main Content Container */}
+            <main className="relative w-full max-w-md mx-auto flex flex-col px-8 py-12 justify-center items-center overflow-hidden sm:bg-[#102214]/50 sm:backdrop-blur-xl sm:rounded-3xl sm:border sm:border-white/5">
 
                 {/* Success Animation/Icon Section */}
-                <div className="flex-1 flex flex-col items-center justify-center space-y-12">
+                <div className="flex-1 flex flex-col items-center justify-center space-y-12 w-full">
                     {/* Icon Frame */}
                     <div className="relative group">
                         {/* Outer Glow Ring */}
@@ -58,7 +49,7 @@ export default function ResetPasswordSuccessPage() {
                 </div>
 
                 {/* Action Section */}
-                <div className="w-full space-y-6 pb-4">
+                <div className="w-full space-y-6 pb-4 mt-12">
                     {/* Secondary Info (Optional Hint) */}
                     <div className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-primary/5 border border-primary/10">
                         <span className="material-icons-round text-[#47f066] text-sm">security</span>
@@ -81,13 +72,7 @@ export default function ResetPasswordSuccessPage() {
                         </div>
                     </div>
                 </div>
-
-                {/* iOS Home Indicator (Mock) */}
-                <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-32 h-1.5 bg-slate-400/20 rounded-full"></div>
             </main>
-
-            {/* Background Element for Premium Feel */}
-            <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full max-w-[430px] border-[12px] border-slate-900/10 dark:border-white/5 rounded-[3rem] pointer-events-none z-50"></div>
         </div>
     );
 }

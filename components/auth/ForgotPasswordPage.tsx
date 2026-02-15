@@ -38,20 +38,11 @@ export default function ForgotPasswordPage() {
 
     return (
         <div className="bg-background-light dark:bg-[#131321] text-slate-900 dark:text-white min-h-screen flex items-center justify-center font-display antialiased">
-            {/* Main Mobile Container */}
-            <div className="relative w-full max-w-[400px] h-screen sm:h-[844px] bg-background-light dark:bg-[#131321] overflow-hidden flex flex-col px-8 pt-16 pb-12 shadow-2xl sm:rounded-xl">
-                {/* Status Bar Decoration (iOS Style) */}
-                <div className="absolute top-0 left-0 w-full h-12 flex items-center justify-between px-8 text-xs font-semibold opacity-60 pointer-events-none">
-                    <span>9:41</span>
-                    <div className="flex items-center space-x-1.5">
-                        <span className="material-icons-round text-[14px]">signal_cellular_alt</span>
-                        <span className="material-icons-round text-[14px]">wifi</span>
-                        <span className="material-icons-round text-[16px]">battery_full</span>
-                    </div>
-                </div>
+            {/* Main Container */}
+            <div className="relative w-full max-w-md bg-background-light dark:bg-[#131321] flex flex-col px-8 py-12 sm:rounded-3xl sm:shadow-xl sm:border sm:border-slate-200 sm:dark:border-white/10">
 
                 {/* Back Button Area */}
-                <div className="mb-12">
+                <div className="mb-8">
                     <button
                         onClick={() => router.back()}
                         className="w-10 h-10 flex items-center justify-center rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
@@ -121,9 +112,6 @@ export default function ForgotPasswordPage() {
                         Back to Login
                     </Link>
                 </div>
-
-                {/* Home Indicator (iOS Style) */}
-                <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-32 h-1.5 bg-slate-200 dark:bg-white/20 rounded-full"></div>
 
                 {/* Abstract Background Decoration */}
                 <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-primary/5 rounded-full blur-[80px] pointer-events-none"></div>
