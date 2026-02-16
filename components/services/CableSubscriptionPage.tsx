@@ -1,43 +1,58 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Loader2 } from 'lucide-react';
+import { Loader2, CheckCircle, AlertCircle } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
+
+interface CablePackage {
+    billsCode: string;
+    package: string;
+    status: string;
+    price: string;
+}
+
+interface ProviderBundles {
+    SERVICE: string;
+    BUNDLE: CablePackage[];
+}
 
 const CableSubscriptionPage = () => {
     const router = useRouter();
     const [provider, setProvider] = useState<'dstv' | 'gotv' | 'startimes' | 'showmax'>('dstv');
     const [smartcardNumber, setSmartcardNumber] = useState("");
+    const [isValidating, setIsValidating] = useState(false);
+    const [customerName, setCustomerName] = useState<string | null>(null);
+    const [validationError, setValidationError] = useState<string | null>(null);
     const [autoRenewal, setAutoRenewal] = useState(true);
     const [processing, setProcessing] = useState(false);
+    const [bundles, setBundles] = useState<ProviderBundles[]>([]);
+    const [loadingBundles, setLoadingBundles] = useState(true);
 
-    // Mock Packages (Real app would fetch from API based on provider/smartcard)
+    // Selected Package ID (billsCode)
     const [selectedPackage, setSelectedPackage] = useState<string>("");
 
-    const mockPackages = {
-        dstv: [
-            { id: 'padi', name: 'DStv Padi', price: 2500 },
-            { id: 'yanga', name: 'DStv Yanga', price: 4200 },
-            { id: 'confam', name: 'DStv Confam', price: 7400 },
-            { id: 'premium', name: 'DStv Premium', price: 24500 },
-        ],
-        gotv: [
-            { id: 'smallie', name: 'GOtv Smallie', price: 1300 },
-            { id: 'jinja', name: 'GOtv Jinja', price: 2700 },
-            { id: 'jolli', name: 'GOtv Jolli', price: 3950 },
-            { id: 'max', name: 'GOtv Max', price: 5700 },
-        ],
-        startimes: [
-            { id: 'nova', name: 'Nova', price: 1200 },
-            { id: 'basic', name: 'Basic', price: 2100 },
-            { id: 'smart', name: 'Smart', price: 3300 },
-            { id: 'classic', name: 'Classic', price: 3800 },
-        ],
-        showmax: [
-            { id: 'mobile', name: 'Showmax Mobile', price: 1200 },
-            { id: 'pro', name: 'Showmax Pro', price: 3200 },
-        ]
-    };
+    useEffect(() => {
+        const fetchBundles = async () => {
+            try {
+                const res = await fetch('/api/bundles/cable');
+                if (!res.ok) throw new Error('Failed to fetch bundles');
+                const data = await res.json();
+                setBundles(data);
+            } catch (error) {
+                console.error("Error fetching bundles:", error);
+                toast({
+                    variant: "destructive",
+                    title: "Error",
+                    description: "Failed to load subscription packages.",
+                });
+            } finally {
+                setLoadingBundles(false);
+            }
+        };
+
+        fetchBundles();
+    }, []);
 
     const getProviderName = (p: string) => {
         switch (p) {
@@ -49,15 +64,51 @@ const CableSubscriptionPage = () => {
         }
     }
 
-    const handleSmartcardBlur = () => {
-        // Logic to validate smartcard name would go here
+    const handleSmartcardBlur = async () => {
+        if (!smartcardNumber || smartcardNumber.length < 5) return;
+
+        setIsValidating(true);
+        setCustomerName(null);
+        setValidationError(null);
+
+        try {
+            const res = await fetch('/api/services/cable/validate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    provider: provider.toUpperCase(),
+                    smartcardNumber
+                })
+            });
+
+            const data = await res.json();
+
+            if (!res.ok || data.error) {
+                setValidationError(data.error || "Invalid Smartcard Number");
+            } else {
+                setCustomerName(data.customerName || "Verified Customer");
+            }
+        } catch (error) {
+            setValidationError("Validation failed. Please check internet connection.");
+        } finally {
+            setIsValidating(false);
+        }
+    };
+
+    const handleProviderChange = (newProvider: 'dstv' | 'gotv' | 'startimes' | 'showmax') => {
+        setProvider(newProvider);
+        setSelectedPackage('');
+        setCustomerName(null);
+        setValidationError(null);
+        setSmartcardNumber('');
     };
 
     const handleSubmit = () => {
         if (!smartcardNumber || !selectedPackage) return;
         setProcessing(true);
 
-        const pack = mockPackages[provider].find(p => p.id === selectedPackage);
+        const currentProviderBundles = bundles.find(b => b.SERVICE.toLowerCase() === provider.toLowerCase())?.BUNDLE || [];
+        const pack = currentProviderBundles.find(p => p.billsCode === selectedPackage);
         const amount = pack ? pack.price : 0;
 
         const queryParams = new URLSearchParams({
@@ -65,14 +116,20 @@ const CableSubscriptionPage = () => {
             provider: provider,
             recipient: smartcardNumber,
             amount: amount.toString(),
-            bundleName: pack ? pack.name : 'Unknown Package'
+            bundleName: pack ? pack.package : 'Unknown Package',
+            // Pass the billsCode as the 'plan' or 'serviceType' for the backend
+            plan: selectedPackage,
+            customerName: customerName || ''
         });
 
         router.push(`/payment/confirmation?${queryParams.toString()}`);
     };
 
-    const currentPackages = mockPackages[provider] || [];
-    const selectedPackageDetails = currentPackages.find(p => p.id === selectedPackage);
+    // Filter bundles for current provider
+    const currentProviderData = bundles.find(b => b.SERVICE.toLowerCase() === provider.toLowerCase());
+    const currentPackages = currentProviderData ? currentProviderData.BUNDLE : [];
+
+    const selectedPackageDetails = currentPackages.find(p => p.billsCode === selectedPackage);
 
     return (
         <div className="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-[Manrope] min-h-screen flex justify-center">
@@ -99,16 +156,16 @@ const CableSubscriptionPage = () => {
                         <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2">
                             {/* DStv */}
                             <div
-                                onClick={() => { setProvider('dstv'); setSelectedPackage(''); }}
+                                onClick={() => handleProviderChange('dstv')}
                                 className={`flex-shrink-0 w-24 h-24 rounded-xl flex flex-col items-center justify-center transition-all duration-300 cursor-pointer ${provider === 'dstv'
-                                        ? 'border-2 border-[#47f0d1] bg-[#47f0d1]/15'
-                                        : 'glass-card'
+                                    ? 'border-2 border-[#47f0d1] bg-[#47f0d1]/15'
+                                    : 'glass-card'
                                     }`}
                             >
                                 <div className="w-12 h-12 mb-2 rounded-full overflow-hidden bg-slate-800 flex items-center justify-center border border-white/10">
                                     <img
                                         className="w-full h-full object-cover"
-                                        alt="Blue and white DStv brand logo"
+                                        alt="DStv"
                                         src="https://lh3.googleusercontent.com/aida-public/AB6AXuCsRqgGLe4H6lXb740sBZzO5NFWn9UKloQORXhoJBUxC1zVDpvwaVFySJTPINA9eDpR-wYJ_nMIOzZ9LkD4bVvpJoc4WlnYieUT_72WepMEGGqiIipyajglxal4MEWbWicq0hJRaTwraUlxIHtsaEj1d7V-Zt_xdvBiKG1p7CG3QMIHEWBekZ9-k0a2uZYFsZB8yQ-YgpoT4EJOF04fhaEss4dpVfGBhnUelsC4hQ8Ob5GrmqBkk8SpFE7dGofIEYowzG0V_ZBU5Uw"
                                     />
                                 </div>
@@ -118,16 +175,16 @@ const CableSubscriptionPage = () => {
                             </div>
                             {/* GOtv */}
                             <div
-                                onClick={() => { setProvider('gotv'); setSelectedPackage(''); }}
+                                onClick={() => handleProviderChange('gotv')}
                                 className={`flex-shrink-0 w-24 h-24 rounded-xl flex flex-col items-center justify-center transition-all duration-300 cursor-pointer ${provider === 'gotv'
-                                        ? 'border-2 border-[#47f0d1] bg-[#47f0d1]/15'
-                                        : 'glass-card'
+                                    ? 'border-2 border-[#47f0d1] bg-[#47f0d1]/15'
+                                    : 'glass-card'
                                     }`}
                             >
                                 <div className="w-12 h-12 mb-2 rounded-full overflow-hidden bg-slate-800 flex items-center justify-center border border-white/10">
                                     <img
                                         className="w-full h-full object-cover"
-                                        alt="Green and neon GOtv brand logo"
+                                        alt="GOtv"
                                         src="https://lh3.googleusercontent.com/aida-public/AB6AXuBW8N_eGXOdXMcaQ88w4mrUVL82fbmAUzsUO3gxv4Dw5ItXbekqTJSibn_UO7UMjUwKTTnjC_z6wpuc0Nj4ErCVyoF6qv8rDwPilCEiFSNDr3oO-tSt7cF82lSg0Qqb2OWs1FZnZ7UkSO1Mpud7S8TZSNhXufUFN-qn50ldvHSPeqrsJ2ZQ8P3sy4PbXDetM3QmCi7-VHWnyZCMe3-F3mOmYMIZ2rDnecMnVArD9IRegwCeNVIIzZazk1I1ajEXQ-w5DyDzP_uEW3M"
                                     />
                                 </div>
@@ -137,16 +194,16 @@ const CableSubscriptionPage = () => {
                             </div>
                             {/* StarTimes */}
                             <div
-                                onClick={() => { setProvider('startimes'); setSelectedPackage(''); }}
+                                onClick={() => handleProviderChange('startimes')}
                                 className={`flex-shrink-0 w-24 h-24 rounded-xl flex flex-col items-center justify-center transition-all duration-300 cursor-pointer ${provider === 'startimes'
-                                        ? 'border-2 border-[#47f0d1] bg-[#47f0d1]/15'
-                                        : 'glass-card'
+                                    ? 'border-2 border-[#47f0d1] bg-[#47f0d1]/15'
+                                    : 'glass-card'
                                     }`}
                             >
                                 <div className="w-12 h-12 mb-2 rounded-full overflow-hidden bg-slate-800 flex items-center justify-center border border-white/10">
                                     <img
                                         className="w-full h-full object-cover"
-                                        alt="Red and white StarTimes brand logo"
+                                        alt="StarTimes"
                                         src="https://lh3.googleusercontent.com/aida-public/AB6AXuBo6ovzR-NsCu-5dVUY4A1MQuBjUV0IzCYPRaf8uxStk1lNXlY1XC40GnRvfWsLJaBOmxzows9ya1eKbajHA08qS9m6CHBfzi69sZyXL65NUBPCWf0uoxSu6-FvBhyD5uMa137Zjt8GBoAYjR2YOKJl1kjJGVSoTVSDuGHqe8jjjy7m4A0rNQsOAqUYErHDXDPRft3zbP2Mn6CcFmRbOK7WW2AFZ18awHNlXxAVSfmorar9PfmqvAjAZzdTfoMl2HWoEQyFl7eqXyo"
                                     />
                                 </div>
@@ -156,16 +213,16 @@ const CableSubscriptionPage = () => {
                             </div>
                             {/* Showmax */}
                             <div
-                                onClick={() => { setProvider('showmax'); setSelectedPackage(''); }}
+                                onClick={() => handleProviderChange('showmax')}
                                 className={`flex-shrink-0 w-24 h-24 rounded-xl flex flex-col items-center justify-center transition-all duration-300 cursor-pointer ${provider === 'showmax'
-                                        ? 'border-2 border-[#47f0d1] bg-[#47f0d1]/15'
-                                        : 'glass-card'
+                                    ? 'border-2 border-[#47f0d1] bg-[#47f0d1]/15'
+                                    : 'glass-card'
                                     }`}
                             >
                                 <div className="w-12 h-12 mb-2 rounded-full overflow-hidden bg-slate-800 flex items-center justify-center border border-white/10">
                                     <img
                                         className="w-full h-full object-cover"
-                                        alt="Red and black streaming service logo"
+                                        alt="Showmax"
                                         src="https://lh3.googleusercontent.com/aida-public/AB6AXuBGVeGWVqEL26vUn-Hh2-e8vsddvIX0t9-C76nXp10yoCzTaMMHf4agEoVKeWUl3Pa_CVAfLhe1Lk4FTDJXAhMoWai3xq8qnPG9nJXI4LX9JQznU-ElNKpTvePbmBcf11yXzCnrKsOaWDiWI4YU-uwebizBGZK2HTai7Ufq890q12VDiohng9Cl8XCY0NZKQM9gko33pWu4PRJfw_pFMv1dE18Sh-5fSfGbLD2Ss2wr5fdukhtNaZrnx001Lg82uCMuBmVCBrsQhlo"
                                     />
                                 </div>
@@ -185,22 +242,34 @@ const CableSubscriptionPage = () => {
                             </label>
                             <div className="relative group">
                                 <input
-                                    className="w-full bg-slate-800/50 border-white/10 rounded-lg py-4 px-5 text-white placeholder:text-slate-600 focus:ring-primary focus:border-primary transition-all pr-12"
-                                    placeholder="Enter 10-digit number"
+                                    className={`w-full bg-slate-800/50 border rounded-lg py-4 px-5 text-white placeholder:text-slate-600 focus:ring-primary focus:border-primary transition-all pr-12 ${validationError ? 'border-red-500' : 'border-white/10'}`}
+                                    placeholder="Enter number"
                                     type="text"
                                     value={smartcardNumber}
                                     onChange={(e) => setSmartcardNumber(e.target.value)}
                                     onBlur={handleSmartcardBlur}
                                 />
-                                <div className="absolute right-4 top-1/2 -translate-y-1/2 text-primary">
-                                    <span className="material-icons-round">check_circle</span>
+                                <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                                    {isValidating ? (
+                                        <Loader2 className="animate-spin text-primary" size={20} />
+                                    ) : customerName ? (
+                                        <CheckCircle className="text-green-500" size={20} />
+                                    ) : validationError ? (
+                                        <AlertCircle className="text-red-500" size={20} />
+                                    ) : null}
                                 </div>
                             </div>
-                            {/* Validation Response (Mock) */}
-                            {smartcardNumber.length > 9 && (
-                                <div className="flex items-center gap-2 px-1 text-sm">
+
+                            {/* Validation Response */}
+                            {customerName && (
+                                <div className="flex items-center gap-2 px-1 text-sm animate-in fade-in slide-in-from-top-1">
                                     <span className="text-slate-400">Customer:</span>
-                                    <span className="text-white font-bold">VERIFIED USER</span>
+                                    <span className="text-green-400 font-bold truncate">{customerName}</span>
+                                </div>
+                            )}
+                            {validationError && (
+                                <div className="flex items-center gap-2 px-1 text-sm animate-in fade-in slide-in-from-top-1">
+                                    <span className="text-red-400">{validationError}</span>
                                 </div>
                             )}
                         </div>
@@ -210,21 +279,34 @@ const CableSubscriptionPage = () => {
                             <label className="text-sm font-semibold text-slate-400 ml-1">
                                 Select Package
                             </label>
-                            <div className="grid grid-cols-1 gap-2">
-                                {currentPackages.map(pack => (
-                                    <div
-                                        key={pack.id}
-                                        onClick={() => setSelectedPackage(pack.id)}
-                                        className={`p-3 rounded-lg border flex justify-between items-center cursor-pointer transition-all ${selectedPackage === pack.id
-                                                ? 'bg-primary/20 border-primary'
-                                                : 'bg-slate-800/50 border-white/10 hover:bg-slate-800'
-                                            }`}
-                                    >
-                                        <span className="text-white font-medium">{pack.name}</span>
-                                        <span className="text-primary font-bold">₦{pack.price.toLocaleString()}</span>
-                                    </div>
-                                ))}
-                            </div>
+                            {loadingBundles ? (
+                                <div className="flex gap-2 justify-center py-8">
+                                    <Loader2 className="animate-spin text-primary" />
+                                    <span className="text-slate-500 text-sm">Loading packages...</span>
+                                </div>
+                            ) : (
+                                <div className="grid grid-cols-1 gap-2">
+                                    {currentPackages.length > 0 ? (
+                                        currentPackages.map(pack => (
+                                            <div
+                                                key={pack.billsCode}
+                                                onClick={() => setSelectedPackage(pack.billsCode)}
+                                                className={`p-3 rounded-lg border flex justify-between items-center cursor-pointer transition-all ${selectedPackage === pack.billsCode
+                                                    ? 'bg-primary/20 border-primary'
+                                                    : 'bg-slate-800/50 border-white/10 hover:bg-slate-800'
+                                                    }`}
+                                            >
+                                                <span className="text-white font-medium text-sm">{pack.package}</span>
+                                                <span className="text-primary font-bold text-sm">₦{Number(pack.price).toLocaleString()}</span>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div className="text-center py-4 text-slate-500 text-sm">
+                                            No packages available for this provider.
+                                        </div>
+                                    )}
+                                </div>
+                            )}
                         </div>
 
                         {/* Auto-renewal Toggle */}
@@ -260,7 +342,7 @@ const CableSubscriptionPage = () => {
                             <div className="space-y-3">
                                 <div className="flex justify-between text-sm">
                                     <span className="text-slate-400">Package Amount</span>
-                                    <span className="text-white font-semibold">₦{selectedPackageDetails.price.toLocaleString()}</span>
+                                    <span className="text-white font-semibold">₦{Number(selectedPackageDetails.price).toLocaleString()}</span>
                                 </div>
                                 <div className="flex justify-between text-sm">
                                     <span className="text-slate-400">Convenience Fee</span>
@@ -270,7 +352,7 @@ const CableSubscriptionPage = () => {
                                     <span className="text-sm text-slate-400 font-medium">Total Payable</span>
                                     <div className="text-right">
                                         <span className="block text-2xl font-extrabold text-primary">
-                                            ₦{selectedPackageDetails.price.toLocaleString()}
+                                            ₦{Number(selectedPackageDetails.price).toLocaleString()}
                                         </span>
                                     </div>
                                 </div>
@@ -283,7 +365,7 @@ const CableSubscriptionPage = () => {
                 <div className="fixed bottom-0 left-0 right-0 max-w-[430px] mx-auto p-6 bg-background-dark/95 backdrop-blur-xl border-t border-white/5">
                     <button
                         onClick={handleSubmit}
-                        disabled={!smartcardNumber || !selectedPackage || processing}
+                        disabled={!smartcardNumber || !selectedPackage || processing || !!validationError || isValidating}
                         className="w-full bg-primary hover:bg-primary/90 text-background-dark font-extrabold py-5 rounded-lg flex items-center justify-center gap-2 shadow-lg shadow-primary/20 active:scale-[0.97] transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {processing ? <Loader2 className="animate-spin" /> : (
@@ -294,14 +376,6 @@ const CableSubscriptionPage = () => {
                         )}
 
                     </button>
-                    <div className="mt-4 flex justify-center items-center gap-1">
-                        <span className="material-icons-round text-slate-500 text-xs">
-                            verified_user
-                        </span>
-                        <span className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">
-                            PCI-DSS Compliant Secure Gateway
-                        </span>
-                    </div>
                 </div>
 
                 {/* Floating UI Decoration */}

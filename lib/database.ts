@@ -298,17 +298,25 @@ export class Database {
     return result.modifiedCount > 0
   }
 
-  static async createReferral(referralData: Omit<Referral, "id" | "createdAt">): Promise<Referral> {
+  static async getReferral(referrerId: string, referredId: string): Promise<Referral | null> {
+    const db = await Database.getDb()
+    return db.collection("referrals").findOne({ referrerId, referredId })
+  }
+
+  static async createReferral(referral: Omit<Referral, "id" | "createdAt">): Promise<Referral> {
     const db = await Database.getDb()
     const now = new Date()
     const result = await db.collection("referrals").insertOne({
-      ...referralData,
+      ...referral,
       createdAt: now,
     })
-    const referral = await db.collection("referrals").findOne({ _id: result.insertedId })
+    const createdReferral = await db.collection("referrals").findOne({ _id: result.insertedId })
+    if (!createdReferral) {
+      throw new Error("Failed to retrieve created referral")
+    }
     return {
-      ...referral,
-      id: referral._id.toString(),
+      ...createdReferral,
+      id: createdReferral._id.toString(),
     }
   }
 

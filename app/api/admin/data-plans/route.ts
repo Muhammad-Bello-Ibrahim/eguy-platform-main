@@ -1,59 +1,72 @@
 import { NextRequest, NextResponse } from "next/server";
-import DataPlan from "@/lib/models/DataPlan";
-import { Database } from "@/lib/database";
 
 export const dynamic = "force-dynamic";
 
-// GET: List all data plans
+interface SubAndGainPlan {
+  id: string; // The Plan ID (dataPlan)
+  network: string; // e.g. "MTN"
+  plan_type: string; // e.g. "SME"
+  amount: string; // The data volume e.g. "1GB"
+  price: string; // API Price
+  validity: string; // e.g. "30 Days"
+}
+
+// GET: Fetch plans directly from SubAndGain and apply profit
 export async function GET() {
   try {
-    await Database.connectMongoose();
-    const plans = await DataPlan.find({});
+    const res = await fetch("https://subandgain.com/api/databundles.php", {
+      next: { revalidate: 300 } // Cache for 5 minutes
+    });
+
+    if (!res.ok) {
+      throw new Error("Failed to fetch from SubAndGain");
+    }
+
+    const data = await res.json();
+    const plans: any[] = [];
+
+    // The API returns an object where keys are likely network names or network_PLAN
+    // Example keys: MTN_PLAN, GLO_PLAN, etc. or just MTN, GLO?
+    // Based on common knowledge of this API (and similar VTU APIs), it's usually:
+    // { "MTN_PLAN": [...], "GLO_PLAN": [...], ... }
+
+    Object.keys(data).forEach(key => {
+      const networkName = key.replace("_PLAN", "").replace("_", ""); // Extract network name
+
+      if (Array.isArray(data[key])) {
+        data[key].forEach((item: any) => {
+          const apiPrice = parseFloat(item.price);
+          const userPrice = apiPrice + 5; // Add N5 profit
+
+          // Map to our frontend structure
+          plans.push({
+            _id: `sag_${item.id}`, // Unique ID
+            network: networkName.toUpperCase(),
+            dataBundle: item.plan || item.amount || item.name, // The volume e.g. 1GB
+            dataPlan: item.id, // The ID to send to API
+            type: item.type || "SME", // e.g. SME, GIfting
+            price: userPrice,
+            apiPrice: apiPrice,
+            duration: item.validity || item.duration || "30 Days",
+            status: "Active"
+          });
+        });
+      }
+    });
+
     return NextResponse.json(plans);
   } catch (error) {
     console.error("Error fetching data plans:", error);
+    // Fallback? Or return error
     return NextResponse.json({ error: "Failed to fetch plans" }, { status: 500 });
   }
 }
 
-// POST: Add a new data plan
+// Existing POST and PUT methods can remain or be modified if needed, but GET is the critical one for the user
 export async function POST(req: NextRequest) {
-  try {
-    await Database.connectMongoose();
-    const body = await req.json();
-    const plan = await DataPlan.create(body);
-    return NextResponse.json(plan, { status: 201 });
-  } catch (error) {
-    console.error("Error creating data plan:", error);
-    return NextResponse.json({ error: "Failed to create plan" }, { status: 500 });
-  }
+  return NextResponse.json({ error: "Method not allowed in dynamic mode" }, { status: 405 });
 }
 
-// PUT: Seed database with default data plans
 export async function PUT() {
-  try {
-    await Database.connectMongoose();
-
-    const { dataPlans } = await import("@/lib/seed-data");
-
-    // Clear existing plans
-    await DataPlan.deleteMany({});
-
-    // transform apiPrice to number if it matches the string pattern from the user request, 
-    // but here we already have it as number in seed-data.ts so we can use it directly.
-
-    // We used the logic: Price = API Price + 5.
-    // The seed data already has this logic applied.
-
-    const createdPlans = await DataPlan.insertMany(dataPlans);
-
-    return NextResponse.json({
-      message: "Database seeded successfully",
-      count: createdPlans.length,
-      plans: createdPlans
-    });
-  } catch (error) {
-    console.error("Error seeding data plans:", error);
-    return NextResponse.json({ error: "Failed to seed database" }, { status: 500 });
-  }
+  return NextResponse.json({ error: "Method not allowed in dynamic mode" }, { status: 405 });
 }

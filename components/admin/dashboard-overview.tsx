@@ -111,6 +111,36 @@ export function DashboardOverview({ searchTerm }: { searchTerm?: string }) {
   // Get user from sessionStorage (or context/provider in production)
   const user = typeof window !== "undefined" ? JSON.parse(window.sessionStorage.getItem("user") || "null") : null;
 
+  const fetchStats = async () => {
+    try {
+      setIsLoading(true)
+      const response = await fetch("/api/admin/stats")
+      if (response.ok) {
+        const data = await response.json()
+        console.log("Received stats from API:", data)
+        setStats(data)
+      } else {
+        console.error("API returned error:", response.status, response.statusText)
+        throw new Error(`API error: ${response.status}`)
+      }
+    } catch (error) {
+      console.error("Failed to fetch admin stats:", error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat("en-NG", {
+      style: "currency",
+      currency: "NGN",
+    }).format(amount)
+  }
+
+  const formatNumber = (num: number) => {
+    return new Intl.NumberFormat("en-NG").format(num)
+  }
+
   useEffect(() => {
     if (isClient) {
       fetchStats()
@@ -139,48 +169,6 @@ export function DashboardOverview({ searchTerm }: { searchTerm?: string }) {
 
   if (!user || user.role !== "admin") {
     return <div className="p-4 text-red-600 bg-red-50 rounded-lg border border-red-100">Access denied: Admins only.</div>;
-  }
-
-  const fetchStats = async () => {
-    try {
-      setIsLoading(true)
-      const response = await fetch("/api/admin/stats")
-      if (response.ok) {
-        const data = await response.json()
-        console.log("Received stats from API:", data)
-
-        // Check if we got real data (not all zeros)
-        // const hasRealData = data.users.total > 0 || data.financial.totalDeposits > 0 || data.transactions.totalTransactions > 0
-
-        // if (hasRealData) {
-        //   console.log("Using real data from API")
-        setStats(data)
-        // } else {
-        //   console.warn("API returned only zeros, using mock data for development")
-        //   setStats(...)
-        // }
-      } else {
-        console.error("API returned error:", response.status, response.statusText)
-        throw new Error(`API error: ${response.status}`)
-      }
-    } catch (error) {
-      console.error("Failed to fetch admin stats:", error)
-      // Use mock data as fallback
-      // setStats(...)
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("en-NG", {
-      style: "currency",
-      currency: "NGN",
-    }).format(amount)
-  }
-
-  const formatNumber = (num: number) => {
-    return new Intl.NumberFormat("en-NG").format(num)
   }
 
   if (isLoading) {

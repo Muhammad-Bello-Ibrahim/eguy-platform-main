@@ -38,16 +38,27 @@ const PaymentConfirmationContent = () => {
                 const planCode = searchParams.get('plan');
                 body = { network: provider, phone: recipient, plan: planCode, amount: amount };
             } else if (type === 'cable') {
-                // Simplified bill payment endpoint based on existing bills-modal.tsx
                 endpoint = '/api/payments/bills';
-                // Mapping provider to serviceType if needed, or sending as is.
-                // Existing bills-modal uses: serviceType: 'tv', provider: 'dstv' etc.
+                // Pass dynamic data from frontend 
+                const customerName = searchParams.get('customerName');
+                const billsCode = searchParams.get('plan'); // Actual package ID needed by API
+
                 body = {
-                    serviceType: 'tv',
-                    provider: provider,
-                    recipient: recipient,
-                    amount: amount,
-                    customerInfo: 'Customer' // Simplified
+                    serviceType: billsCode, // The bills_code from SubAndGain (e.g., 'gotv-jinja')
+                    provider: provider,     // The service name (e.g., 'gotv')
+                    recipient: recipient,   // Smartcard number
+                    amount: Number(amount),
+                    customerInfo: customerName || 'Customer'
+                };
+            } else if (type === 'electricity') {
+                endpoint = '/api/payments/electricity';
+                const meterType = searchParams.get('meterType');
+
+                body = {
+                    disco: provider,        // The service ID (e.g., 'AEDC')
+                    meterType: meterType,   // 'PRE' or 'POST'
+                    meterNumber: recipient, // Meter number
+                    amount: Number(amount)
                 };
             }
 
@@ -114,7 +125,7 @@ const PaymentConfirmationContent = () => {
                             Confirm Transaction
                         </h2>
                         <p className="text-primary/70 text-sm font-medium uppercase tracking-wider">
-                            {type === 'airtime' ? 'Airtime Top-up' : type === 'data' ? 'Data Bundle' : 'Cable Subscription'}
+                            {type === 'airtime' ? 'Airtime Top-up' : type === 'data' ? 'Data Bundle' : type === 'electricity' ? 'Electricity Bill' : 'Cable Subscription'}
                         </p>
                     </div>
 
@@ -122,7 +133,7 @@ const PaymentConfirmationContent = () => {
                     <div className="flex flex-col items-center mb-10">
                         <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mb-4 ring-1 ring-primary/30">
                             <span className="material-icons-round text-primary text-4xl">
-                                {type === 'airtime' ? 'smartphone' : type === 'data' ? 'wifi' : 'tv'}
+                                {type === 'airtime' ? 'smartphone' : type === 'data' ? 'wifi' : type === 'electricity' ? 'bolt' : 'tv'}
                             </span>
                         </div>
                         <h3 className="text-white text-xl font-bold uppercase">{provider}</h3>

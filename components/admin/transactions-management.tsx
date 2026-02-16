@@ -50,18 +50,6 @@ export function TransactionsManagement({ searchTerm: initialSearchTerm }: { sear
   // Get user from sessionStorage (or context/provider in production)
   const user = typeof window !== "undefined" ? JSON.parse(window.sessionStorage.getItem("user") || "null") : null;
 
-  useEffect(() => {
-    if (isClient) {
-      fetchTransactions()
-    }
-  }, [isClient])
-
-  if (!isClient) return null;
-
-  if (!user || user.role !== "admin") {
-    return <div className="p-4 text-red-600 bg-red-50 rounded-lg border border-red-100">Access denied: Admins only.</div>;
-  }
-
   const fetchTransactions = async () => {
     try {
       const response = await fetch("/api/admin/transactions")
@@ -79,6 +67,20 @@ export function TransactionsManagement({ searchTerm: initialSearchTerm }: { sear
       setIsLoading(false)
     }
   }
+
+  useEffect(() => {
+    if (isClient) {
+      fetchTransactions()
+    }
+  }, [isClient])
+
+  if (!isClient) return null;
+
+  if (!user || user.role !== "admin") {
+    return <div className="p-4 text-red-600 bg-red-50 rounded-lg border border-red-100">Access denied: Admins only.</div>;
+  }
+
+
 
   const handleTransactionAction = async (transactionId: string, action: string) => {
     setIsActionLoading(true)
@@ -499,8 +501,8 @@ export function TransactionsManagement({ searchTerm: initialSearchTerm }: { sear
                       <TableCell>
                         <div
                           className={`font-semibold ${transaction.type === "deposit" || transaction.type === "referral_bonus"
-                              ? "text-green-600"
-                              : "text-slate-900"
+                            ? "text-green-600"
+                            : "text-slate-900"
                             }`}
                         >
                           {transaction.type === "deposit" || transaction.type === "referral_bonus" ? "+" : "-"}
@@ -550,8 +552,8 @@ export function TransactionsManagement({ searchTerm: initialSearchTerm }: { sear
                 <div key={transaction.id} className="bg-white border border-slate-100 rounded-xl p-4 shadow-sm relative overflow-hidden">
                   {/* Status Stripe */}
                   <div className={`absolute top-0 left-0 w-1 h-full ${transaction.status === 'completed' ? 'bg-green-500' :
-                      transaction.status === 'pending' ? 'bg-amber-500' :
-                        transaction.status === 'failed' ? 'bg-red-500' : 'bg-slate-300'
+                    transaction.status === 'pending' ? 'bg-amber-500' :
+                      transaction.status === 'failed' ? 'bg-red-500' : 'bg-slate-300'
                     }`} />
 
                   <div className="flex items-start justify-between mb-3 pl-3">

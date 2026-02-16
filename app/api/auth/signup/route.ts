@@ -46,23 +46,14 @@ export async function POST(request: NextRequest) {
       dob,
       address,
       walletBalance: 0,
-      referralCode: generateReferralCode(),
+      referralCode: "", // Referral code generated upon ElevateX activation
       referredBy,
       kycStatus: "pending",
       status: "active",
       role: "user", // default role
     })
 
-    // Create referral relationship if applicable
-    if (referredBy) {
-      await Database.createReferral({
-        referrerId: referredBy,
-        referredId: user.id,
-        level: 1,
-        bonusAmount: 200, // Basic pack level 1 bonus
-        status: "active",
-      })
-    }
+    // Referral relationship is created when the user activates ElevateX via /api/elevatex/activate
 
     // Send verification email
     const crypto = await import("crypto")
