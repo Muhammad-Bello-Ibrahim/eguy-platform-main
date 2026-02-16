@@ -8,6 +8,7 @@ import {
 	Zap, Share2, Bell, Link as LinkIcon, Layers, Crown
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { DepositModal } from "@/components/dashboard/deposit-modal";
 import { WithdrawModal } from "@/components/dashboard/withdraw-modal";
 import { useToast } from "@/hooks/use-toast";
@@ -48,6 +49,8 @@ export default function ElevatexPage() {
 	const [elevatexTransactions, setElevatexTransactions] = useState<any[]>([]);
 	const [transactionsLoading, setTransactionsLoading] = useState(false);
 	const [referralTree, setReferralTree] = useState<any[]>([]); // Dynamic tree data
+	// User Details Modal Logic (Moved to Top)
+	const [selectedNode, setSelectedNode] = useState<any>(null);
 
 	const referralLink = referralCode ? `${window.location.origin}/register?ref=${referralCode}` : "";
 	const [copied, setCopied] = useState(false);
@@ -147,6 +150,7 @@ export default function ElevatexPage() {
 			</div>
 		);
 	}
+
 
 	return (
 		<div className="min-h-screen bg-[#131321] text-slate-100 pb-24 font-sans selection:bg-[#47f0d1] selection:text-[#131321]">
@@ -279,7 +283,10 @@ export default function ElevatexPage() {
 
 							{/* Recursive Tree */}
 							<div className="w-full mt-0">
-								<NetworkTree data={referralTree} />
+								<NetworkTree
+									data={referralTree}
+									onNodeClick={(node) => setSelectedNode(node)}
+								/>
 							</div>
 						</div>
 					</section>
@@ -355,6 +362,56 @@ export default function ElevatexPage() {
 					toast({ title: "Withdrawal Successful", description: "Funds have been processed." });
 				}}
 			/>
+
+			{/* User Details Dialog */}
+			<Dialog open={!!selectedNode} onOpenChange={(open) => !open && setSelectedNode(null)}>
+				<DialogContent className="w-[90%] max-w-sm rounded-[2rem] bg-[#1a1a2e] border-white/10 p-6 text-white">
+					<DialogHeader>
+						<DialogTitle className="text-center text-lg font-bold">Member Details</DialogTitle>
+					</DialogHeader>
+
+					{selectedNode && (
+						<div className="flex flex-col items-center gap-6 py-4">
+							<div className="relative">
+								<div className="w-20 h-20 rounded-full bg-[#47f0d1]/10 border-2 border-[#47f0d1]/30 flex items-center justify-center text-2xl font-bold text-[#47f0d1]">
+									{selectedNode.user?.fullName?.charAt(0) || "U"}
+								</div>
+								<div className="absolute -bottom-2 -right-2 bg-[#47f0d1] text-[#131321] text-[10px] font-black px-2 py-0.5 rounded-md shadow-lg border border-[#131321]">
+									L{selectedNode.level || '?'}
+								</div>
+							</div>
+
+							<div className="text-center space-y-1">
+								<h3 className="text-xl font-bold">{selectedNode.user?.fullName || "Unknown User"}</h3>
+								<div className={cn(
+									"inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider",
+									selectedNode.status === 'active' ? "bg-[#47f0d1]/10 text-[#47f0d1]" : "bg-slate-500/10 text-slate-400"
+								)}>
+									<span className={cn("w-1.5 h-1.5 rounded-full", selectedNode.status === 'active' ? "bg-[#47f0d1]" : "bg-slate-400")}></span>
+									{selectedNode.status || 'Inactive'}
+								</div>
+							</div>
+
+							<div className="w-full space-y-3 bg-white/5 rounded-2xl p-4 border border-white/5">
+								<div className="flex justify-between items-center py-2 border-b border-white/5 last:border-0">
+									<span className="text-xs text-slate-400">Email Address</span>
+									<span className="text-xs font-medium text-white">{selectedNode.user?.email || "Hidden"}</span>
+								</div>
+								<div className="flex justify-between items-center py-2 border-b border-white/5 last:border-0">
+									<span className="text-xs text-slate-400">Date Joined</span>
+									<span className="text-xs font-medium text-white">
+										{selectedNode.createdAt ? new Date(selectedNode.createdAt).toLocaleDateString(undefined, {
+											year: 'numeric',
+											month: 'long',
+											day: 'numeric'
+										}) : "Unknown"}
+									</span>
+								</div>
+							</div>
+						</div>
+					)}
+				</DialogContent>
+			</Dialog>
 		</div>
 	);
 }

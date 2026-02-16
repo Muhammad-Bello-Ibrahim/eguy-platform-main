@@ -19,9 +19,10 @@ interface Referral {
 interface NetworkTreeProps {
     data: Referral[];
     level?: number;
+    onNodeClick?: (node: Referral) => void;
 }
 
-export function NetworkTree({ data, level = 1 }: NetworkTreeProps) {
+export function NetworkTree({ data, level = 1, onNodeClick }: NetworkTreeProps) {
     if (!data || data.length === 0) return null;
 
     return (
@@ -38,10 +39,13 @@ export function NetworkTree({ data, level = 1 }: NetworkTreeProps) {
                         <div className="h-4 w-0.5 bg-[#47f0d1]/30 -mt-4 mb-1"></div>
 
                         {/* Node UI */}
-                        <div className={cn(
-                            "w-20 h-auto min-h-[5rem] rounded-xl bg-[#131321] border p-2 relative mb-2 flex flex-col items-center justify-center gap-1 transition-all hover:scale-105 hover:border-[#47f0d1] group z-10",
-                            node.status === 'active' ? "border-[#47f0d1]/40 shadow-[0_0_10px_rgba(71,240,209,0.1)]" : "border-white/10 opacity-70"
-                        )}>
+                        <div
+                            onClick={() => onNodeClick?.(node)}
+                            className={cn(
+                                "w-20 h-auto min-h-[5rem] rounded-xl bg-[#131321] border p-2 relative mb-2 flex flex-col items-center justify-center gap-1 transition-all hover:scale-105 hover:border-[#47f0d1] group z-10 cursor-pointer active:scale-95",
+                                node.status === 'active' ? "border-[#47f0d1]/40 shadow-[0_0_10px_rgba(71,240,209,0.1)]" : "border-white/10 opacity-70"
+                            )}
+                        >
                             {/* Avatar */}
                             <div className={cn(
                                 "w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold",
@@ -61,8 +65,8 @@ export function NetworkTree({ data, level = 1 }: NetworkTreeProps) {
                                 L{level}
                             </div>
 
-                            {/* Hover Tooltip (Simple) */}
-                            <div className="absolute bottom-full mb-2 bg-slate-900 border border-white/20 p-2 rounded-lg text-[10px] whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20 shadow-xl">
+                            {/* Hover Tooltip (Simple) - Keeping for desktop */}
+                            <div className="hidden md:block absolute bottom-full mb-2 bg-slate-900 border border-white/20 p-2 rounded-lg text-[10px] whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20 shadow-xl">
                                 <p className="text-[#47f0d1] font-bold">{node.user?.email || "No Email"}</p>
                                 <p className="text-slate-400">Joined: {new Date(node.createdAt).toLocaleDateString()}</p>
                             </div>
@@ -70,7 +74,7 @@ export function NetworkTree({ data, level = 1 }: NetworkTreeProps) {
 
                         {/* Recursively Render Children */}
                         {node.children && node.children.length > 0 ? (
-                            <NetworkTree data={node.children} level={level + 1} />
+                            <NetworkTree data={node.children} level={level + 1} onNodeClick={onNodeClick} />
                         ) : null}
                     </div>
                 ))}

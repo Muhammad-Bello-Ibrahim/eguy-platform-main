@@ -194,6 +194,53 @@ export class Database {
     }
   }
 
+  static async findUserByPhone(phone: string): Promise<DatabaseUser | null> {
+    try {
+      await this.connectMongoose();
+      const db = await Database.getDb();
+      const user = await db.collection("users").findOne({ phone });
+      if (!user) return null;
+
+      // Calculate rank on the fly
+      const { rank, stats } = await this.getUserRank(user._id.toString());
+
+      return {
+        id: user._id.toString(),
+        fullName: user.fullName,
+        email: user.email,
+        phone: user.phone,
+        passwordHash: user.passwordHash,
+        walletBalance: user.walletBalance,
+        referralCode: user.referralCode,
+        referredBy: user.referredBy,
+        kycStatus: user.kycStatus,
+        status: user.status,
+        role: user.role,
+        transactionPin: user.transactionPin,
+        avatar: user.avatar,
+        dob: user.dob,
+        address: user.address,
+        payoutAccount: user.payoutAccount,
+        linkedAccounts: user.linkedAccounts,
+        elevatexActivated: user.elevatexActivated,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+        bio: user.bio,
+        twitter: user.twitter,
+        linkedin: user.linkedin,
+        payoutSchedule: user.payoutSchedule,
+        notificationPreferences: user.notificationPreferences,
+        subscriptionPlan: user.subscriptionPlan,
+        rank,
+        referralStats: stats,
+        monthActivated: user.monthActivated
+      };
+    } catch (error) {
+      console.error("Error finding user by phone:", error);
+      return null;
+    }
+  }
+
   static async findUserById(id: string): Promise<DatabaseUser | null> {
     try {
       await this.connectMongoose();

@@ -63,7 +63,15 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Signin error:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    console.error("Signin error:", error);
+    // Log the actual error for debugging
+    if (error instanceof Error) {
+      console.error("Error details:", {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      });
+    }
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
