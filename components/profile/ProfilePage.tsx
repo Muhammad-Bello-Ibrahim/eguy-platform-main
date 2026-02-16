@@ -3,9 +3,12 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useTheme } from 'next-themes';
 
 export default function ProfilePage() {
     const router = useRouter();
+    const { theme, setTheme } = useTheme();
+    const [mounted, setMounted] = useState(false);
     const [user, setUser] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -28,6 +31,7 @@ export default function ProfilePage() {
         };
 
         fetchUserData();
+        setMounted(true);
     }, [router]);
 
     const handleSignOut = async () => {
@@ -196,18 +200,27 @@ export default function ProfilePage() {
                             </div>
                             <span className="material-icons-round text-slate-400">chevron_right</span>
                         </Link>
-                        <div className="w-full flex items-center justify-between p-4">
+                        <button
+                            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                            className="w-full flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
+                        >
                             <div className="flex items-center gap-4">
                                 <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-                                    <span className="material-icons-round">dark_mode</span>
+                                    <span className="material-icons-round">
+                                        {mounted && theme === 'dark' ? 'dark_mode' : 'light_mode'}
+                                    </span>
                                 </div>
                                 <div className="text-left">
                                     <p className="text-sm font-semibold">Appearance</p>
-                                    <p className="text-xs text-slate-500">System Default</p>
+                                    <p className="text-xs text-slate-500">
+                                        {mounted ? (theme === 'dark' ? 'Dark Mode' : 'Light Mode') : 'System Default'}
+                                    </p>
                                 </div>
                             </div>
-                            <div className="bg-primary/10 px-3 py-1 rounded-full text-primary text-xs font-bold">DARK</div>
-                        </div>
+                            <div className="bg-primary/10 px-3 py-1 rounded-full text-primary text-xs font-bold uppercase">
+                                {mounted ? (theme === 'dark' ? 'ON' : 'OFF') : 'AUTO'}
+                            </div>
+                        </button>
                     </div>
                 </section>
 

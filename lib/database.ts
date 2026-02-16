@@ -25,8 +25,30 @@ export interface DatabaseUser {
   };
   linkedAccounts?: LinkedAccount[];
   elevatexActivated?: boolean;
+  elevatexActivated?: boolean;
+  bio?: string;
+  socials?: {
+    twitter?: string;
+    linkedin?: string;
+    instagram?: string;
+    facebook?: string;
+  };
+  notificationSettings?: NotificationSettings;
+  payoutSettings?: PayoutSettings;
   createdAt: Date
   updatedAt: Date
+}
+
+export interface NotificationSettings {
+  push: { network: boolean; earnings: boolean; security: boolean; marketing: boolean };
+  email: { network: boolean; earnings: boolean; security: boolean; marketing: boolean };
+  sms: { network: boolean; earnings: boolean; security: boolean; marketing: boolean };
+}
+
+export interface PayoutSettings {
+  frequency: string;
+  minPayout: number;
+  preferredDay?: string;
 }
 
 export interface LinkedAccount {

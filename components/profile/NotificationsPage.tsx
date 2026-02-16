@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 const Toggle = ({ checked, onChange }: { checked: boolean; onChange: () => void }) => (
     <div
         onClick={onChange}
-        className={`relative inline-flex items-center cursor-pointer w-11 h-6 rounded-full transition-colors ${checked ? 'bg-primary' : 'bg-slate-700'}`}
+        className={`relative inline-flex items-center cursor-pointer w-11 h-6 rounded-full transition-colors ${checked ? 'bg-primary' : 'bg-slate-200 dark:bg-slate-700'}`}
     >
         <div className={`absolute top-1 bg-white w-4 h-4 rounded-full transition-transform shadow-sm ${checked ? 'left-[22px]' : 'left-1'}`}></div>
     </div>
@@ -69,16 +69,16 @@ export default function NotificationsPage() {
     ];
 
     return (
-        <div className="bg-background-dark text-slate-100 font-sans min-h-screen pb-32">
+        <div className="bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-sans min-h-screen pb-32">
             {/* Header */}
-            <header className="sticky top-0 z-50 bg-background-dark/80 backdrop-blur-md px-6 pt-14 pb-4 flex items-center justify-between border-b border-white/5">
+            <header className="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md px-6 pt-14 pb-4 flex items-center justify-between border-b border-slate-200 dark:border-white/5">
                 <button
                     onClick={() => router.back()}
-                    className="w-10 h-10 flex items-center justify-start text-slate-400 hover:text-white transition-colors"
+                    className="w-10 h-10 flex items-center justify-start text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
                 >
                     <span className="material-icons-round">arrow_back_ios</span>
                 </button>
-                <h1 className="text-lg font-bold">Notification Preferences</h1>
+                <h1 className="text-lg font-bold text-slate-900 dark:text-white">Notification Preferences</h1>
                 <div className="w-10"></div>
             </header>
 
@@ -89,15 +89,15 @@ export default function NotificationsPage() {
                             <span className="material-icons-round text-primary text-xl">{section.icon}</span>
                             <h2 className="text-xs font-bold uppercase tracking-widest text-slate-500">{section.title}</h2>
                         </div>
-                        <div className="bg-surface-dark border border-white/5 rounded-2xl overflow-hidden">
+                        <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/5 rounded-2xl overflow-hidden">
                             {section.items.map((item, index) => (
                                 <div
                                     key={item.key}
-                                    className={`flex items-center justify-between p-4 ${index !== section.items.length - 1 ? 'border-b border-white/5' : ''}`}
+                                    className={`flex items-center justify-between p-4 ${index !== section.items.length - 1 ? 'border-b border-slate-100 dark:border-white/5' : ''}`}
                                 >
                                     <div className="flex flex-col">
-                                        <p className="text-[15px] font-semibold">{item.title}</p>
-                                        <p className="text-xs text-slate-500">{item.subtitle}</p>
+                                        <p className="text-[15px] font-semibold text-slate-900 dark:text-white">{item.title}</p>
+                                        <p className="text-xs text-slate-500 dark:text-slate-500">{item.subtitle}</p>
                                     </div>
                                     <Toggle
                                         //@ts-ignore

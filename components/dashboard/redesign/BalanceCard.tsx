@@ -40,7 +40,7 @@ export function BalanceCard({ balance, onWithdraw, isLoading }: BalanceCardProps
     };
 
     return (
-        <section className="relative overflow-hidden bg-white dark:bg-card-dark rounded-2xl p-6 shadow-xl dark:shadow-2xl border border-slate-200 dark:border-slate-800/50 text-slate-900 dark:text-white transition-colors duration-300">
+        <section className="relative overflow-hidden bg-card-dark rounded-2xl p-6 shadow-2xl border border-slate-800/50 text-white">
             {/* Decorative Gradient Glow */}
             <div className="absolute -top-24 -right-24 w-48 h-48 bg-primary/10 blur-[80px] rounded-full"></div>
 

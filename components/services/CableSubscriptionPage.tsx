@@ -133,14 +133,14 @@ const CableSubscriptionPage = () => {
 
     return (
         <div className="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-[Manrope] min-h-screen flex justify-center">
-            <div className="w-full max-w-[430px] min-h-screen bg-background-dark relative overflow-hidden flex flex-col">
+            <div className="w-full max-w-[430px] min-h-screen bg-white dark:bg-background-dark relative overflow-hidden flex flex-col">
                 {/* Header */}
-                <header className="px-6 pt-12 pb-6 flex items-center justify-between sticky top-0 bg-background-dark/80 backdrop-blur-md z-10">
-                    <button onClick={() => router.back()} className="w-10 h-10 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-white cursor-pointer hover:bg-white/10 transition-colors">
+                <header className="px-6 pt-12 pb-6 flex items-center justify-between sticky top-0 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md z-10 border-b border-slate-100 dark:border-transparent">
+                    <button onClick={() => router.back()} className="w-10 h-10 rounded-full flex items-center justify-center bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-white cursor-pointer hover:bg-slate-200 dark:hover:bg-white/10 transition-colors">
                         <span className="material-icons-round">arrow_back_ios_new</span>
                     </button>
-                    <h1 className="text-xl font-bold tracking-tight text-white">Cable TV</h1>
-                    <button className="w-10 h-10 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-white">
+                    <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">Cable TV</h1>
+                    <button className="w-10 h-10 rounded-full flex items-center justify-center bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-white">
                         <span className="material-icons-round">history</span>
                     </button>
                 </header>
@@ -155,11 +155,12 @@ const CableSubscriptionPage = () => {
                         </div>
                         <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2">
                             {/* DStv */}
+                            {/* DStv */}
                             <div
                                 onClick={() => handleProviderChange('dstv')}
                                 className={`flex-shrink-0 w-24 h-24 rounded-xl flex flex-col items-center justify-center transition-all duration-300 cursor-pointer ${provider === 'dstv'
                                     ? 'border-2 border-[#47f0d1] bg-[#47f0d1]/15'
-                                    : 'glass-card'
+                                    : 'bg-white dark:glass-card border border-slate-200 dark:border-white/5 shadow-sm dark:shadow-none'
                                     }`}
                             >
                                 <div className="w-12 h-12 mb-2 rounded-full overflow-hidden bg-slate-800 flex items-center justify-center border border-white/10">
@@ -178,7 +179,7 @@ const CableSubscriptionPage = () => {
                                 onClick={() => handleProviderChange('gotv')}
                                 className={`flex-shrink-0 w-24 h-24 rounded-xl flex flex-col items-center justify-center transition-all duration-300 cursor-pointer ${provider === 'gotv'
                                     ? 'border-2 border-[#47f0d1] bg-[#47f0d1]/15'
-                                    : 'glass-card'
+                                    : 'bg-white dark:glass-card border border-slate-200 dark:border-white/5 shadow-sm dark:shadow-none'
                                     }`}
                             >
                                 <div className="w-12 h-12 mb-2 rounded-full overflow-hidden bg-slate-800 flex items-center justify-center border border-white/10">
@@ -197,7 +198,7 @@ const CableSubscriptionPage = () => {
                                 onClick={() => handleProviderChange('startimes')}
                                 className={`flex-shrink-0 w-24 h-24 rounded-xl flex flex-col items-center justify-center transition-all duration-300 cursor-pointer ${provider === 'startimes'
                                     ? 'border-2 border-[#47f0d1] bg-[#47f0d1]/15'
-                                    : 'glass-card'
+                                    : 'bg-white dark:glass-card border border-slate-200 dark:border-white/5 shadow-sm dark:shadow-none'
                                     }`}
                             >
                                 <div className="w-12 h-12 mb-2 rounded-full overflow-hidden bg-slate-800 flex items-center justify-center border border-white/10">
@@ -216,7 +217,7 @@ const CableSubscriptionPage = () => {
                                 onClick={() => handleProviderChange('showmax')}
                                 className={`flex-shrink-0 w-24 h-24 rounded-xl flex flex-col items-center justify-center transition-all duration-300 cursor-pointer ${provider === 'showmax'
                                     ? 'border-2 border-[#47f0d1] bg-[#47f0d1]/15'
-                                    : 'glass-card'
+                                    : 'bg-white dark:glass-card border border-slate-200 dark:border-white/5 shadow-sm dark:shadow-none'
                                     }`}
                             >
                                 <div className="w-12 h-12 mb-2 rounded-full overflow-hidden bg-slate-800 flex items-center justify-center border border-white/10">
@@ -242,7 +243,7 @@ const CableSubscriptionPage = () => {
                             </label>
                             <div className="relative group">
                                 <input
-                                    className={`w-full bg-slate-800/50 border rounded-lg py-4 px-5 text-white placeholder:text-slate-600 focus:ring-primary focus:border-primary transition-all pr-12 ${validationError ? 'border-red-500' : 'border-white/10'}`}
+                                    className={`w-full bg-slate-100 dark:bg-slate-800/50 border rounded-lg py-4 px-5 text-slate-900 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-600 focus:ring-primary focus:border-primary transition-all pr-12 ${validationError ? 'border-red-500' : 'border-slate-200 dark:border-white/10'}`}
                                     placeholder="Enter number"
                                     type="text"
                                     value={smartcardNumber}
@@ -263,8 +264,8 @@ const CableSubscriptionPage = () => {
                             {/* Validation Response */}
                             {customerName && (
                                 <div className="flex items-center gap-2 px-1 text-sm animate-in fade-in slide-in-from-top-1">
-                                    <span className="text-slate-400">Customer:</span>
-                                    <span className="text-green-400 font-bold truncate">{customerName}</span>
+                                    <span className="text-slate-500 dark:text-slate-400">Customer:</span>
+                                    <span className="text-green-600 dark:text-green-400 font-bold truncate">{customerName}</span>
                                 </div>
                             )}
                             {validationError && (
@@ -293,10 +294,10 @@ const CableSubscriptionPage = () => {
                                                 onClick={() => setSelectedPackage(pack.billsCode)}
                                                 className={`p-3 rounded-lg border flex justify-between items-center cursor-pointer transition-all ${selectedPackage === pack.billsCode
                                                     ? 'bg-primary/20 border-primary'
-                                                    : 'bg-slate-800/50 border-white/10 hover:bg-slate-800'
+                                                    : 'bg-white dark:bg-slate-800/50 border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-slate-800'
                                                     }`}
                                             >
-                                                <span className="text-white font-medium text-sm">{pack.package}</span>
+                                                <span className="text-slate-900 dark:text-white font-medium text-sm">{pack.package}</span>
                                                 <span className="text-primary font-bold text-sm">₦{Number(pack.price).toLocaleString()}</span>
                                             </div>
                                         ))
@@ -310,14 +311,14 @@ const CableSubscriptionPage = () => {
                         </div>
 
                         {/* Auto-renewal Toggle */}
-                        <div className="flex items-center justify-between p-4 glass-card rounded-lg border border-white/5">
+                        <div className="flex items-center justify-between p-4 bg-white dark:glass-card rounded-lg border border-slate-200 dark:border-white/5 shadow-sm dark:shadow-none">
                             <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
                                     <span className="material-icons-round">sync</span>
                                 </div>
                                 <div>
-                                    <p className="text-sm font-bold text-white">Enable Auto-renewal</p>
-                                    <p className="text-xs text-slate-400">Never miss a match</p>
+                                    <p className="text-sm font-bold text-slate-900 dark:text-white">Enable Auto-renewal</p>
+                                    <p className="text-xs text-slate-500 dark:text-slate-400">Never miss a match</p>
                                 </div>
                             </div>
                             <label className="relative inline-flex items-center cursor-pointer">
@@ -362,7 +363,7 @@ const CableSubscriptionPage = () => {
                 </main>
 
                 {/* Fixed Bottom Button */}
-                <div className="fixed bottom-0 left-0 right-0 max-w-[430px] mx-auto p-6 bg-background-dark/95 backdrop-blur-xl border-t border-white/5">
+                <div className="fixed bottom-0 left-0 right-0 max-w-[430px] mx-auto p-6 bg-white/95 dark:bg-background-dark/95 backdrop-blur-xl border-t border-slate-100 dark:border-white/5">
                     <button
                         onClick={handleSubmit}
                         disabled={!smartcardNumber || !selectedPackage || processing || !!validationError || isValidating}
@@ -379,8 +380,8 @@ const CableSubscriptionPage = () => {
                 </div>
 
                 {/* Floating UI Decoration */}
-                <div className="absolute top-0 right-0 -z-10 w-64 h-64 bg-primary/5 blur-[100px] rounded-full"></div>
-                <div className="absolute bottom-40 -left-20 -z-10 w-64 h-64 bg-primary/10 blur-[100px] rounded-full"></div>
+                <div className="absolute top-0 right-0 -z-10 w-64 h-64 bg-primary/5 blur-[100px] rounded-full pointer-events-none"></div>
+                <div className="absolute bottom-40 -left-20 -z-10 w-64 h-64 bg-primary/10 blur-[100px] rounded-full pointer-events-none"></div>
             </div>
         </div>
     );

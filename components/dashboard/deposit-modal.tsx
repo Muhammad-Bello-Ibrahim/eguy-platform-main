@@ -71,24 +71,24 @@ export function DepositModal({ isOpen, onClose, onSuccess }: DepositModalProps) 
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px] overflow-hidden bg-[#131321] border border-white/10 text-white rounded-3xl p-0">
+      <DialogContent className="sm:max-w-[425px] overflow-hidden bg-white dark:bg-[#131321] border border-slate-100 dark:border-white/10 text-slate-900 dark:text-white rounded-3xl p-0">
         {/* Header */}
         <div className="flex flex-col items-center pt-3 pb-6 relative">
-          <div className="w-12 h-1.5 bg-white/20 rounded-full mb-6"></div>
+          <div className="w-12 h-1.5 bg-slate-200 dark:bg-white/20 rounded-full mb-6"></div>
           <div className="flex justify-between items-center w-full px-6">
-            <DialogTitle className="text-xl font-bold text-white">Fund Wallet</DialogTitle>
+            <DialogTitle className="text-xl font-bold text-slate-900 dark:text-white">Fund Wallet</DialogTitle>
             <div className="w-8"></div> {/* Spacer to center title if close button is handled by DialogPrimitive, but let's keep visual balance */}
           </div>
         </div>
 
         {/* Tabs */}
         <div className="px-6 mb-6">
-          <div className="bg-white/5 p-1 rounded-full flex relative">
+          <div className="bg-slate-100 dark:bg-white/5 p-1 rounded-full flex relative">
             <button
               onClick={() => setActiveTab("automatic")}
               className={cn(
                 "flex-1 py-2.5 text-sm font-semibold rounded-full transition-all",
-                activeTab === "automatic" ? "bg-[#47f0d1] text-[#131321] shadow-[0_4px_12px_rgba(71,240,209,0.2)]" : "text-white/60 hover:text-white"
+                activeTab === "automatic" ? "bg-[#47f0d1] text-[#131321] shadow-[0_4px_12px_rgba(71,240,209,0.2)]" : "text-slate-500 dark:text-white/60 hover:text-slate-800 dark:hover:text-white"
               )}
             >
               Automatic
@@ -97,7 +97,7 @@ export function DepositModal({ isOpen, onClose, onSuccess }: DepositModalProps) 
               onClick={() => setActiveTab("manual")}
               className={cn(
                 "flex-1 py-2.5 text-sm font-semibold rounded-full transition-all",
-                activeTab === "manual" ? "bg-[#47f0d1] text-[#131321] shadow-[0_4px_12px_rgba(71,240,209,0.2)]" : "text-white/60 hover:text-white"
+                activeTab === "manual" ? "bg-[#47f0d1] text-[#131321] shadow-[0_4px_12px_rgba(71,240,209,0.2)]" : "text-slate-500 dark:text-white/60 hover:text-slate-800 dark:hover:text-white"
               )}
             >
               Manual Transfer
@@ -116,7 +116,7 @@ export function DepositModal({ isOpen, onClose, onSuccess }: DepositModalProps) 
               )}
 
               <div className="space-y-3">
-                <Label htmlFor="amount" className="text-sm font-semibold text-slate-300 ml-1">
+                <Label htmlFor="amount" className="text-sm font-semibold text-slate-500 dark:text-slate-300 ml-1">
                   Enter Amount
                 </Label>
                 <div className="relative">
@@ -130,7 +130,7 @@ export function DepositModal({ isOpen, onClose, onSuccess }: DepositModalProps) 
                     min={100}
                     step={100}
                     required
-                    className="pl-10 h-14 rounded-2xl text-lg font-bold bg-white/5 border-white/10 text-white focus:bg-white/10 focus:border-[#47f0d1] transition-all shadow-sm placeholder:text-slate-600"
+                    className="pl-10 h-14 rounded-2xl text-lg font-bold bg-slate-100 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-900 dark:text-white focus:bg-white dark:focus:bg-white/10 focus:border-[#47f0d1] transition-all shadow-sm placeholder:text-slate-400 dark:placeholder:text-slate-600"
                   />
                 </div>
 
@@ -144,7 +144,7 @@ export function DepositModal({ isOpen, onClose, onSuccess }: DepositModalProps) 
                         "px-3 py-1.5 rounded-full text-xs font-semibold border transition-all",
                         amount === amt.toString()
                           ? "bg-[#47f0d1] border-[#47f0d1] text-[#131321]"
-                          : "bg-transparent border-white/10 text-slate-400 hover:border-[#47f0d1]/50 hover:text-[#47f0d1]"
+                          : "bg-transparent border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 hover:border-[#47f0d1]/50 hover:text-[#47f0d1]"
                       )}
                     >
                       ₦{amt.toLocaleString()}
@@ -165,8 +165,8 @@ export function DepositModal({ isOpen, onClose, onSuccess }: DepositModalProps) 
                       <div className="w-full h-full bg-[#00c3f7] rounded-full"></div>
                     </div>
                     <div>
-                      <p className="text-white font-bold text-base">Pay with Paystack</p>
-                      <p className="text-white/50 text-xs font-normal">Card, Bank Transfer, USSD</p>
+                      <p className="text-[#00c3f7] dark:text-white font-bold text-base">Pay with Paystack</p>
+                      <p className="text-slate-500 dark:text-white/50 text-xs font-normal">Card, Bank Transfer, USSD</p>
                     </div>
                   </div>
                   {isLoading ? <Loader2 className="animate-spin text-[#00c3f7]" /> : <span className="text-[#00c3f7] font-bold text-xl">→</span>}
@@ -177,36 +177,36 @@ export function DepositModal({ isOpen, onClose, onSuccess }: DepositModalProps) 
           ) : (
             <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
               {/* Static Bank Card 1 */}
-              <div className="bg-white/5 border border-white/10 rounded-xl p-5 flex flex-col gap-4">
+              <div className="bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/10 rounded-xl p-5 flex flex-col gap-4">
                 <div className="flex justify-between items-start">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-[#47f0d1]/10 flex items-center justify-center">
                       <span className="font-bold text-[#47f0d1]">W</span>
                     </div>
                     <div>
-                      <p className="text-white/50 text-[10px] uppercase font-bold tracking-wider">Bank Name</p>
-                      <p className="text-white font-semibold">Wema Bank</p>
+                      <p className="text-slate-500 dark:text-white/50 text-[10px] uppercase font-bold tracking-wider">Bank Name</p>
+                      <p className="text-slate-900 dark:text-white font-semibold">Wema Bank</p>
                     </div>
                   </div>
-                  <button onClick={() => copyToClipboard("0123456789")} className="w-10 h-10 bg-[#47f0d1] rounded-full flex items-center justify-center text-[#131321] active:scale-95 transition-transform hover:bg-white">
+                  <button onClick={() => copyToClipboard("0123456789")} className="w-10 h-10 bg-[#47f0d1] rounded-full flex items-center justify-center text-[#131321] active:scale-95 transition-transform hover:bg-slate-100 dark:hover:bg-white">
                     {copied ? <CheckCircle2 className="w-5 h-5" /> : <Copy className="w-5 h-5" />}
                   </button>
                 </div>
-                <div className="grid grid-cols-2 gap-4 pt-4 border-t border-white/5">
+                <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-200 dark:border-white/5">
                   <div>
-                    <p className="text-white/50 text-[10px] uppercase font-bold tracking-wider">Account Number</p>
-                    <p className="text-xl font-bold text-white tracking-widest mt-1 font-mono">0123456789</p>
+                    <p className="text-slate-500 dark:text-white/50 text-[10px] uppercase font-bold tracking-wider">Account Number</p>
+                    <p className="text-xl font-bold text-slate-900 dark:text-white tracking-widest mt-1 font-mono">0123456789</p>
                   </div>
                   <div>
-                    <p className="text-white/50 text-[10px] uppercase font-bold tracking-wider">Account Name</p>
-                    <p className="text-sm font-semibold text-white mt-1">eGuy Platform</p>
+                    <p className="text-slate-500 dark:text-white/50 text-[10px] uppercase font-bold tracking-wider">Account Name</p>
+                    <p className="text-sm font-semibold text-slate-900 dark:text-white mt-1">eGuy Platform</p>
                   </div>
                 </div>
               </div>
 
               {/* Info Note */}
               <div className="bg-[#47f0d1]/5 p-4 rounded-xl border border-[#47f0d1]/10 mt-2">
-                <p className="text-xs text-white/70 leading-relaxed italic text-center">
+                <p className="text-xs text-slate-600 dark:text-white/70 leading-relaxed italic text-center">
                   Transfer to this account and your wallet will be credited automatically.
                 </p>
               </div>

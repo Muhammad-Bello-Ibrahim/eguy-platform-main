@@ -9,16 +9,16 @@ export default function PayoutsPage() {
     const [minPayout, setMinPayout] = useState(1500);
 
     return (
-        <div className="bg-background-dark text-slate-100 font-sans min-h-screen pb-32">
+        <div className="bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-sans min-h-screen pb-32">
             {/* Header */}
-            <header className="sticky top-0 z-40 bg-background-dark/80 backdrop-blur-md px-6 pt-14 pb-4 flex items-center gap-4">
+            <header className="sticky top-0 z-40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md px-6 pt-14 pb-4 flex items-center gap-4 border-b border-slate-200 dark:border-white/5">
                 <button
                     onClick={() => router.back()}
-                    className="p-2 -ml-2 rounded-full hover:bg-white/5 transition-colors"
+                    className="p-2 -ml-2 rounded-full hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
                 >
-                    <span className="material-icons-round">arrow_back_ios_new</span>
+                    <span className="material-icons-round text-slate-600 dark:text-slate-300">arrow_back_ios_new</span>
                 </button>
-                <h1 className="text-xl font-bold">Payout Schedule</h1>
+                <h1 className="text-xl font-bold text-slate-900 dark:text-white">Payout Schedule</h1>
             </header>
 
             <main className="px-5 space-y-6 pb-32">
@@ -51,9 +51,9 @@ export default function PayoutsPage() {
                 {/* Payout Frequency */}
                 <section>
                     <h2 className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3 px-1">Payout Frequency</h2>
-                    <div className="bg-surface-dark/40 border border-white/5 rounded-2xl p-2 space-y-1">
+                    <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/5 rounded-2xl p-2 space-y-1">
                         <label
-                            className={`flex items-center justify-between p-4 rounded-xl transition-colors cursor-pointer group ${frequency === 'daily' ? 'bg-primary/5 border border-primary/20' : 'hover:bg-white/5 border border-transparent'}`}
+                            className={`flex items-center justify-between p-4 rounded-xl transition-colors cursor-pointer group ${frequency === 'daily' ? 'bg-primary/5 border border-primary/20' : 'hover:bg-slate-50 dark:hover:bg-white/5 border border-transparent'}`}
                             onClick={() => setFrequency('daily')}
                         >
                             <div className="flex items-center gap-4">
@@ -71,7 +71,7 @@ export default function PayoutsPage() {
                         </label>
 
                         <label
-                            className={`flex items-center justify-between p-4 rounded-xl transition-colors cursor-pointer group ${frequency === 'weekly' ? 'bg-primary/5 border border-primary/20' : 'hover:bg-white/5 border border-transparent'}`}
+                            className={`flex items-center justify-between p-4 rounded-xl transition-colors cursor-pointer group ${frequency === 'weekly' ? 'bg-primary/5 border border-primary/20' : 'hover:bg-slate-50 dark:hover:bg-white/5 border border-transparent'}`}
                             onClick={() => setFrequency('weekly')}
                         >
                             <div className="flex items-center gap-4">
@@ -89,7 +89,7 @@ export default function PayoutsPage() {
                         </label>
 
                         <label
-                            className={`flex items-center justify-between p-4 rounded-xl transition-colors cursor-pointer group ${frequency === 'monthly' ? 'bg-primary/5 border border-primary/20' : 'hover:bg-white/5 border border-transparent'}`}
+                            className={`flex items-center justify-between p-4 rounded-xl transition-colors cursor-pointer group ${frequency === 'monthly' ? 'bg-primary/5 border border-primary/20' : 'hover:bg-slate-50 dark:hover:bg-white/5 border border-transparent'}`}
                             onClick={() => setFrequency('monthly')}
                         >
                             <div className="flex items-center gap-4">
@@ -110,13 +110,13 @@ export default function PayoutsPage() {
 
                 {/* Preferred Day (Only show for Weekly) */}
                 {frequency === 'weekly' && (
-                    <section className="bg-surface-dark/40 border border-white/5 rounded-2xl p-5">
+                    <section className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/5 rounded-2xl p-5">
                         <h2 className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-4">Preferred Payout Day</h2>
                         <div className="flex justify-between items-center gap-2">
                             {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, i) => (
                                 <button
                                     key={i}
-                                    className={`w-10 h-10 rounded-lg text-xs font-bold transition-colors ${i === 4 ? 'bg-primary text-background-dark font-black' : 'border border-white/5 hover:bg-primary/10'}`}
+                                    className={`w-10 h-10 rounded-lg text-xs font-bold transition-colors ${i === 4 ? 'bg-primary text-slate-900 dark:text-background-dark font-black' : 'border border-slate-200 dark:border-white/5 hover:bg-primary/10 text-slate-600 dark:text-slate-400'}`}
                                 >{day}</button>
                             ))}
                         </div>
@@ -129,9 +129,9 @@ export default function PayoutsPage() {
                         <h2 className="text-xs font-bold uppercase tracking-widest text-slate-500">Minimum Payout</h2>
                         <span className="text-xl font-extrabold text-primary">${minPayout.toLocaleString()}</span>
                     </div>
-                    <div className="bg-surface-dark/40 border border-white/5 rounded-2xl p-6">
+                    <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/5 rounded-2xl p-6">
                         <input
-                            className="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-primary"
+                            className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-primary"
                             max="5000"
                             min="100"
                             step="100"
@@ -150,7 +150,7 @@ export default function PayoutsPage() {
                 </section>
 
                 <div className="pt-6 pb-12">
-                    <button className="w-full bg-primary text-background-dark font-bold py-4 rounded-2xl shadow-lg shadow-primary/20 active:scale-[0.98] transition-all">
+                    <button className="w-full bg-primary text-slate-900 dark:text-background-dark font-bold py-4 rounded-2xl shadow-lg shadow-primary/20 active:scale-[0.98] transition-all">
                         SAVE SETTINGS
                     </button>
                 </div>

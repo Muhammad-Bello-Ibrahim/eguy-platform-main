@@ -2,21 +2,11 @@
 
 import Link from 'next/link';
 
-import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
-
 interface DashboardHeaderProps {
     user: any;
 }
 
 export function DashboardHeader({ user }: DashboardHeaderProps) {
-    const { theme, setTheme } = useTheme();
-    const [mounted, setMounted] = useState(false);
-
-    useEffect(() => {
-        setMounted(true);
-    }, []);
-
     // Get greeting based on time of day
     const getGreeting = () => {
         const hour = new Date().getHours();
@@ -36,7 +26,7 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
     };
 
     return (
-        <header className="sticky top-0 z-50 px-6 py-4 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md flex items-center justify-between border-b border-gray-100 dark:border-gray-800 transition-colors duration-300">
+        <header className="sticky top-0 z-50 px-6 py-4 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md flex items-center justify-between border-b border-gray-100 dark:border-gray-800">
             <Link href="/profile" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
                 <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center border border-primary/30 overflow-hidden relative">
                     {user?.avatar ? (
@@ -57,25 +47,11 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
                 </div>
             </Link>
 
-            <div className="flex items-center gap-3">
-                {mounted && (
-                    <button
-                        onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                        className="w-10 h-10 rounded-full bg-slate-100 dark:bg-card-dark flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all"
-                    >
-                        <span className="material-icons-round">
-                            {theme === "dark" ? "light_mode" : "dark_mode"}
-                        </span>
-                    </button>
-                )}
-
-                <Link href="/notifications" className="relative w-10 h-10 rounded-full bg-slate-100 dark:bg-card-dark flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
-                    <span className="material-icons-round">notifications</span>
-                    {/* Notification dot - logic to show/hide based on actual notifications can be added later */}
-                    <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-primary rounded-full border-2 border-background-light dark:border-background-dark"></span>
-                </Link>
-            </div>
+            <Link href="/notifications" className="relative w-10 h-10 rounded-full bg-slate-100 dark:bg-card-dark flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+                <span className="material-icons-round">notifications</span>
+                {/* Notification dot - logic to show/hide based on actual notifications can be added later */}
+                <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-primary rounded-full border-2 border-background-light dark:border-background-dark"></span>
+            </Link>
         </header>
     );
 }
-

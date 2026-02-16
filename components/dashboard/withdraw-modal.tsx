@@ -104,20 +104,20 @@ export function WithdrawModal({ isOpen, onClose, onSuccess }: WithdrawModalProps
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md bg-[#131321] border border-white/10 text-white rounded-3xl p-0 overflow-hidden shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
+      <DialogContent className="sm:max-w-md bg-white dark:bg-[#131321] border border-slate-100 dark:border-white/10 text-slate-900 dark:text-white rounded-3xl p-0 overflow-hidden shadow-[0_-10px_40px_rgba(0,0,0,0.1)] dark:shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
         {/* iOS Grabber */}
-        <div className="w-12 h-1.5 bg-zinc-700 rounded-full mx-auto mt-3 mb-4"></div>
+        <div className="w-12 h-1.5 bg-slate-200 dark:bg-zinc-700 rounded-full mx-auto mt-3 mb-4"></div>
 
         {/* Header */}
         <div className="flex justify-between items-center px-6 mb-6">
-          <DialogTitle className="text-xl font-bold text-white">Withdraw Funds</DialogTitle>
+          <DialogTitle className="text-xl font-bold text-slate-900 dark:text-white">Withdraw Funds</DialogTitle>
           {/* Close button handled by DialogPrimitive typically, but added for visual match if needed, though standard close X is usually fine */}
         </div>
 
         <form className="space-y-6 px-6 pb-10" onSubmit={handleSubmit}>
           {/* Balance Display */}
           <div className="text-center mb-6">
-            <p className="text-zinc-400 text-sm font-medium mb-2">Available Balance</p>
+            <p className="text-slate-500 dark:text-zinc-400 text-sm font-medium mb-2">Available Balance</p>
             <h3 className="text-[#47f0d1] text-3xl font-extrabold tracking-tight">
               {isLoadingData ? "..." : formatCurrency(userBalance)}
             </h3>
@@ -131,9 +131,9 @@ export function WithdrawModal({ isOpen, onClose, onSuccess }: WithdrawModalProps
 
           {/* Amount Input */}
           <div>
-            <Label htmlFor="amount" className="text-zinc-400 text-xs font-bold uppercase tracking-widest mb-3 block">Amount to Withdraw</Label>
+            <Label htmlFor="amount" className="text-slate-500 dark:text-zinc-400 text-xs font-bold uppercase tracking-widest mb-3 block">Amount to Withdraw</Label>
             <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/50 text-xl font-bold">₦</span>
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-white/50 text-xl font-bold">₦</span>
               <Input
                 id="amount"
                 type="number"
@@ -143,7 +143,7 @@ export function WithdrawModal({ isOpen, onClose, onSuccess }: WithdrawModalProps
                 min={100}
                 step={100}
                 required
-                className="w-full bg-zinc-800/50 border-2 border-transparent focus:border-[#47f0d1] focus:ring-0 text-white text-2xl font-bold rounded-xl py-6 pl-10 pr-20 transition-all outline-none h-auto placeholder:text-zinc-700"
+                className="w-full bg-slate-100 dark:bg-zinc-800/50 border-2 border-transparent focus:border-[#47f0d1] focus:ring-0 text-slate-900 dark:text-white text-2xl font-bold rounded-xl py-6 pl-10 pr-20 transition-all outline-none h-auto placeholder:text-slate-400 dark:placeholder:text-zinc-700"
               />
               <button
                 type="button"
@@ -158,15 +158,15 @@ export function WithdrawModal({ isOpen, onClose, onSuccess }: WithdrawModalProps
 
           {/* Bank Selection / Payout Account */}
           <div>
-            <Label className="text-zinc-400 text-xs font-bold uppercase tracking-widest mb-3 block">Send to</Label>
+            <Label className="text-slate-500 dark:text-zinc-400 text-xs font-bold uppercase tracking-widest mb-3 block">Send to</Label>
             {payoutAccount ? (
-              <div className="flex items-center gap-4 bg-zinc-800/50 border border-white/5 p-4 rounded-xl hover:bg-zinc-800 transition-colors group">
-                <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
+              <div className="flex items-center gap-4 bg-slate-100 dark:bg-zinc-800/50 border border-slate-200 dark:border-white/5 p-4 rounded-xl hover:bg-slate-200 dark:hover:bg-zinc-800 transition-colors group">
+                <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0 shadow-sm">
                   <span className="text-zinc-900 font-bold text-xl">{payoutAccount.bank.substring(0, 2).toUpperCase()}</span>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-white font-semibold truncate">{payoutAccount.bank}</p>
-                  <p className="text-zinc-500 text-sm truncate">{payoutAccount.accountNumber} • {payoutAccount.accountName}</p>
+                  <p className="text-slate-900 dark:text-white font-semibold truncate">{payoutAccount.bank}</p>
+                  <p className="text-slate-500 dark:text-zinc-500 text-sm truncate">{payoutAccount.accountNumber} • {payoutAccount.accountName}</p>
                 </div>
                 {/* <ChevronDown className="text-zinc-600 group-hover:text-[#47f0d1] transition-colors" /> */}
               </div>
@@ -192,14 +192,14 @@ export function WithdrawModal({ isOpen, onClose, onSuccess }: WithdrawModalProps
 
           {/* Summary Card */}
           {amount && Number.parseFloat(amount) >= 100 && (
-            <div className="bg-zinc-900/40 rounded-xl p-5 border border-white/5 space-y-3">
+            <div className="bg-slate-50 dark:bg-zinc-900/40 rounded-xl p-5 border border-slate-200 dark:border-white/5 space-y-3">
               <div className="flex justify-between items-center text-sm">
-                <span className="text-zinc-500">Transaction Fee</span>
-                <span className="text-zinc-300">{formatCurrency(transactionFee)}</span>
+                <span className="text-slate-500 dark:text-zinc-500">Transaction Fee</span>
+                <span className="text-slate-900 dark:text-zinc-300">{formatCurrency(transactionFee)}</span>
               </div>
-              <div className="h-px bg-white/5"></div>
+              <div className="h-px bg-slate-200 dark:bg-white/5"></div>
               <div className="flex justify-between items-center">
-                <span className="text-zinc-300 font-medium">Final Amount</span>
+                <span className="text-slate-900 dark:text-zinc-300 font-medium">Final Amount</span>
                 <span className="text-[#47f0d1] text-lg font-bold">{formatCurrency(amountAfterFee)}</span>
               </div>
             </div>
