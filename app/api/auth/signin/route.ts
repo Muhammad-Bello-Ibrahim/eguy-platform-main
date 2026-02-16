@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { Database } from "@/lib/database"
 import { verifyPassword, createSession } from "@/lib/auth"
+import { handleApiError, AuthenticationError, NotFoundError, AuthorizationError } from "@/lib/errors"
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,24 +19,24 @@ export async function POST(request: NextRequest) {
     }
 
     if (!user) {
-      return NextResponse.json({ error: "Invalid credentials" }, { status: 401 })
+      throw new NotFoundError("User");
     }
 
     // Verify password
     const isValidPassword = await verifyPassword(password, user.passwordHash)
     if (!isValidPassword) {
-      return NextResponse.json({ error: "Invalid credentials" }, { status: 401 })
+      throw new AuthenticationError("Invalid credentials");
     }
 
     // Check if user is active
     if (user.status !== "active") {
-      return NextResponse.json({ error: "Account is suspended or inactive" }, { status: 403 })
+      throw new AuthorizationError("Account is suspended or inactive");
     }
 
     // Fetch latest user data from DB before creating session
     const latestUser = await Database.findUserById(user.id);
     if (!latestUser) {
-      return NextResponse.json({ error: "User not found after login" }, { status: 404 });
+      throw new NotFoundError("User");
     }
     await createSession({
       id: latestUser.id,
@@ -63,15 +64,9 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Signin error:", error);
-    // Log the actual error for debugging
-    if (error instanceof Error) {
-      console.error("Error details:", {
-        message: error.message,
-        stack: error.stack,
-        name: error.name
-      });
-    }
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return handleApiError(error as Error, {
+      route: '/api/auth/signin',
+      emailOrPhone,
+    });
   }
 }

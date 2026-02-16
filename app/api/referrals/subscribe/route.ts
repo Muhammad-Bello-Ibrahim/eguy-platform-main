@@ -1,12 +1,13 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getSession } from "@/lib/auth"
 import { Database } from "@/lib/database"
+import { handleApiError, AuthenticationError, InsufficientBalanceError, NotFoundError } from "@/lib/errors"
 
 export async function POST(request: NextRequest) {
   try {
     const session = await getSession()
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      throw new AuthenticationError();
     }
 
     // Fixed activation fee
@@ -15,8 +16,11 @@ export async function POST(request: NextRequest) {
 
     // Check user wallet balance
     const user = await Database.findUserById(session.user.id)
-    if (!user || user.walletBalance < ACTIVATION_FEE) {
-      return NextResponse.json({ error: "Insufficient wallet balance" }, { status: 400 })
+    if (!user) {
+      throw new NotFoundError("User");
+    }
+    if (user.walletBalance < ACTIVATION_FEE) {
+      throw new InsufficientBalanceError(ACTIVATION_FEE, user.walletBalance);
     }
 
     // Deduct from wallet
@@ -45,7 +49,9 @@ export async function POST(request: NextRequest) {
       reference,
     })
   } catch (error) {
-    console.error("Activation error:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    return handleApiError(error as Error, {
+      route: '/api/referrals/subscribe',
+      userId: (await getSession())?.user?.id,
+    });
   }
 }

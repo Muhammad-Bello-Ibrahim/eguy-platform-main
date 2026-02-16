@@ -1,28 +1,32 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getSession } from "@/lib/auth"
 import { Database } from "@/lib/database"
+import { handleApiError, AuthenticationError, ValidationError, InsufficientBalanceError, NotFoundError } from "@/lib/errors"
+
 
 export async function POST(request: NextRequest) {
   try {
     const session = await getSession()
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      throw new AuthenticationError();
     }
 
     const { network, phone, amount } = await request.json()
 
     if (!network || !phone || !amount) {
-      return NextResponse.json({ error: "All fields are required" }, { status: 400 })
+      throw new ValidationError("All fields are required");
     }
 
     if (amount < 50) {
-      return NextResponse.json({ error: "Minimum airtime purchase is ₦50" }, { status: 400 })
+      throw new ValidationError("Minimum airtime purchase is ₦50");
     }
 
-    // Check user wallet balance
     const user = await Database.findUserById((session.user as any).id)
-    if (!user || user.walletBalance < amount) {
-      return NextResponse.json({ error: "Insufficient wallet balance" }, { status: 400 })
+    if (!user) {
+      throw new NotFoundError("User");
+    }
+    if (user.walletBalance < amount) {
+      throw new InsufficientBalanceError(amount, user.walletBalance);
     }
 
     // Check SubAndGain API credentials
@@ -101,7 +105,11 @@ export async function POST(request: NextRequest) {
       subaData,
     });
   } catch (error) {
-    console.error("Airtime purchase error:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    return handleApiError(error as Error, {
+      route: '/api/payments/airtime',
+      network,
+      phone,
+      amount,
+    });
   }
 }

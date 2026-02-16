@@ -1,33 +1,31 @@
 import { NextRequest, NextResponse } from "next/server"
 import { Database } from "@/lib/database"
+import { handleApiError, ValidationError, NotFoundError } from "@/lib/errors"
 
 export async function POST(request: NextRequest) {
   try {
     const { token } = await request.json()
-    
+
     if (!token) {
-      return NextResponse.json({ error: "Token required" }, { status: 400 })
+      throw new ValidationError("Token required");
     }
 
-    // Get verification token
     const tokenDoc = await Database.getVerificationToken(token)
-    
+
     if (!tokenDoc) {
-      return NextResponse.json({ error: "Invalid or expired token" }, { status: 400 })
+      throw new ValidationError("Invalid or expired token");
     }
 
-    // Check if token has expired
     if (tokenDoc.expires < new Date()) {
-      return NextResponse.json({ error: "Invalid or expired token" }, { status: 400 })
+      throw new ValidationError("Invalid or expired token");
     }
 
-    // Update user KYC status to verified
-    const updatedUser = await Database.updateUserById(tokenDoc.userId, { 
-      kycStatus: "verified" 
+    const updatedUser = await Database.updateUserById(tokenDoc.userId, {
+      kycStatus: "verified"
     })
 
     if (!updatedUser) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 })
+      throw new NotFoundError("User");
     }
 
     // Mark token as used
@@ -50,7 +48,8 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ message: "Email verified successfully" })
   } catch (error) {
-    console.error("Email verification error:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    return handleApiError(error as Error, {
+      route: '/api/auth/verify-email',
+    });
   }
 }

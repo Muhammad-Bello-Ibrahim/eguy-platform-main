@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server"
 import { getSession } from "@/lib/auth"
 import { Database } from "@/lib/database"
+import { handleApiError, AuthenticationError } from "@/lib/errors"
 
 export async function GET() {
   try {
     const session = await getSession()
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      throw new AuthenticationError();
     }
 
     const transactions = await Database.getUserTransactions(session.user.id)
@@ -23,7 +24,9 @@ export async function GET() {
       })),
     })
   } catch (error) {
-    console.error("Transactions fetch error:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    return handleApiError(error as Error, {
+      route: '/api/wallet/transactions',
+      userId: (await getSession())?.user?.id,
+    });
   }
 }

@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { Database } from "@/lib/database"
 import { hashPassword, createSession, generateReferralCode } from "@/lib/auth"
+import { handleApiError, ValidationError, DatabaseError } from "@/lib/errors"
 
 export async function POST(request: NextRequest) {
   try {
@@ -8,18 +9,18 @@ export async function POST(request: NextRequest) {
 
     // Validate input
     if (!fullName || !email || !phone || !password || !transactionPin) {
-      return NextResponse.json({ error: "All fields are required" }, { status: 400 })
+      throw new ValidationError("All fields are required");
     }
 
     // Check if user already exists
     const existingUserByEmail = await Database.findUserByEmail(email)
     if (existingUserByEmail) {
-      return NextResponse.json({ error: "User with this email already exists" }, { status: 400 })
+      throw new ValidationError("User with this email already exists");
     }
 
     const existingUserByPhone = await Database.findUserByPhone(phone)
     if (existingUserByPhone) {
-      return NextResponse.json({ error: "User with this phone number already exists" }, { status: 400 })
+      throw new ValidationError("User with this phone number already exists");
     }
 
     // Hash password
@@ -89,7 +90,9 @@ export async function POST(request: NextRequest) {
       },
     })
   } catch (error) {
-    console.error("Signup error:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    return handleApiError(error as Error, {
+      route: '/api/auth/signup',
+      email,
+    });
   }
 }

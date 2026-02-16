@@ -1,27 +1,30 @@
-import { type NextRequest, NextResponse } from "next/server";
-import { getSession } from "@/lib/auth";
-import { Database } from "@/lib/database";
+import { type NextRequest, NextResponse } from "next/server"
+import { getSession } from "@/lib/auth"
+import { Database } from "@/lib/database"
+import { handleApiError, AuthenticationError, NotFoundError, ValidationError, InsufficientBalanceError } from "@/lib/errors";
 
 export async function POST(request: NextRequest) {
+  let session; // Declare session outside try block
+  let amount; // Declare amount outside try block
   try {
-    const session = await getSession();
+    session = await getSession();
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      throw new AuthenticationError();
     }
-    const { amount } = await request.json();
-    if (!amount || amount < 100) {
-      return NextResponse.json({ error: "Minimum withdrawal amount is ₦100" }, { status: 400 });
+    ({ amount } = await request.json());
+    if (!amount || amount <= 0) {
+      throw new ValidationError("Invalid withdrawal amount");
     }
     // Find user
     const user = await Database.findUserByEmail(session.user.email);
     if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      throw new NotFoundError("User");
     }
     if (!user.payoutAccount) {
       return NextResponse.json({ error: "No payout account found. Please add one in your profile." }, { status: 400 });
     }
     if (user.walletBalance < amount) {
-      return NextResponse.json({ error: "Insufficient wallet balance" }, { status: 400 });
+      throw new InsufficientBalanceError(amount, user.walletBalance);
     }
     // Paystack transfer automation
     const PAYSTACK_SECRET = process.env.PAYSTACK_SECRET_KEY;
@@ -90,8 +93,11 @@ export async function POST(request: NextRequest) {
       updatedAt: new Date(),
     } as any);
     return NextResponse.json({ success: true, transfer: transferData.data });
-  } catch (error: any) {
-    console.error("Withdrawal error:", error);
-    return NextResponse.json({ error: error?.message || "Internal server error" }, { status: 500 });
+  } catch (error) {
+    return handleApiError(error as Error, {
+      route: '/api/wallet/withdraw',
+      userId: session?.user?.id,
+      amount,
+    });
   }
 }

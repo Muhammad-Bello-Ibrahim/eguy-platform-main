@@ -2,22 +2,30 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { Database } from "@/lib/database";
+import { handleApiError, AuthenticationError, NotFoundError, ValidationError } from "@/lib/errors";
 
 export async function GET(request: NextRequest) {
-    const session = await getSession();
-    const user = session?.user as any;
-    if (!session || !user?.email) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    try {
+        const session = await getSession();
+        const user = session?.user as any;
+        if (!session || !user?.email) {
+            throw new AuthenticationError();
+        }
 
-    const dbUser = await Database.findUserByEmail(user.email);
-    if (!dbUser) {
-        return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
+        const dbUser = await Database.findUserByEmail(user.email);
+        if (!dbUser) {
+            throw new NotFoundError("User");
+        }
 
-    return NextResponse.json({
-        linkedAccounts: dbUser.linkedAccounts || []
-    });
+        return NextResponse.json({
+            linkedAccounts: dbUser.linkedAccounts || []
+        });
+    } catch (error) {
+        return handleApiError(error as Error, {
+            route: '/api/user/banking',
+            method: 'GET',
+        });
+    }
 }
 
 export async function POST(request: NextRequest) {

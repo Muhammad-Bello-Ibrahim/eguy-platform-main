@@ -1,12 +1,13 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getSession } from "@/lib/auth"
 import { Database } from "@/lib/database"
+import { handleApiError, AuthenticationError, ValidationError, ExternalAPIError } from "@/lib/errors"
 
 export async function POST(request: NextRequest) {
   try {
     const session = await getSession()
     if (!session || !session.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      throw new AuthenticationError();
     }
 
     const user = session.user as any;
@@ -14,7 +15,7 @@ export async function POST(request: NextRequest) {
     const { amount } = await request.json()
 
     if (!amount || amount <= 0) {
-      return NextResponse.json({ error: "Invalid amount" }, { status: 400 })
+      throw new ValidationError("Invalid deposit amount");
     }
 
     // Integrate with Paystack
@@ -67,7 +68,10 @@ export async function POST(request: NextRequest) {
       amount: Number(amount),
     })
   } catch (error) {
-    console.error("Deposit error:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    return handleApiError(error as Error, {
+      route: '/api/wallet/deposit',
+      userId: (await getSession())?.user?.id,
+      amount,
+    });
   }
 }
