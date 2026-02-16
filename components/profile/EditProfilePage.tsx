@@ -5,10 +5,61 @@ import { useRouter } from 'next/navigation';
 
 export default function EditProfilePage() {
     const router = useRouter();
-    const [name, setName] = useState("Alexander Wright");
-    const [bio, setBio] = useState("Fintech enthusiast & Growth Strategist. Building the future of networking at eGuy. 🚀");
-    const [twitter, setTwitter] = useState("@alex_wright_growth");
-    const [linkedin, setLinkedin] = useState("linkedin.com/in/alexwright");
+    const [name, setName] = useState("");
+    const [bio, setBio] = useState("");
+    const [twitter, setTwitter] = useState("");
+    const [linkedin, setLinkedin] = useState("");
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
+
+    React.useEffect(() => {
+        fetchProfile();
+    }, []);
+
+    const fetchProfile = async () => {
+        try {
+            const res = await fetch('/api/user');
+            const data = await res.json();
+            if (data.user) {
+                setName(data.user.fullName || "");
+                setBio(data.user.bio || "");
+                setTwitter(data.user.twitter || "");
+                setLinkedin(data.user.linkedin || "");
+            }
+        } catch (error) {
+            console.error("Failed to fetch profile", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleSave = async () => {
+        setSaving(true);
+        try {
+            const res = await fetch('/api/user', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    fullName: name,
+                    bio,
+                    twitter,
+                    linkedin
+                })
+            });
+
+            if (res.ok) {
+                alert("Profile updated successfully!");
+                router.refresh();
+            } else {
+                alert("Failed to update profile");
+            }
+        } catch (error) {
+            console.error("Error updating profile", error);
+            alert("An error occurred");
+        } finally {
+            setSaving(false);
+        }
+    };
 
     return (
         <div className="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-sans min-h-screen pb-32">
@@ -104,8 +155,12 @@ export default function EditProfilePage() {
                 </div>
 
                 <div className="pt-8">
-                    <button className="w-full bg-primary text-slate-100 dark:text-background-dark font-extrabold py-5 rounded-2xl shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all tracking-widest text-sm uppercase">
-                        Save Changes
+                    <button
+                        onClick={handleSave}
+                        disabled={saving || loading}
+                        className="w-full bg-primary text-slate-100 dark:text-background-dark font-extrabold py-5 rounded-2xl shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all tracking-widest text-sm uppercase disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        {saving ? "SAVING..." : "SAVE CHANGES"}
                     </button>
                     <p className="text-center text-slate-600 text-[10px] mt-6 uppercase tracking-widest font-bold">Account Security: AES-256 Encrypted</p>
                 </div>

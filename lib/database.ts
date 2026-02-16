@@ -25,30 +25,49 @@ export interface DatabaseUser {
   };
   linkedAccounts?: LinkedAccount[];
   elevatexActivated?: boolean;
-  elevatexActivated?: boolean;
-  bio?: string;
-  socials?: {
-    twitter?: string;
-    linkedin?: string;
-    instagram?: string;
-    facebook?: string;
-  };
-  notificationSettings?: NotificationSettings;
-  payoutSettings?: PayoutSettings;
   createdAt: Date
   updatedAt: Date
+  bio?: string;
+  twitter?: string;
+  linkedin?: string;
+  payoutSchedule?: PayoutSchedule;
+  notificationPreferences?: NotificationPreferences;
+  subscriptionPlan?: string;
+  rank?: string;
+  referralStats?: {
+    l1Count: number;
+    l2Count: number;
+    l3Count: number;
+    l4Count: number;
+  };
+  monthActivated?: number;
 }
 
-export interface NotificationSettings {
-  push: { network: boolean; earnings: boolean; security: boolean; marketing: boolean };
-  email: { network: boolean; earnings: boolean; security: boolean; marketing: boolean };
-  sms: { network: boolean; earnings: boolean; security: boolean; marketing: boolean };
-}
-
-export interface PayoutSettings {
-  frequency: string;
+export interface PayoutSchedule {
+  frequency: 'daily' | 'weekly' | 'monthly';
   minPayout: number;
-  preferredDay?: string;
+  preferredDay?: string; // For weekly payouts (M, T, W, etc.)
+}
+
+export interface NotificationPreferences {
+  push: {
+    network: boolean;
+    earnings: boolean;
+    security: boolean;
+    marketing: boolean;
+  };
+  email: {
+    network: boolean;
+    earnings: boolean;
+    security: boolean;
+    marketing: boolean;
+  };
+  sms: {
+    network: boolean;
+    earnings: boolean;
+    security: boolean;
+    marketing: boolean;
+  };
 }
 
 export interface LinkedAccount {
@@ -141,6 +160,56 @@ export class Database {
       ...user,
       id: user._id.toString(),
     };
+  }
+
+  static async updateUserPayoutSchedule(userId: string, schedule: PayoutSchedule): Promise<void> {
+    const db = await Database.getDb();
+    await db.collection("users").updateOne(
+      { _id: new ObjectId(userId) },
+      { $set: { payoutSchedule: schedule, updatedAt: new Date() } }
+    );
+  }
+
+  static async updateUserNotificationPreferences(userId: string, preferences: NotificationPreferences): Promise<void> {
+    const db = await Database.getDb();
+    await db.collection("users").updateOne(
+      { _id: new ObjectId(userId) },
+      { $set: { notificationPreferences: preferences, updatedAt: new Date() } }
+    );
+  }
+
+  static async addLinkedAccount(userId: string, account: Omit<LinkedAccount, "id">): Promise<LinkedAccount> {
+    const db = await Database.getDb();
+    const newAccount = { ...account, id: new ObjectId().toString() };
+    await db.collection("users").updateOne(
+      { _id: new ObjectId(userId) },
+      { $push: { linkedAccounts: newAccount }, $set: { updatedAt: new Date() } }
+    );
+    return newAccount;
+  }
+
+  static async removeLinkedAccount(userId: string, accountId: string): Promise<void> {
+    const db = await Database.getDb();
+    await db.collection("users").updateOne(
+      { _id: new ObjectId(userId) },
+      { $pull: { linkedAccounts: { id: accountId } }, $set: { updatedAt: new Date() } }
+    );
+  }
+
+  static async setPrimaryLinkedAccount(userId: string, accountId: string): Promise<void> {
+    const db = await Database.getDb();
+    const user = await db.collection("users").findOne({ _id: new ObjectId(userId) });
+    if (!user || !user.linkedAccounts) return;
+
+    const updatedAccounts = user.linkedAccounts.map((acc: LinkedAccount) => ({
+      ...acc,
+      isPrimary: acc.id === accountId
+    }));
+
+    await db.collection("users").updateOne(
+      { _id: new ObjectId(userId) },
+      { $set: { linkedAccounts: updatedAccounts, updatedAt: new Date() } }
+    );
   }
 
   static async updateUserPayoutAccountById(userId: string, payoutAccount: { bank: string; accountNumber: string; accountName: string }): Promise<DatabaseUser | null> {
@@ -602,6 +671,162 @@ export class Database {
     }
   }
 
+  static async findUserByEmail(email: string): Promise<DatabaseUser | null> {
+    try {
+      await this.connectMongoose();
+      const db = await Database.getDb();
+      const user = await db.collection("users").findOne({ email });
+      if (!user) return null;
+
+      // Calculate rank on the fly
+      const { rank, stats } = await this.getUserRank(user._id.toString());
+
+      return {
+        id: user._id.toString(),
+        fullName: user.fullName,
+        email: user.email,
+        phone: user.phone,
+        passwordHash: user.passwordHash,
+        walletBalance: user.walletBalance,
+        referralCode: user.referralCode,
+        referredBy: user.referredBy,
+        kycStatus: user.kycStatus,
+        status: user.status,
+        role: user.role,
+        transactionPin: user.transactionPin,
+        avatar: user.avatar,
+        dob: user.dob,
+        address: user.address,
+        payoutAccount: user.payoutAccount,
+        linkedAccounts: user.linkedAccounts,
+        elevatexActivated: user.elevatexActivated,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+        bio: user.bio,
+        twitter: user.twitter,
+        linkedin: user.linkedin,
+        payoutSchedule: user.payoutSchedule,
+        notificationPreferences: user.notificationPreferences,
+        subscriptionPlan: user.subscriptionPlan,
+        rank,
+        referralStats: stats,
+        monthActivated: user.monthActivated
+      };
+    } catch (error) {
+      console.error("Error finding user by email:", error);
+      return null;
+    }
+  }
+
+  static async findUserById(id: string): Promise<DatabaseUser | null> {
+    try {
+      await this.connectMongoose();
+      if (!ObjectId.isValid(id)) return null;
+
+      const db = await Database.getDb();
+      const user = await db.collection("users").findOne({ _id: new ObjectId(id) });
+      if (!user) return null;
+
+      // Calculate rank on the fly
+      const { rank, stats } = await this.getUserRank(id);
+
+      return {
+        id: user._id.toString(),
+        fullName: user.fullName,
+        email: user.email,
+        phone: user.phone,
+        passwordHash: user.passwordHash,
+        walletBalance: user.walletBalance,
+        referralCode: user.referralCode,
+        referredBy: user.referredBy,
+        kycStatus: user.kycStatus,
+        status: user.status,
+        role: user.role,
+        transactionPin: user.transactionPin,
+        avatar: user.avatar,
+        dob: user.dob,
+        address: user.address,
+        payoutAccount: user.payoutAccount,
+        linkedAccounts: user.linkedAccounts,
+        elevatexActivated: user.elevatexActivated,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+        bio: user.bio,
+        twitter: user.twitter,
+        linkedin: user.linkedin,
+        payoutSchedule: user.payoutSchedule,
+        notificationPreferences: user.notificationPreferences,
+        subscriptionPlan: user.subscriptionPlan,
+        rank,
+        referralStats: stats,
+        monthActivated: user.monthActivated
+      };
+    } catch (error) {
+      console.error("Error finding user by id:", error);
+      return null;
+    }
+  }
+
+  static async getUserRank(userId: string): Promise<{ rank: string; stats: any }> {
+    try {
+      await this.connectMongoose();
+      const db = await Database.getDb();
+
+      // Get L1 Count (Direct Referrals)
+      const l1Referrals = await db.collection("referrals").find({ referrerId: userId, status: "active" }).toArray();
+      const l1Count = l1Referrals.length;
+      const l1Ids = l1Referrals.map((r: any) => r.referredId);
+
+      // Get L2 Count (Referrals of L1)
+      let l2Count = 0;
+      let l2Ids: string[] = [];
+      if (l1Count > 0) {
+        const l2Referrals = await db.collection("referrals").find({ referrerId: { $in: l1Ids }, status: "active" }).toArray();
+        l2Count = l2Referrals.length;
+        l2Ids = l2Referrals.map((r: any) => r.referredId);
+      }
+
+      // Get L3 Count (Referrals of L2)
+      let l3Count = 0;
+      let l3Ids: string[] = [];
+      if (l2Count > 0) {
+        const l3Referrals = await db.collection("referrals").find({ referrerId: { $in: l2Ids }, status: "active" }).toArray();
+        l3Count = l3Referrals.length;
+        l3Ids = l3Referrals.map((r: any) => r.referredId);
+      }
+
+      // Get L4 Count (Referrals of L3)
+      let l4Count = 0;
+      if (l3Count > 0) {
+        l4Count = await db.collection("referrals").countDocuments({ referrerId: { $in: l3Ids }, status: "active" });
+      }
+
+      // Determine Rank
+      let rank = "Basic";
+      if (l1Count >= 5) rank = "Growth"; // Completed L1
+      if (l2Count >= 25) rank = "Expansion"; // Completed L2
+      if (l3Count >= 125) rank = "Premium"; // Completed L3
+      if (l4Count >= 625) rank = "Pinnacle"; // Completed L4
+
+      // NOTE: User must have elevatexActivated to have a rank other than "Guest User"
+      // But we will let the UI handle the "Guest User" display if elevatexActivated is false.
+      // Or we can verify it here.
+      const user = await db.collection("users").findOne({ _id: new ObjectId(userId) });
+      if (!user?.elevatexActivated) {
+        rank = "Guest";
+      }
+
+      return {
+        rank,
+        stats: { l1Count, l2Count, l3Count, l4Count }
+      };
+
+    } catch (error) {
+      console.error("Error calculating user rank:", error);
+      return { rank: "Basic", stats: { l1Count: 0, l2Count: 0, l3Count: 0, l4Count: 0 } };
+    }
+  }
+
   static async getTotalUsersFund(): Promise<number> {
     try {
       await this.connectMongoose();
@@ -866,38 +1091,57 @@ export class Database {
   }
 
   static async addLinkedAccount(userId: string, account: Omit<LinkedAccount, "id">): Promise<LinkedAccount> {
-    const db = await Database.getDb();
-    const newAccount: LinkedAccount = {
-      ...account,
-      id: new ObjectId().toString(),
-    };
+    console.log(`[Database.addLinkedAccount] Starting for userId: ${userId}, account: ${JSON.stringify(account)}`);
+    try {
+      const db = await Database.getDb();
+      const newAccount: LinkedAccount = {
+        ...account,
+        id: new ObjectId().toString(),
+      };
 
-    // If this is the first account or set as primary, update other accounts
-    if (newAccount.isPrimary) {
+      console.log(`[Database.addLinkedAccount] Generated newAccount: ${JSON.stringify(newAccount)}`);
+
+      // If this is the first account or set as primary, update other accounts
+      // Only attempt to update if linkedAccounts exists and has items
+      if (newAccount.isPrimary) {
+        const user = await db.collection("users").findOne({ _id: new ObjectId(userId) });
+        if (user && user.linkedAccounts && user.linkedAccounts.length > 0) {
+          console.log(`[Database.addLinkedAccount] Setting others to non-primary`);
+          await db.collection("users").updateOne(
+            { _id: new ObjectId(userId) },
+            { $set: { "linkedAccounts.$[].isPrimary": false } }
+          );
+        } else {
+          console.log(`[Database.addLinkedAccount] No existing accounts to update or user not found`);
+        }
+      }
+
+      console.log(`[Database.addLinkedAccount] Pushing new account`);
       await db.collection("users").updateOne(
         { _id: new ObjectId(userId) },
-        { $set: { "linkedAccounts.$[].isPrimary": false } }
+        {
+          $push: { linkedAccounts: newAccount },
+          $set: { updatedAt: new Date() }
+        }
       );
-    }
 
-    await db.collection("users").updateOne(
-      { _id: new ObjectId(userId) },
-      {
-        $push: { linkedAccounts: newAccount },
-        $set: { updatedAt: new Date() }
+      // If primary, update the main payoutAccount for compatibility
+      if (newAccount.isPrimary) {
+        console.log(`[Database.addLinkedAccount] Updating payoutAccount`);
+        await this.updateUserPayoutAccountById(userId, {
+          bank: newAccount.bank,
+          accountNumber: newAccount.accountNumber,
+          accountName: newAccount.accountName
+        });
       }
-    );
 
-    // If primary, update the main payoutAccount for compatibility
-    if (newAccount.isPrimary) {
-      await this.updateUserPayoutAccountById(userId, {
-        bank: newAccount.bank,
-        accountNumber: newAccount.accountNumber,
-        accountName: newAccount.accountName
-      });
+      console.log(`[Database.addLinkedAccount] Success`);
+      return newAccount;
+
+    } catch (error) {
+      console.error(`[Database.addLinkedAccount] Error:`, error);
+      throw error;
     }
-
-    return newAccount;
   }
 
   static async removeLinkedAccount(userId: string, accountId: string): Promise<void> {
@@ -937,6 +1181,22 @@ export class Database {
         accountName: account.accountName
       });
     }
+  }
+
+  static async updateUserPayoutSchedule(userId: string, schedule: PayoutSchedule): Promise<void> {
+    const db = await Database.getDb();
+    await db.collection("users").updateOne(
+      { _id: new ObjectId(userId) },
+      { $set: { payoutSchedule: schedule, updatedAt: new Date() } }
+    );
+  }
+
+  static async updateUserNotificationPreferences(userId: string, preferences: NotificationPreferences): Promise<void> {
+    const db = await Database.getDb();
+    await db.collection("users").updateOne(
+      { _id: new ObjectId(userId) },
+      { $set: { notificationPreferences: preferences, updatedAt: new Date() } }
+    );
   }
 
   // Overloaded to support ID or email

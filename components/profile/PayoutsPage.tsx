@@ -7,6 +7,57 @@ export default function PayoutsPage() {
     const router = useRouter();
     const [frequency, setFrequency] = useState('weekly');
     const [minPayout, setMinPayout] = useState(1500);
+    const [preferredDay, setPreferredDay] = useState('F');
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
+
+    React.useEffect(() => {
+        fetchSettings();
+    }, []);
+
+    const fetchSettings = async () => {
+        try {
+            const res = await fetch('/api/user/payouts');
+            const data = await res.json();
+            if (data.payoutSchedule) {
+                setFrequency(data.payoutSchedule.frequency);
+                setMinPayout(data.payoutSchedule.minPayout);
+                if (data.payoutSchedule.preferredDay) {
+                    setPreferredDay(data.payoutSchedule.preferredDay);
+                }
+            }
+        } catch (error) {
+            console.error("Failed to fetch payout settings", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleSave = async () => {
+        setSaving(true);
+        try {
+            const res = await fetch('/api/user/payouts', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    frequency,
+                    minPayout,
+                    preferredDay
+                })
+            });
+
+            if (res.ok) {
+                alert("Settings saved successfully!");
+            } else {
+                alert("Failed to save settings");
+            }
+        } catch (error) {
+            console.error("Error saving settings", error);
+            alert("An error occurred");
+        } finally {
+            setSaving(false);
+        }
+    };
 
     return (
         <div className="bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-sans min-h-screen pb-32">
@@ -113,10 +164,11 @@ export default function PayoutsPage() {
                     <section className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/5 rounded-2xl p-5">
                         <h2 className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-4">Preferred Payout Day</h2>
                         <div className="flex justify-between items-center gap-2">
-                            {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, i) => (
+                            {['M', 'T', 'W', 'Th', 'F', 'Sa', 'Su'].map((day, i) => (
                                 <button
                                     key={i}
-                                    className={`w-10 h-10 rounded-lg text-xs font-bold transition-colors ${i === 4 ? 'bg-primary text-slate-900 dark:text-background-dark font-black' : 'border border-slate-200 dark:border-white/5 hover:bg-primary/10 text-slate-600 dark:text-slate-400'}`}
+                                    onClick={() => setPreferredDay(day)}
+                                    className={`w-10 h-10 rounded-lg text-xs font-bold transition-colors ${preferredDay === day ? 'bg-primary text-slate-900 dark:text-background-dark font-black' : 'border border-slate-200 dark:border-white/5 hover:bg-primary/10 text-slate-600 dark:text-slate-400'}`}
                                 >{day}</button>
                             ))}
                         </div>
@@ -150,8 +202,12 @@ export default function PayoutsPage() {
                 </section>
 
                 <div className="pt-6 pb-12">
-                    <button className="w-full bg-primary text-slate-900 dark:text-background-dark font-bold py-4 rounded-2xl shadow-lg shadow-primary/20 active:scale-[0.98] transition-all">
-                        SAVE SETTINGS
+                    <button
+                        onClick={handleSave}
+                        disabled={saving || loading}
+                        className="w-full bg-primary text-slate-900 dark:text-background-dark font-bold py-4 rounded-2xl shadow-lg shadow-primary/20 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        {saving ? "SAVING..." : "SAVE SETTINGS"}
                     </button>
                 </div>
             </main>

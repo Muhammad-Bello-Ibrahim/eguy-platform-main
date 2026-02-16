@@ -41,10 +41,13 @@ export default function BankingPage() {
                 })
             });
 
+            const data = await res.json();
+
             if (res.ok) {
                 await fetchAccounts();
+                setIsModalOpen(false); // Close modal on success
             } else {
-                alert("Failed to add account");
+                alert(data.error || "Failed to add account");
             }
         } catch (error) {
             console.error("Error adding account", error);

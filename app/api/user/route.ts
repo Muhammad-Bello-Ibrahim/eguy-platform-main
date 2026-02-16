@@ -1,12 +1,17 @@
+import { NextRequest, NextResponse } from "next/server";
+import { getSession } from "@/lib/auth";
+import { Database } from "@/lib/database";
+
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
+
 export async function PUT(request: NextRequest) {
   const session = await getSession();
   if (!session || !session.user?.email) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   const body = await request.json();
-  const { fullName, phone, avatar, payoutAccount } = body;
+  const { fullName, phone, avatar, payoutAccount, bio, twitter, linkedin } = body;
 
   const user = await Database.findUserByEmail(session.user.email);
   if (!user) {
@@ -18,6 +23,9 @@ export async function PUT(request: NextRequest) {
     phone,
     avatar,
     payoutAccount,
+    bio,
+    twitter,
+    linkedin
   });
 
   if (!updated) {
@@ -25,16 +33,14 @@ export async function PUT(request: NextRequest) {
   }
   return NextResponse.json({ user: updated });
 }
-import { NextRequest, NextResponse } from "next/server";
-import { getSession } from "@/lib/auth";
-import { Database } from "@/lib/database";
 
 export async function GET(request: NextRequest) {
   const session = await getSession();
-  if (!session || !session.user?.email) {
+  const userSession = session?.user as any;
+  if (!session || !userSession?.email) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const user = await Database.findUserByEmail(session.user.email);
+  const user = await Database.findUserByEmail(userSession.email);
   if (!user) {
     return NextResponse.json({ error: "User not found" }, { status: 404 });
   }

@@ -78,9 +78,17 @@ export default function ProfilePage() {
                     <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">{displayEmail}</p>
 
                     {/* Tier Badge */}
-                    <div className="mt-4 inline-flex items-center gap-2 bg-gradient-to-r from-primary/20 to-primary/5 border border-primary/30 px-4 py-1.5 rounded-full">
-                        <span className="material-icons-round text-primary text-sm">workspace_premium</span>
-                        <span className="text-xs font-bold uppercase tracking-widest text-primary">Premium Gold</span>
+                    <div className={`mt-4 inline-flex items-center gap-2 border px-4 py-1.5 rounded-full ${user?.rank === 'Pinnacle' ? 'bg-red-500/10 border-red-500/30 text-red-600' :
+                            user?.rank === 'Premium' ? 'bg-orange-500/10 border-orange-500/30 text-orange-600' :
+                                user?.rank === 'Expansion' ? 'bg-purple-500/10 border-purple-500/30 text-purple-600' :
+                                    user?.rank === 'Growth' ? 'bg-green-500/10 border-green-500/30 text-green-600' :
+                                        user?.rank === 'Basic' ? 'bg-blue-500/10 border-blue-500/30 text-blue-600' :
+                                            'bg-slate-500/10 border-slate-500/30 text-slate-600'
+                        }`}>
+                        <span className="material-icons-round text-sm">workspace_premium</span>
+                        <span className="text-xs font-bold uppercase tracking-widest">
+                            {user?.rank || 'Guest'}
+                        </span>
                     </div>
                 </div>
             </div>
@@ -164,7 +172,7 @@ export default function ProfilePage() {
                                 </div>
                                 <div className="text-left">
                                     <p className="text-sm font-semibold">Linked Accounts</p>
-                                    <p className="text-xs text-slate-500">2 accounts connected</p>
+                                    <p className="text-xs text-slate-500">{user?.linkedAccounts?.length || 0} accounts connected</p>
                                 </div>
                             </div>
                             <span className="material-icons-round text-slate-400">chevron_right</span>
@@ -176,7 +184,7 @@ export default function ProfilePage() {
                                 </div>
                                 <div className="text-left">
                                     <p className="text-sm font-semibold">Payout Schedule</p>
-                                    <p className="text-xs text-slate-500">Weekly on Fridays</p>
+                                    <p className="text-xs text-slate-500 capitalize">{user?.payoutSchedule?.frequency || "Weekly"} on {user?.payoutSchedule?.preferredDay || "Friday"}s</p>
                                 </div>
                             </div>
                             <span className="material-icons-round text-slate-400">chevron_right</span>

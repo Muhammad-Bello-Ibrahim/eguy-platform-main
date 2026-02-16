@@ -12,124 +12,33 @@ interface SubscriptionPacksProps {
   onSubscriptionSuccess: () => void
 }
 
-const packs = [
-  {
-    id: "basic-pack",
-    name: "Basic Pack",
-    price: 3000,
-    description: "Perfect for getting started with referrals",
-    icon: Zap,
-    color: "text-blue-600",
-    bgColor: "bg-blue-50",
-    borderColor: "border-blue-200",
-    features: [
-      "Up to 10 direct referrals",
-      "₦200 per Level 1 referral",
-      "₦150 per Level 2 referral",
-      "₦100 per Level 3 referral",
-      "₦50 per Level 4 & 5 referrals",
-      "Basic support",
-    ],
-    popular: false,
-  },
-  {
-    id: "growth-pack",
-    name: "Growth Pack",
-    price: 5000,
-    description: "Scale your referral network effectively",
-    icon: Star,
-    color: "text-green-600",
-    bgColor: "bg-green-50",
-    borderColor: "border-green-200",
-    features: [
-      "Up to 20 direct referrals",
-      "₦300 per Level 1 referral",
-      "₦200 per Level 2 referral",
-      "₦150 per Level 3 referral",
-      "₦100 per Level 4 referral",
-      "₦75 per Level 5 referral",
-      "Priority support",
-    ],
-    popular: true,
-  },
-  {
-    id: "expansion-pack",
-    name: "Expansion Pack",
-    price: 10000,
-    description: "For serious network builders",
-    icon: Crown,
-    color: "text-purple-600",
-    bgColor: "bg-purple-50",
-    borderColor: "border-purple-200",
-    features: [
-      "Up to 50 direct referrals",
-      "₦500 per Level 1 referral",
-      "₦350 per Level 2 referral",
-      "₦250 per Level 3 referral",
-      "₦150 per Level 4 referral",
-      "₦100 per Level 5 referral",
-      "Premium support",
-      "Monthly bonus rewards",
-    ],
-    popular: false,
-  },
-  {
-    id: "premium-pack",
-    name: "Premium Pack",
-    price: 20000,
-    description: "Maximum earning potential",
-    icon: Crown,
-    color: "text-orange-600",
-    bgColor: "bg-orange-50",
-    borderColor: "border-orange-200",
-    features: [
-      "Up to 100 direct referrals",
-      "₦800 per Level 1 referral",
-      "₦600 per Level 2 referral",
-      "₦400 per Level 3 referral",
-      "₦250 per Level 4 referral",
-      "₦150 per Level 5 referral",
-      "VIP support",
-      "Weekly bonus rewards",
-      "Exclusive training materials",
-    ],
-    popular: false,
-  },
-  {
-    id: "pinnacle-pack",
-    name: "Pinnacle Pack",
-    price: 50000,
-    description: "Ultimate package for top earners",
-    icon: Crown,
-    color: "text-red-600",
-    bgColor: "bg-red-50",
-    borderColor: "border-red-200",
-    features: [
-      "Up to 200 direct referrals",
-      "₦1,500 per Level 1 referral",
-      "₦1,000 per Level 2 referral",
-      "₦750 per Level 3 referral",
-      "₦500 per Level 4 referral",
-      "₦300 per Level 5 referral",
-      "Dedicated account manager",
-      "Daily bonus rewards",
-      "Exclusive events access",
-      "Custom referral tools",
-    ],
-    popular: false,
-  },
-]
+const ActivationCard = {
+  id: "activate",
+  name: "Activate ElevateX",
+  price: 1000,
+  description: "Unlock your earning potential with a one-time activation fee",
+  icon: Zap,
+  color: "text-primary",
+  bgColor: "bg-primary/5",
+  borderColor: "border-primary/20",
+  features: [
+    "Unlock Referral System",
+    "Earn Matrix Bonuses (5 Levels)",
+    "Instant Payouts",
+    "Access to Premium Features",
+    "24/7 Priority Support",
+  ],
+  popular: true,
+}
 
 export function SubscriptionPacks({ onSubscriptionSuccess }: SubscriptionPacksProps) {
-  const [selectedPack, setSelectedPack] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const { toast } = useToast()
 
-  const handleSubscribe = async (packId: string) => {
+  const handleActivate = async () => {
     setError("")
     setIsLoading(true)
-    setSelectedPack(packId)
 
     try {
       const response = await fetch("/api/referrals/subscribe", {
@@ -137,18 +46,18 @@ export function SubscriptionPacks({ onSubscriptionSuccess }: SubscriptionPacksPr
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ packId }),
+        body: JSON.stringify({ packId: 'activation' }), // Sending dummy packId
       })
 
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || "Subscription failed")
+        throw new Error(data.error || "Activation failed")
       }
 
       toast({
-        title: "Subscription Successful!",
-        description: `You've successfully subscribed to ${data.pack.name}`,
+        title: "Activation Successful!",
+        description: `Welcome to ElevateX! You are now an active member.`,
       })
 
       onSubscriptionSuccess()
@@ -156,7 +65,6 @@ export function SubscriptionPacks({ onSubscriptionSuccess }: SubscriptionPacksPr
       setError(error instanceof Error ? error.message : "Something went wrong")
     } finally {
       setIsLoading(false)
-      setSelectedPack(null)
     }
   }
 
@@ -168,10 +76,15 @@ export function SubscriptionPacks({ onSubscriptionSuccess }: SubscriptionPacksPr
   }
 
   return (
-    <div className="space-y-6">
-      <div className="text-center">
-        <h2 className="text-2xl font-bold mb-2">Choose Your ElevateX Pack</h2>
-        <p className="text-muted-foreground">Select a subscription pack to start earning referral bonuses</p>
+    <div className="space-y-8 max-w-4xl mx-auto">
+      <div className="text-center space-y-4">
+        <h2 className="text-3xl font-bold">Activate Your Account</h2>
+        <div className="max-w-2xl mx-auto">
+          <p className="text-muted-foreground text-lg">
+            Start your journey with a simple one-time activation fee of ₦1,000.
+            Unlock unlimited earning potential through our 5-level matrix system.
+          </p>
+        </div>
       </div>
 
       {error && (
@@ -180,75 +93,82 @@ export function SubscriptionPacks({ onSubscriptionSuccess }: SubscriptionPacksPr
         </Alert>
       )}
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {packs.map((pack) => (
-          <Card key={pack.id} className={`relative ${pack.borderColor} ${pack.popular ? "ring-2 ring-primary" : ""}`}>
-            {pack.popular && (
-              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                <Badge className="bg-primary text-primary-foreground">Most Popular</Badge>
+      <div className="flex justify-center">
+        <Card className={`relative w-full max-w-md ${ActivationCard.borderColor} ring-4 ring-primary/10 shadow-xl`}>
+          <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+            <Badge className="bg-primary text-primary-foreground px-4 py-1 text-sm font-bold shadow-lg">
+              BEST VALUE
+            </Badge>
+          </div>
+
+          <CardHeader className={`${ActivationCard.bgColor} rounded-t-lg pt-10 pb-8 text-center border-b border-primary/10`}>
+            <div className="flex justify-center mb-4">
+              <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center shadow-sm">
+                <ActivationCard.icon className={`h-8 w-8 ${ActivationCard.color}`} />
               </div>
-            )}
+            </div>
+            <CardTitle className="text-2xl font-bold text-slate-900 dark:text-white mb-2">{ActivationCard.name}</CardTitle>
+            <div className="flex items-center justify-center gap-1 text-primary">
+              <span className="text-4xl font-extrabold">{formatCurrency(ActivationCard.price)}</span>
+              <span className="text-sm font-medium opacity-80 self-end mb-1">/ one-time</span>
+            </div>
+          </CardHeader>
 
-            <CardHeader className={`${pack.bgColor} rounded-t-lg`}>
-              <div className="flex items-center justify-between">
-                <pack.icon className={`h-8 w-8 ${pack.color}`} />
-                <div className="text-right">
-                  <div className="text-2xl font-bold">{formatCurrency(pack.price)}</div>
-                  <div className="text-sm text-muted-foreground">one-time</div>
-                </div>
-              </div>
-              <CardTitle className="text-xl">{pack.name}</CardTitle>
-              <CardDescription>{pack.description}</CardDescription>
-            </CardHeader>
+          <CardContent className="pt-8 px-8 pb-8">
+            <ul className="space-y-4 mb-8">
+              {ActivationCard.features.map((feature, index) => (
+                <li key={index} className="flex items-center gap-3 text-slate-700 dark:text-slate-300">
+                  <div className="w-6 h-6 rounded-full bg-green-500/10 flex items-center justify-center flex-shrink-0">
+                    <Check className="h-3.5 w-3.5 text-green-600" />
+                  </div>
+                  <span className="font-medium">{feature}</span>
+                </li>
+              ))}
+            </ul>
 
-            <CardContent className="pt-6">
-              <ul className="space-y-3 mb-6">
-                {pack.features.map((feature, index) => (
-                  <li key={index} className="flex items-start space-x-2">
-                    <Check className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm">{feature}</span>
-                  </li>
-                ))}
-              </ul>
+            <Button
+              className="w-full py-6 text-lg font-bold shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all"
+              onClick={handleActivate}
+              disabled={isLoading}
+              size="lg"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                `Pay ${formatCurrency(ActivationCard.price)} & Activate`
+              )}
+            </Button>
 
-              <Button
-                className="w-full"
-                onClick={() => handleSubscribe(pack.id)}
-                disabled={isLoading}
-                variant={pack.popular ? "default" : "outline"}
-              >
-                {isLoading && selectedPack === pack.id ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Subscribing...
-                  </>
-                ) : (
-                  `Subscribe to ${pack.name}`
-                )}
-              </Button>
-            </CardContent>
-          </Card>
-        ))}
+            <p className="text-xs text-center text-muted-foreground mt-4">
+              Secure payment via your wallet balance
+            </p>
+          </CardContent>
+        </Card>
       </div>
 
-      <div className="bg-muted/50 p-6 rounded-lg">
-        <h3 className="font-semibold mb-3">How ElevateX Works</h3>
-        <div className="grid md:grid-cols-2 gap-4 text-sm text-muted-foreground">
-          <div>
-            <h4 className="font-medium text-foreground mb-2">Referral Rules:</h4>
-            <ul className="space-y-1">
-              <li>• Complete 10 direct referrals to unlock withdrawals</li>
-              <li>• Earn bonuses from 5 levels of referrals</li>
-              <li>• Reactivate subscription after completing a cycle</li>
-            </ul>
+      <div className="bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 p-8 rounded-2xl">
+        <h3 className="text-lg font-bold mb-6 flex items-center gap-2">
+          <span className="material-icons-round text-primary">info</span>
+          How Current Rank Works
+        </h3>
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 text-sm">
+          <div className="p-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm">
+            <div className="text-primary font-bold mb-1">Basic</div>
+            <div className="text-xs text-muted-foreground mb-2">0 - 4 Referrals</div>
+            <p className="text-slate-600 dark:text-slate-400 text-xs">Entry level rank. Activate your account to start referring.</p>
           </div>
-          <div>
-            <h4 className="font-medium text-foreground mb-2">Benefits:</h4>
-            <ul className="space-y-1">
-              <li>• Passive income from your network</li>
-              <li>• Higher tier packs = higher bonuses</li>
-              <li>• Build a sustainable income stream</li>
-            </ul>
+          <div className="p-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm">
+            <div className="text-green-600 font-bold mb-1">Growth</div>
+            <div className="text-xs text-muted-foreground mb-2">5 Direct Referrals</div>
+            <p className="text-slate-600 dark:text-slate-400 text-xs">Unlock higher bonuses by completing your first level.</p>
+          </div>
+          <div className="p-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm">
+            <div className="text-purple-600 font-bold mb-1">Expansion</div>
+            <div className="text-xs text-muted-foreground mb-2">Team Growth</div>
+            <p className="text-slate-600 dark:text-slate-400 text-xs">Advance to Expansion, Premium, and Pinnacle as your team grows deeper.</p>
           </div>
         </div>
       </div>

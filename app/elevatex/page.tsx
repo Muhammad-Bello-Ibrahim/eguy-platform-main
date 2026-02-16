@@ -42,6 +42,7 @@ export default function ElevatexPage() {
 	const [activating, setActivating] = useState(false);
 	const [showDeposit, setShowDeposit] = useState(false);
 	const [showWithdraw, setShowWithdraw] = useState(false);
+	const [rank, setRank] = useState<string>("Guest");
 
 	// ElevateX specific data
 	const [elevatexTransactions, setElevatexTransactions] = useState<any[]>([]);
@@ -79,6 +80,7 @@ export default function ElevatexPage() {
 				if (data.user) {
 					setSubscribed(!!data.user.elevatexActivated);
 					if (data.user.referralCode) setReferralCode(data.user.referralCode);
+					if (data.user.rank) setRank(data.user.rank);
 				}
 			} catch (error) {
 				console.error("Failed to fetch user", error);
@@ -233,7 +235,7 @@ export default function ElevatexPage() {
 						<div className="space-y-1 text-right">
 							<p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Growth Rank</p>
 							<div className="flex items-center justify-end gap-2">
-								<span className="text-lg font-black italic text-[#47f0d1] tracking-tighter uppercase">{subscribed ? "Member" : "Guest"}</span>
+								<span className="text-lg font-black italic text-[#47f0d1] tracking-tighter uppercase">{rank}</span>
 								{subscribed && <Zap className="w-4 h-4 text-[#47f0d1] fill-current" />}
 							</div>
 						</div>
@@ -266,7 +268,7 @@ export default function ElevatexPage() {
 							<span className="text-[10px] bg-white/10 px-2 py-0.5 rounded text-white/60">Live</span>
 						</div>
 
-						<div className="flex flex-col items-center overflow-x-auto pb-4 pt-2">
+						<div className="flex flex-col items-center overflow-x-auto pb-4 pt-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
 							{/* Root Node (User) */}
 							<div className="relative z-10 flex flex-col items-center">
 								<div className="w-20 h-20 rounded-2xl bg-[#131321] border-4 border-[#47f0d1] p-1 relative shadow-[0_0_30px_rgba(71,240,209,0.2)] flex items-center justify-center mb-0 z-20">

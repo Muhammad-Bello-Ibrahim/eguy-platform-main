@@ -9,53 +9,43 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const { packId } = await request.json()
-
-    if (!packId) {
-      return NextResponse.json({ error: "Pack ID is required" }, { status: 400 })
-    }
-
-    // Get pack details (in production, this would come from database)
-    const packs = {
-      "basic-pack": { name: "Basic Pack", price: 1000, benefits: { max_referrals: 5, level_1_bonus: 200 } },
-    }
-
-    const selectedPack = packs[packId as keyof typeof packs]
-    if (!selectedPack) {
-      return NextResponse.json({ error: "Invalid pack selected" }, { status: 400 })
-    }
+    // Fixed activation fee
+    const ACTIVATION_FEE = 1000;
+    const packName = "ElevateX Activation";
 
     // Check user wallet balance
     const user = await Database.findUserById(session.user.id)
-    if (!user || user.walletBalance < selectedPack.price) {
+    if (!user || user.walletBalance < ACTIVATION_FEE) {
       return NextResponse.json({ error: "Insufficient wallet balance" }, { status: 400 })
     }
 
     // Deduct from wallet
-    await Database.updateUserWallet(session.user.id, -selectedPack.price)
+    await Database.updateUserWallet(session.user.id, -ACTIVATION_FEE)
 
     // Create transaction record
-    const reference = `SUB_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`
+    const reference = `ACT_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`
     await Database.createTransaction({
       userId: session.user.id,
       type: "payment",
-      amount: selectedPack.price,
-      description: `ElevateX ${selectedPack.name} subscription`,
+      amount: ACTIVATION_FEE,
+      description: `ElevateX Activation`,
       status: "completed",
       reference,
-      metadata: { packId, packName: selectedPack.name },
+      metadata: { type: 'activation' },
     })
 
-    // In production, create user subscription record
-    // await Database.createUserSubscription(...)
+    // Update user subscription status
+    await Database.updateUserById(session.user.id, {
+      elevatexActivated: true,
+      monthActivated: new Date().getMonth() + 1 // Track activation month for renewals
+    });
 
     return NextResponse.json({
-      message: "Subscription successful",
-      pack: selectedPack,
+      message: "Activation successful",
       reference,
     })
   } catch (error) {
-    console.error("Subscription error:", error)
+    console.error("Activation error:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }

@@ -15,21 +15,55 @@ const Toggle = ({ checked, onChange }: { checked: boolean; onChange: () => void 
 export default function NotificationsPage() {
     const router = useRouter();
 
+    const [loading, setLoading] = useState(true);
+
     const [settings, setSettings] = useState({
         push: { network: true, earnings: true, security: true, marketing: false },
         email: { network: false, earnings: true, security: true, marketing: false },
         sms: { network: false, earnings: true, security: true, marketing: false }
     });
 
-    const toggleSetting = (type: 'push' | 'email' | 'sms', key: string) => {
-        setSettings(prev => ({
-            ...prev,
-            [type]: {
-                ...prev[type],
-                //@ts-ignore
-                [key]: !prev[type][key]
+    React.useEffect(() => {
+        fetchSettings();
+    }, []);
+
+    const fetchSettings = async () => {
+        try {
+            const res = await fetch('/api/user/notifications');
+            const data = await res.json();
+            if (data.notificationPreferences) {
+                setSettings(data.notificationPreferences);
             }
-        }));
+        } catch (error) {
+            console.error("Failed to fetch notification settings", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const toggleSetting = async (type: 'push' | 'email' | 'sms', key: string) => {
+        const newSettings = {
+            ...settings,
+            [type]: {
+                ...settings[type],
+                //@ts-ignore
+                [key]: !settings[type][key]
+            }
+        };
+
+        // Optimistic update
+        setSettings(newSettings);
+
+        try {
+            await fetch('/api/user/notifications', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ preferences: newSettings })
+            });
+        } catch (error) {
+            console.error("Error saving settings", error);
+            // Revert on error? For now, we'll just log it.
+        }
     };
 
     const sections = [
