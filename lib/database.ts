@@ -139,92 +139,110 @@ export class Database {
       }
     }
   }
-  static async findUserByReferralCode(referralCode: string): Promise<DatabaseUser | null> {
-    const db = await Database.getDb();
-    const user = await db.collection("users").findOne({ referralCode });
-    if (!user) return null;
-    return {
-      ...user,
-      id: user._id.toString(),
-    };
-  }
-  static async updateUserPayoutAccount(email: string, payoutAccount: { bank: string; accountNumber: string; accountName: string }): Promise<DatabaseUser | null> {
-    const db = await Database.getDb();
-    await db.collection("users").updateOne(
-      { email },
-      { $set: { payoutAccount, updatedAt: new Date() } }
-    );
-    const user = await db.collection("users").findOne({ email });
-    if (!user) return null;
-    return {
-      ...user,
-      id: user._id.toString(),
-    };
-  }
 
-  static async updateUserPayoutSchedule(userId: string, schedule: PayoutSchedule): Promise<void> {
-    const db = await Database.getDb();
-    await db.collection("users").updateOne(
-      { _id: new ObjectId(userId) },
-      { $set: { payoutSchedule: schedule, updatedAt: new Date() } }
-    );
-  }
 
-  static async updateUserNotificationPreferences(userId: string, preferences: NotificationPreferences): Promise<void> {
-    const db = await Database.getDb();
-    await db.collection("users").updateOne(
-      { _id: new ObjectId(userId) },
-      { $set: { notificationPreferences: preferences, updatedAt: new Date() } }
-    );
-  }
 
-  static async addLinkedAccount(userId: string, account: Omit<LinkedAccount, "id">): Promise<LinkedAccount> {
-    const db = await Database.getDb();
-    const newAccount = { ...account, id: new ObjectId().toString() };
-    await db.collection("users").updateOne(
-      { _id: new ObjectId(userId) },
-      { $push: { linkedAccounts: newAccount }, $set: { updatedAt: new Date() } }
-    );
-    return newAccount;
-  }
 
-  static async removeLinkedAccount(userId: string, accountId: string): Promise<void> {
-    const db = await Database.getDb();
-    await db.collection("users").updateOne(
-      { _id: new ObjectId(userId) },
-      { $pull: { linkedAccounts: { id: accountId } }, $set: { updatedAt: new Date() } }
-    );
+
+
+
+
+  static async findUserByEmail(email: string): Promise<DatabaseUser | null> {
+    try {
+      await this.connectMongoose();
+      const db = await Database.getDb();
+      const user = await db.collection("users").findOne({ email });
+      if (!user) return null;
+
+      // Calculate rank on the fly
+      const { rank, stats } = await this.getUserRank(user._id.toString());
+
+      return {
+        id: user._id.toString(),
+        fullName: user.fullName,
+        email: user.email,
+        phone: user.phone,
+        passwordHash: user.passwordHash,
+        walletBalance: user.walletBalance,
+        referralCode: user.referralCode,
+        referredBy: user.referredBy,
+        kycStatus: user.kycStatus,
+        status: user.status,
+        role: user.role,
+        transactionPin: user.transactionPin,
+        avatar: user.avatar,
+        dob: user.dob,
+        address: user.address,
+        payoutAccount: user.payoutAccount,
+        linkedAccounts: user.linkedAccounts,
+        elevatexActivated: user.elevatexActivated,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+        bio: user.bio,
+        twitter: user.twitter,
+        linkedin: user.linkedin,
+        payoutSchedule: user.payoutSchedule,
+        notificationPreferences: user.notificationPreferences,
+        subscriptionPlan: user.subscriptionPlan,
+        rank,
+        referralStats: stats,
+        monthActivated: user.monthActivated
+      };
+    } catch (error) {
+      console.error("Error finding user by email:", error);
+      return null;
+    }
   }
 
-  static async setPrimaryLinkedAccount(userId: string, accountId: string): Promise<void> {
-    const db = await Database.getDb();
-    const user = await db.collection("users").findOne({ _id: new ObjectId(userId) });
-    if (!user || !user.linkedAccounts) return;
+  static async findUserById(id: string): Promise<DatabaseUser | null> {
+    try {
+      await this.connectMongoose();
+      if (!ObjectId.isValid(id)) return null;
 
-    const updatedAccounts = user.linkedAccounts.map((acc: LinkedAccount) => ({
-      ...acc,
-      isPrimary: acc.id === accountId
-    }));
+      const db = await Database.getDb();
+      const user = await db.collection("users").findOne({ _id: new ObjectId(id) });
+      if (!user) return null;
 
-    await db.collection("users").updateOne(
-      { _id: new ObjectId(userId) },
-      { $set: { linkedAccounts: updatedAccounts, updatedAt: new Date() } }
-    );
+      // Calculate rank on the fly
+      const { rank, stats } = await this.getUserRank(id);
+
+      return {
+        id: user._id.toString(),
+        fullName: user.fullName,
+        email: user.email,
+        phone: user.phone,
+        passwordHash: user.passwordHash,
+        walletBalance: user.walletBalance,
+        referralCode: user.referralCode,
+        referredBy: user.referredBy,
+        kycStatus: user.kycStatus,
+        status: user.status,
+        role: user.role,
+        transactionPin: user.transactionPin,
+        avatar: user.avatar,
+        dob: user.dob,
+        address: user.address,
+        payoutAccount: user.payoutAccount,
+        linkedAccounts: user.linkedAccounts,
+        elevatexActivated: user.elevatexActivated,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+        bio: user.bio,
+        twitter: user.twitter,
+        linkedin: user.linkedin,
+        payoutSchedule: user.payoutSchedule,
+        notificationPreferences: user.notificationPreferences,
+        subscriptionPlan: user.subscriptionPlan,
+        rank,
+        referralStats: stats,
+        monthActivated: user.monthActivated
+      };
+    } catch (error) {
+      console.error("Error finding user by id:", error);
+      return null;
+    }
   }
 
-  static async updateUserPayoutAccountById(userId: string, payoutAccount: { bank: string; accountNumber: string; accountName: string }): Promise<DatabaseUser | null> {
-    const db = await Database.getDb();
-    await db.collection("users").updateOne(
-      { _id: new ObjectId(userId) },
-      { $set: { payoutAccount, updatedAt: new Date() } }
-    );
-    const user = await db.collection("users").findOne({ _id: new ObjectId(userId) });
-    if (!user) return null;
-    return {
-      ...user,
-      id: user._id.toString(),
-    };
-  }
   static async updateUserById(userId: string, updates: Partial<Omit<DatabaseUser, "id" | "createdAt" | "updatedAt">>): Promise<DatabaseUser | null> {
     const db = await Database.getDb()
     const result = await db.collection("users").updateOne(
@@ -272,6 +290,7 @@ export class Database {
       id: updatedUser._id.toString(),
     }
   }
+
   static async createUser(userData: Omit<DatabaseUser, "id" | "createdAt" | "updatedAt">): Promise<DatabaseUser> {
     const db = await Database.getDb();
     const now = new Date();
@@ -286,36 +305,6 @@ export class Database {
       ...user,
       id: user._id.toString(),
     };
-  }
-
-  static async findUserByEmail(email: string): Promise<DatabaseUser | null> {
-    const db = await Database.getDb()
-    const user = await db.collection("users").findOne({ email })
-    if (!user) return null
-    return {
-      ...user,
-      id: user._id.toString(),
-    }
-  }
-
-  static async findUserByPhone(phone: string): Promise<DatabaseUser | null> {
-    const db = await Database.getDb()
-    const user = await db.collection("users").findOne({ phone })
-    if (!user) return null
-    return {
-      ...user,
-      id: user._id.toString(),
-    }
-  }
-
-  static async findUserById(id: string): Promise<DatabaseUser | null> {
-    const db = await Database.getDb()
-    const user = await db.collection("users").findOne({ _id: new ObjectId(id) })
-    if (!user) return null;
-    return {
-      ...user,
-      id: user._id.toString(),
-    }
   }
 
   static async updateUserWallet(userId: string, amount: number): Promise<void> {
@@ -668,102 +657,6 @@ export class Database {
     } catch (error) {
       console.error("Error getting successful transaction count:", error);
       return 0;
-    }
-  }
-
-  static async findUserByEmail(email: string): Promise<DatabaseUser | null> {
-    try {
-      await this.connectMongoose();
-      const db = await Database.getDb();
-      const user = await db.collection("users").findOne({ email });
-      if (!user) return null;
-
-      // Calculate rank on the fly
-      const { rank, stats } = await this.getUserRank(user._id.toString());
-
-      return {
-        id: user._id.toString(),
-        fullName: user.fullName,
-        email: user.email,
-        phone: user.phone,
-        passwordHash: user.passwordHash,
-        walletBalance: user.walletBalance,
-        referralCode: user.referralCode,
-        referredBy: user.referredBy,
-        kycStatus: user.kycStatus,
-        status: user.status,
-        role: user.role,
-        transactionPin: user.transactionPin,
-        avatar: user.avatar,
-        dob: user.dob,
-        address: user.address,
-        payoutAccount: user.payoutAccount,
-        linkedAccounts: user.linkedAccounts,
-        elevatexActivated: user.elevatexActivated,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt,
-        bio: user.bio,
-        twitter: user.twitter,
-        linkedin: user.linkedin,
-        payoutSchedule: user.payoutSchedule,
-        notificationPreferences: user.notificationPreferences,
-        subscriptionPlan: user.subscriptionPlan,
-        rank,
-        referralStats: stats,
-        monthActivated: user.monthActivated
-      };
-    } catch (error) {
-      console.error("Error finding user by email:", error);
-      return null;
-    }
-  }
-
-  static async findUserById(id: string): Promise<DatabaseUser | null> {
-    try {
-      await this.connectMongoose();
-      if (!ObjectId.isValid(id)) return null;
-
-      const db = await Database.getDb();
-      const user = await db.collection("users").findOne({ _id: new ObjectId(id) });
-      if (!user) return null;
-
-      // Calculate rank on the fly
-      const { rank, stats } = await this.getUserRank(id);
-
-      return {
-        id: user._id.toString(),
-        fullName: user.fullName,
-        email: user.email,
-        phone: user.phone,
-        passwordHash: user.passwordHash,
-        walletBalance: user.walletBalance,
-        referralCode: user.referralCode,
-        referredBy: user.referredBy,
-        kycStatus: user.kycStatus,
-        status: user.status,
-        role: user.role,
-        transactionPin: user.transactionPin,
-        avatar: user.avatar,
-        dob: user.dob,
-        address: user.address,
-        payoutAccount: user.payoutAccount,
-        linkedAccounts: user.linkedAccounts,
-        elevatexActivated: user.elevatexActivated,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt,
-        bio: user.bio,
-        twitter: user.twitter,
-        linkedin: user.linkedin,
-        payoutSchedule: user.payoutSchedule,
-        notificationPreferences: user.notificationPreferences,
-        subscriptionPlan: user.subscriptionPlan,
-        rank,
-        referralStats: stats,
-        monthActivated: user.monthActivated
-      };
-    } catch (error) {
-      console.error("Error finding user by id:", error);
-      return null;
     }
   }
 
