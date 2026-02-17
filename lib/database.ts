@@ -1,1153 +1,243 @@
-// Database connection and operations
-// This would typically connect to MongoDB Atlas in production
+import { MongoClient, Db, ObjectId } from "mongodb"
+
+let client: MongoClient
+let db: Db
 
 export interface DatabaseUser {
   id: string
   fullName: string
   email: string
   phone: string
-  passwordHash?: string
-  walletBalance: number
-  referralCode: string
-  referredBy?: string
-  kycStatus: "pending" | "verified" | "rejected"
-  status: "active" | "suspended" | "inactive"
-  role: "user" | "admin"
+  passwordHash: string
   transactionPin?: string
-  avatar?: string
-  dob?: string;
-  address?: string;
-  payoutAccount?: {
-    bank: string;
-    accountNumber: string;
-    accountName: string;
-    recipientCode?: string;
-  };
-  linkedAccounts?: LinkedAccount[];
-  elevatexActivated?: boolean;
-  createdAt: Date
-  updatedAt: Date
-  bio?: string;
-  twitter?: string;
-  linkedin?: string;
-  payoutSchedule?: PayoutSchedule;
-  notificationPreferences?: NotificationPreferences;
-  subscriptionPlan?: string;
-  rank?: string;
-  referralStats?: {
-    l1Count: number;
-    l2Count: number;
-    l3Count: number;
-    l4Count: number;
-  };
-  monthActivated?: number;
+  walletBalance: number
+  referralCode?: string
+  referredBy?: string
+  elevatexActivated?: boolean
+  kycStatus?: string
+  status?: string
+  role?: string
+  createdAt?: Date
+  updatedAt?: Date
 }
-
-export interface PayoutSchedule {
-  frequency: 'daily' | 'weekly' | 'monthly';
-  minPayout: number;
-  preferredDay?: string; // For weekly payouts (M, T, W, etc.)
-}
-
-export interface NotificationPreferences {
-  push: {
-    network: boolean;
-    earnings: boolean;
-    security: boolean;
-    marketing: boolean;
-  };
-  email: {
-    network: boolean;
-    earnings: boolean;
-    security: boolean;
-    marketing: boolean;
-  };
-  sms: {
-    network: boolean;
-    earnings: boolean;
-    security: boolean;
-    marketing: boolean;
-  };
-}
-
-export interface LinkedAccount {
-  id: string;
-  bank: string;
-  accountNumber: string;
-  accountName: string;
-  isPrimary: boolean;
-  type?: "savings" | "checking";
-}
-
-export interface Transaction {
-  id: string
-  userId: string
-  type: "deposit" | "withdrawal" | "transfer" | "payment" | "referral_bonus"
-  amount: number
-  description: string
-  status: "pending" | "completed" | "failed" | "cancelled"
-  reference?: string
-  metadata?: any
-  createdAt: Date
-  updatedAt: Date
-}
-
-export interface Referral {
-  id: string
-  referrerId: string
-  referredId: string
-  level: number
-  bonusAmount: number
-  status: "active" | "completed" | "inactive"
-  createdAt: Date
-}
-
-import mongoose from "mongoose"
-import { MongoClient, ObjectId } from "mongodb"
-import Notification from "./models/Notification"
-
-const uri = process.env.MONGODB_URI || "mongodb://localhost:27017/eguy"
-const client = new MongoClient(uri)
-const dbName = uri.split("/").pop()?.split("?")[0] || "eguy"
-let db: any
-let mongooseConnected = false
 
 export class Database {
-  static async getDb() {
-    if (!db) {
-      try {
-        await client.connect()
-        db = client.db(dbName)
-        console.log("Database connected successfully")
-      } catch (error) {
-        console.error("Database connection failed:", error)
-        throw new Error("Database connection failed")
-      }
+  // =========================
+  // CONNECTION
+  // =========================
+
+  private static async connect() {
+    if (!client) {
+      client = new MongoClient(process.env.MONGODB_URI as string)
+      await client.connect()
+      db = client.db(process.env.MONGODB_DB)
+      console.log("✅ MongoDB Connected")
     }
+  }
+
+  private static async getDb(): Promise<Db> {
+    await this.connect()
     return db
   }
 
-  static async connectMongoose() {
-    if (!mongooseConnected && uri) {
-      try {
-        await mongoose.connect(uri)
-        mongooseConnected = true
-        console.log("Mongoose connected successfully")
-      } catch (error) {
-        console.error("Mongoose connection error:", error)
-        throw error
-      }
-    }
+  // =========================
+  // USER METHODS
+  // =========================
+
+  static async createUser(data: Partial<DatabaseUser>) {
+    const database = await this.getDb()
+
+    const result = await database.collection("users").insertOne({
+      ...data,
+      walletBalance: data.walletBalance ?? 0,
+      elevatexActivated: data.elevatexActivated ?? false,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    })
+
+    return {
+      id: result.insertedId.toString(),
+      ...data,
+    } as DatabaseUser
   }
 
-
-
-
-
-
-
-
   static async findUserByEmail(email: string): Promise<DatabaseUser | null> {
-    try {
-      await this.connectMongoose();
-      const db = await Database.getDb();
-      const user = await db.collection("users").findOne({ email });
-      if (!user) return null;
-
-      // Calculate rank on the fly
-      const { rank, stats } = await this.getUserRank(user._id.toString());
-
-      return {
-        id: user._id.toString(),
-        fullName: user.fullName,
-        email: user.email,
-        phone: user.phone,
-        passwordHash: user.passwordHash,
-        walletBalance: user.walletBalance,
-        referralCode: user.referralCode,
-        referredBy: user.referredBy,
-        kycStatus: user.kycStatus,
-        status: user.status,
-        role: user.role,
-        transactionPin: user.transactionPin,
-        avatar: user.avatar,
-        dob: user.dob,
-        address: user.address,
-        payoutAccount: user.payoutAccount,
-        linkedAccounts: user.linkedAccounts,
-        elevatexActivated: user.elevatexActivated,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt,
-        bio: user.bio,
-        twitter: user.twitter,
-        linkedin: user.linkedin,
-        payoutSchedule: user.payoutSchedule,
-        notificationPreferences: user.notificationPreferences,
-        subscriptionPlan: user.subscriptionPlan,
-        rank,
-        referralStats: stats,
-        monthActivated: user.monthActivated
-      };
-    } catch (error) {
-      console.error("Error finding user by email:", error);
-      return null;
-    }
+    const database = await this.getDb()
+    const user = await database.collection("users").findOne({ email })
+    if (!user) return null
+    return { ...user, id: user._id.toString() }
   }
 
   static async findUserByPhone(phone: string): Promise<DatabaseUser | null> {
-    try {
-      await this.connectMongoose();
-      const db = await Database.getDb();
-      const user = await db.collection("users").findOne({ phone });
-      if (!user) return null;
-
-      // Calculate rank on the fly
-      const { rank, stats } = await this.getUserRank(user._id.toString());
-
-      return {
-        id: user._id.toString(),
-        fullName: user.fullName,
-        email: user.email,
-        phone: user.phone,
-        passwordHash: user.passwordHash,
-        walletBalance: user.walletBalance,
-        referralCode: user.referralCode,
-        referredBy: user.referredBy,
-        kycStatus: user.kycStatus,
-        status: user.status,
-        role: user.role,
-        transactionPin: user.transactionPin,
-        avatar: user.avatar,
-        dob: user.dob,
-        address: user.address,
-        payoutAccount: user.payoutAccount,
-        linkedAccounts: user.linkedAccounts,
-        elevatexActivated: user.elevatexActivated,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt,
-        bio: user.bio,
-        twitter: user.twitter,
-        linkedin: user.linkedin,
-        payoutSchedule: user.payoutSchedule,
-        notificationPreferences: user.notificationPreferences,
-        subscriptionPlan: user.subscriptionPlan,
-        rank,
-        referralStats: stats,
-        monthActivated: user.monthActivated
-      };
-    } catch (error) {
-      console.error("Error finding user by phone:", error);
-      return null;
-    }
+    const database = await this.getDb()
+    const user = await database.collection("users").findOne({ phone })
+    if (!user) return null
+    return { ...user, id: user._id.toString() }
   }
 
   static async findUserById(id: string): Promise<DatabaseUser | null> {
-    try {
-      await this.connectMongoose();
-      if (!ObjectId.isValid(id)) return null;
-
-      const db = await Database.getDb();
-      const user = await db.collection("users").findOne({ _id: new ObjectId(id) });
-      if (!user) return null;
-
-      // Calculate rank on the fly
-      const { rank, stats } = await this.getUserRank(id);
-
-      return {
-        id: user._id.toString(),
-        fullName: user.fullName,
-        email: user.email,
-        phone: user.phone,
-        passwordHash: user.passwordHash,
-        walletBalance: user.walletBalance,
-        referralCode: user.referralCode,
-        referredBy: user.referredBy,
-        kycStatus: user.kycStatus,
-        status: user.status,
-        role: user.role,
-        transactionPin: user.transactionPin,
-        avatar: user.avatar,
-        dob: user.dob,
-        address: user.address,
-        payoutAccount: user.payoutAccount,
-        linkedAccounts: user.linkedAccounts,
-        elevatexActivated: user.elevatexActivated,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt,
-        bio: user.bio,
-        twitter: user.twitter,
-        linkedin: user.linkedin,
-        payoutSchedule: user.payoutSchedule,
-        notificationPreferences: user.notificationPreferences,
-        subscriptionPlan: user.subscriptionPlan,
-        rank,
-        referralStats: stats,
-        monthActivated: user.monthActivated
-      };
-    } catch (error) {
-      console.error("Error finding user by id:", error);
-      return null;
-    }
+    const database = await this.getDb()
+    const user = await database
+      .collection("users")
+      .findOne({ _id: new ObjectId(id) })
+    if (!user) return null
+    return { ...user, id: user._id.toString() }
   }
 
-  static async updateUserById(userId: string, updates: Partial<Omit<DatabaseUser, "id" | "createdAt" | "updatedAt">>): Promise<DatabaseUser | null> {
-    const db = await Database.getDb()
-    const result = await db.collection("users").updateOne(
-      { _id: new ObjectId(userId) },
+  static async findUserByReferralCode(
+    code: string
+  ): Promise<DatabaseUser | null> {
+    const database = await this.getDb()
+    const user = await database.collection("users").findOne({ referralCode: code })
+    if (!user) return null
+    return { ...user, id: user._id.toString() }
+  }
+
+  static async updateUserById(id: string, updates: Partial<DatabaseUser>) {
+    const database = await this.getDb()
+    await database.collection("users").updateOne(
+      { _id: new ObjectId(id) },
       {
         $set: {
           ...updates,
-          updatedAt: new Date()
-        }
-      }
-    )
-
-    if (result.matchedCount === 0) {
-      return null
-    }
-
-    // Return the updated user
-    const updatedUser = await db.collection("users").findOne({ _id: new ObjectId(userId) })
-    return {
-      ...updatedUser,
-      id: updatedUser._id.toString(),
-    }
-  }
-
-  static async updateUserByEmail(email: string, updates: Partial<Omit<DatabaseUser, "id" | "createdAt" | "updatedAt">>): Promise<DatabaseUser | null> {
-    const db = await Database.getDb()
-    const result = await db.collection("users").updateOne(
-      { email },
-      {
-        $set: {
-          ...updates,
-          updatedAt: new Date()
-        }
-      }
-    )
-
-    if (result.matchedCount === 0) {
-      return null
-    }
-
-    // Return the updated user
-    const updatedUser = await db.collection("users").findOne({ email })
-    return {
-      ...updatedUser,
-      id: updatedUser._id.toString(),
-    }
-  }
-
-  static async createUser(userData: Omit<DatabaseUser, "id" | "createdAt" | "updatedAt">): Promise<DatabaseUser> {
-    const db = await Database.getDb();
-    const now = new Date();
-    const result = await db.collection("users").insertOne({
-      ...userData,
-      role: "user", // default role
-      createdAt: now,
-      updatedAt: now,
-    });
-    const user = await db.collection("users").findOne({ _id: result.insertedId });
-    return {
-      ...user,
-      id: user._id.toString(),
-    };
-  }
-
-  static async updateUserWallet(userId: string, amount: number): Promise<void> {
-    const db = await Database.getDb()
-    await db.collection("users").updateOne(
-      { _id: new ObjectId(userId) },
-      { $inc: { walletBalance: amount }, $set: { updatedAt: new Date() } }
-    )
-  }
-
-  static async createTransaction(transactionData: Omit<Transaction, "id" | "createdAt" | "updatedAt">): Promise<Transaction> {
-    const db = await Database.getDb()
-    const now = new Date()
-    const result = await db.collection("transactions").insertOne({
-      ...transactionData,
-      createdAt: now,
-      updatedAt: now,
-    })
-    const transaction = await db.collection("transactions").findOne({ _id: result.insertedId })
-    return {
-      ...transaction,
-      id: transaction._id.toString(),
-    }
-  }
-
-  static async getUserTransactions(userId: string): Promise<Transaction[]> {
-    const db = await Database.getDb()
-    const transactions = await db.collection("transactions").find({ userId }).sort({ createdAt: -1 }).toArray()
-    return transactions.map((t: any) => ({ ...t, id: t._id.toString() }))
-  }
-
-  static async findTransactionById(id: string): Promise<Transaction | null> {
-    const db = await Database.getDb()
-    const transaction = await db.collection("transactions").findOne({ _id: new ObjectId(id) })
-    if (!transaction) return null
-    return {
-      ...transaction,
-      id: transaction._id.toString(),
-    }
-  }
-
-  static async findTransactionByReference(reference: string): Promise<Transaction | null> {
-    const db = await Database.getDb()
-    const transaction = await db.collection("transactions").findOne({ reference })
-    if (!transaction) return null
-    return {
-      ...transaction,
-      id: transaction._id.toString(),
-    }
-  }
-
-  static async updateTransactionStatus(reference: string, status: "pending" | "completed" | "failed" | "cancelled"): Promise<void> {
-    const db = await Database.getDb()
-    await db.collection("transactions").updateOne(
-      { reference },
-      { $set: { status, updatedAt: new Date() } }
-    )
-  }
-
-  static async updateTransactionStatusAtomic(
-    reference: string,
-    expectedStatus: "pending" | "completed" | "failed" | "cancelled",
-    newStatus: "pending" | "completed" | "failed" | "cancelled"
-  ): Promise<boolean> {
-    const db = await Database.getDb()
-    const result = await db.collection("transactions").updateOne(
-      { reference, status: expectedStatus },
-      { $set: { status: newStatus, updatedAt: new Date() } }
-    )
-    // Returns true only if a document was actually modified
-    return result.modifiedCount > 0
-  }
-
-  static async getReferral(referrerId: string, referredId: string): Promise<Referral | null> {
-    const db = await Database.getDb()
-    return db.collection("referrals").findOne({ referrerId, referredId })
-  }
-
-  static async createReferral(referral: Omit<Referral, "id" | "createdAt">): Promise<Referral> {
-    const db = await Database.getDb()
-    const now = new Date()
-    const result = await db.collection("referrals").insertOne({
-      ...referral,
-      createdAt: now,
-    })
-    const createdReferral = await db.collection("referrals").findOne({ _id: result.insertedId })
-    if (!createdReferral) {
-      throw new Error("Failed to retrieve created referral")
-    }
-    return {
-      ...createdReferral,
-      id: createdReferral._id.toString(),
-    }
-  }
-
-  static async getUserReferrals(userId: string): Promise<Referral[]> {
-    const db = await Database.getDb()
-    const referrals = await db.collection("referrals").find({ referrerId: userId }).toArray()
-    return referrals.map((r: any) => ({ ...r, id: r._id.toString() }))
-  }
-
-  static async createNotification(notificationData: {
-    userId: string;
-    type: "transaction" | "referral" | "security" | "system" | "promotion";
-    title: string;
-    message: string;
-    amount?: number;
-    status?: "success" | "error" | "warning" | "info";
-    actionUrl?: string;
-    metadata?: Record<string, any>;
-  }): Promise<void> {
-    await this.connectMongoose();
-    await Notification.create({
-      userId: new ObjectId(notificationData.userId),
-      type: notificationData.type,
-      title: notificationData.title,
-      message: notificationData.message,
-      amount: notificationData.amount,
-      status: notificationData.status || "info",
-      actionUrl: notificationData.actionUrl,
-      metadata: notificationData.metadata,
-    });
-  }
-
-  static async getUserNotifications(
-    userId: string,
-    options: {
-      type?: string;
-      limit?: number;
-      offset?: number;
-      unreadOnly?: boolean;
-    } = {}
-  ): Promise<any[]> {
-    await this.connectMongoose();
-    const { type, limit = 20, offset = 0, unreadOnly = false } = options;
-
-    let query: any = { userId: new ObjectId(userId) };
-
-    if (type && type !== "all") {
-      if (type === "unread") {
-        query.read = false;
-      } else {
-        query.type = type;
-      }
-    }
-
-    if (unreadOnly) {
-      query.read = false;
-    }
-
-    const notifications = await Notification
-      .find(query)
-      .sort({ createdAt: -1 })
-      .skip(offset)
-      .limit(limit)
-      .lean();
-
-    return notifications.map((n: any) => ({
-      id: n._id.toString(),
-      type: n.type,
-      title: n.title,
-      message: n.message,
-      amount: n.amount,
-      status: n.status,
-      read: n.read,
-      createdAt: n.createdAt,
-      actionUrl: n.actionUrl,
-      metadata: n.metadata,
-    }));
-  }
-
-  static async markNotificationsAsRead(userId: string, notificationIds: string[]): Promise<void> {
-    await this.connectMongoose();
-    await Notification.updateMany(
-      {
-        userId: new ObjectId(userId),
-        _id: { $in: notificationIds.map(id => new ObjectId(id)) }
-      },
-      { read: true }
-    );
-  }
-
-  static async deleteNotification(userId: string, notificationId: string): Promise<void> {
-    await this.connectMongoose();
-    await Notification.findOneAndDelete({
-      _id: new ObjectId(notificationId),
-      userId: new ObjectId(userId)
-    });
-  }
-
-  static async getUnreadNotificationCount(userId: string): Promise<number> {
-    await this.connectMongoose();
-    return await Notification.countDocuments({
-      userId: new ObjectId(userId),
-      read: false
-    });
-  }
-
-  static async getUserCount(): Promise<number> {
-    try {
-      await this.connectMongoose();
-      const db = await Database.getDb();
-      const count = await db.collection("users").countDocuments({ role: "user" });
-      console.log("User count:", count);
-      return count || 0;
-    } catch (error) {
-      console.error("Error getting user count:", error);
-      // Return 0 if database is not available (for development/testing)
-      return 0;
-    }
-  }
-
-  static async getTotalDeposits(): Promise<number> {
-    try {
-      await this.connectMongoose();
-      const db = await Database.getDb();
-
-      // Check if there are any transactions first
-      const transactionCount = await db.collection("transactions").countDocuments({ type: "deposit", status: "completed" });
-
-      if (transactionCount === 0) {
-        console.log("No completed deposit transactions found");
-        return 0;
-      }
-
-      const result = await db.collection("transactions").aggregate([
-        { $match: { type: "deposit", status: "completed" } },
-        { $group: { _id: null, total: { $sum: { $ifNull: ["$amount", 0] } } } }
-      ]).toArray();
-
-      console.log("Total deposits aggregation result:", result);
-      return result.length > 0 ? Number(result[0].total) || 0 : 0;
-    } catch (error) {
-      console.error("Error calculating total deposits:", error);
-      return 0;
-    }
-  }
-
-  static async getTotalWithdrawals(): Promise<number> {
-    try {
-      await this.connectMongoose();
-      const db = await Database.getDb();
-
-      // Check if there are any withdrawal transactions first
-      const transactionCount = await db.collection("transactions").countDocuments({ type: "withdrawal", status: "completed" });
-
-      if (transactionCount === 0) {
-        console.log("No completed withdrawal transactions found");
-        return 0;
-      }
-
-      const result = await db.collection("transactions").aggregate([
-        { $match: { type: "withdrawal", status: "completed" } },
-        { $group: { _id: null, total: { $sum: { $ifNull: ["$amount", 0] } } } }
-      ]).toArray();
-
-      console.log("Total withdrawals aggregation result:", result);
-      return result.length > 0 ? Number(result[0].total) || 0 : 0;
-    } catch (error) {
-      console.error("Error calculating total withdrawals:", error);
-      return 0;
-    }
-  }
-
-  static async getPendingWithdrawals(): Promise<number> {
-    try {
-      await this.connectMongoose();
-      const db = await Database.getDb();
-
-      // Check if there are any pending withdrawal transactions first
-      const transactionCount = await db.collection("transactions").countDocuments({ type: "withdrawal", status: "pending" });
-
-      if (transactionCount === 0) {
-        console.log("No pending withdrawal transactions found");
-        return 0;
-      }
-
-      const result = await db.collection("transactions").aggregate([
-        { $match: { type: "withdrawal", status: "pending" } },
-        { $group: { _id: null, total: { $sum: { $ifNull: ["$amount", 0] } } } }
-      ]).toArray();
-
-      console.log("Pending withdrawals aggregation result:", result);
-      return result.length > 0 ? Number(result[0].total) || 0 : 0;
-    } catch (error) {
-      console.error("Error calculating pending withdrawals:", error);
-      return 0;
-    }
-  }
-
-  static async getMonthlyRevenue(): Promise<number> {
-    try {
-      await this.connectMongoose();
-      const db = await Database.getDb();
-      const startOfMonth = new Date();
-      startOfMonth.setDate(1);
-      startOfMonth.setHours(0, 0, 0, 0);
-
-      // Check if there are any monthly transactions first
-      const monthlyCount = await db.collection("transactions").countDocuments({
-        type: "deposit",
-        status: "completed",
-        createdAt: { $gte: startOfMonth }
-      });
-
-      if (monthlyCount === 0) {
-        console.log("No completed deposit transactions found for this month");
-        return 0;
-      }
-
-      const result = await db.collection("transactions").aggregate([
-        {
-          $match: {
-            type: "deposit",
-            status: "completed",
-            createdAt: { $gte: startOfMonth }
-          }
+          updatedAt: new Date(),
         },
-        { $group: { _id: null, total: { $sum: { $ifNull: ["$amount", 0] } } } }
-      ]).toArray();
-
-      console.log("Monthly revenue aggregation result:", result);
-      return result.length > 0 ? Number(result[0].total) || 0 : 0;
-    } catch (error) {
-      console.error("Error calculating monthly revenue:", error);
-      return 0;
-    }
-  }
-
-  static async getTransactionCount(): Promise<number> {
-    try {
-      await this.connectMongoose();
-      const db = await Database.getDb();
-      const count = await db.collection("transactions").countDocuments({});
-      console.log("Total transaction count:", count);
-      return count || 0;
-    } catch (error) {
-      console.error("Error getting transaction count:", error);
-      return 0;
-    }
-  }
-
-  static async getSuccessfulTransactionCount(): Promise<number> {
-    try {
-      await this.connectMongoose();
-      const db = await Database.getDb();
-      const count = await db.collection("transactions").countDocuments({ status: "completed" });
-      console.log("Successful transaction count:", count);
-      return count || 0;
-    } catch (error) {
-      console.error("Error getting successful transaction count:", error);
-      return 0;
-    }
-  }
-
-  static async getUserRank(userId: string): Promise<{ rank: string; stats: any }> {
-    try {
-      await this.connectMongoose();
-      const db = await Database.getDb();
-
-      // Get L1 Count (Direct Referrals)
-      const l1Referrals = await db.collection("referrals").find({ referrerId: userId, status: "active" }).toArray();
-      const l1Count = l1Referrals.length;
-      const l1Ids = l1Referrals.map((r: any) => r.referredId);
-
-      // Get L2 Count (Referrals of L1)
-      let l2Count = 0;
-      let l2Ids: string[] = [];
-      if (l1Count > 0) {
-        const l2Referrals = await db.collection("referrals").find({ referrerId: { $in: l1Ids }, status: "active" }).toArray();
-        l2Count = l2Referrals.length;
-        l2Ids = l2Referrals.map((r: any) => r.referredId);
       }
-
-      // Get L3 Count (Referrals of L2)
-      let l3Count = 0;
-      let l3Ids: string[] = [];
-      if (l2Count > 0) {
-        const l3Referrals = await db.collection("referrals").find({ referrerId: { $in: l2Ids }, status: "active" }).toArray();
-        l3Count = l3Referrals.length;
-        l3Ids = l3Referrals.map((r: any) => r.referredId);
-      }
-
-      // Get L4 Count (Referrals of L3)
-      let l4Count = 0;
-      if (l3Count > 0) {
-        l4Count = await db.collection("referrals").countDocuments({ referrerId: { $in: l3Ids }, status: "active" });
-      }
-
-      // Determine Rank
-      let rank = "Basic";
-      if (l1Count >= 5) rank = "Growth"; // Completed L1
-      if (l2Count >= 25) rank = "Expansion"; // Completed L2
-      if (l3Count >= 125) rank = "Premium"; // Completed L3
-      if (l4Count >= 625) rank = "Pinnacle"; // Completed L4
-
-      // NOTE: User must have elevatexActivated to have a rank other than "Guest User"
-      // But we will let the UI handle the "Guest User" display if elevatexActivated is false.
-      // Or we can verify it here.
-      const user = await db.collection("users").findOne({ _id: new ObjectId(userId) });
-      if (!user?.elevatexActivated) {
-        rank = "Guest";
-      }
-
-      return {
-        rank,
-        stats: { l1Count, l2Count, l3Count, l4Count }
-      };
-
-    } catch (error) {
-      console.error("Error calculating user rank:", error);
-      return { rank: "Basic", stats: { l1Count: 0, l2Count: 0, l3Count: 0, l4Count: 0 } };
-    }
+    )
   }
 
-  static async getTotalUsersFund(): Promise<number> {
-    try {
-      await this.connectMongoose();
-      const db = await Database.getDb();
+  // =========================
+  // WALLET
+  // =========================
 
-      // First check if there are any users
-      const userCount = await db.collection("users").countDocuments({ role: "user" });
+  static async updateUserWallet(userId: string, amount: number) {
+    const database = await this.getDb()
 
-      if (userCount === 0) {
-        console.log("No users found in database");
-        return 0;
-      }
-
-      // Check if walletBalance field exists by looking at a sample document
-      const sampleUser = await db.collection("users").findOne({ role: "user" }, { walletBalance: 1 });
-
-      if (!sampleUser || sampleUser.walletBalance === undefined) {
-        console.log("walletBalance field not found in users collection");
-        return 0;
-      }
-
-      const result = await db.collection("users").aggregate([
-        { $match: { role: "user" } },
-        { $group: { _id: null, total: { $sum: { $ifNull: ["$walletBalance", 0] } } } }
-      ]).toArray();
-
-      console.log("Users fund aggregation result:", result);
-      const total = result.length > 0 ? Number(result[0].total) || 0 : 0;
-      console.log("Calculated total users fund:", total);
-      return total;
-    } catch (error) {
-      console.error("Error calculating users fund:", error);
-      return 0;
-    }
-  }
-
-  static async getReferralStats(): Promise<{
-    totalReferrals: number;
-    activeReferrals: number;
-    totalBonusPaid: number;
-    averageTreeSize: number;
-    topReferrer: string;
-  }> {
-    try {
-      await this.connectMongoose();
-      const db = await Database.getDb();
-
-      // Get total referrals count
-      const totalReferrals = await db.collection("referrals").countDocuments({});
-
-      // Get active referrals (referrals with status "active")
-      const activeReferrals = await db.collection("referrals").countDocuments({ status: "active" });
-
-      // Get total bonus paid from referral_bonus transactions
-      const bonusResult = await db.collection("transactions").aggregate([
-        { $match: { type: "referral_bonus", status: "completed" } },
-        { $group: { _id: null, total: { $sum: { $ifNull: ["$amount", 0] } } } }
-      ]).toArray();
-
-      const totalBonusPaid = bonusResult.length > 0 ? Number(bonusResult[0].total) || 0 : 0;
-
-      // Calculate average tree size (average referrals per referrer)
-      const treeSizeResult = await db.collection("referrals").aggregate([
-        { $group: { _id: "$referrerId", count: { $sum: 1 } } },
-        { $group: { _id: null, avgSize: { $avg: "$count" } } }
-      ]).toArray();
-
-      const averageTreeSize = treeSizeResult.length > 0 ? Number(treeSizeResult[0].avgSize) || 0 : 0;
-
-      // Find top referrer (user with most referrals)
-      const topReferrerResult = await db.collection("referrals").aggregate([
-        { $group: { _id: "$referrerId", count: { $sum: 1 } } },
-        { $sort: { count: -1 } },
-        { $limit: 1 }
-      ]).toArray();
-
-      let topReferrer = "No referrals yet";
-      if (topReferrerResult.length > 0) {
-        const topReferrerId = topReferrerResult[0]._id;
-        if (ObjectId.isValid(topReferrerId)) {
-          const topReferrerUser = await db.collection("users").findOne({ _id: new ObjectId(topReferrerId) });
-          topReferrer = topReferrerUser ? topReferrerUser.fullName : "Unknown User";
-        }
-      }
-
-      return {
-        totalReferrals,
-        activeReferrals,
-        totalBonusPaid,
-        averageTreeSize: Math.round(averageTreeSize * 100) / 100,
-        topReferrer
-      };
-    } catch (error) {
-      console.error("Error getting referral stats:", error);
-      return {
-        totalReferrals: 0,
-        activeReferrals: 0,
-        totalBonusPaid: 0,
-        averageTreeSize: 0,
-        topReferrer: "Unknown"
-      };
-    }
-  }
-
-  static async getServiceUsageStats(): Promise<{
-    airtimeTransactions: number;
-    dataTransactions: number;
-    billPayments: number;
-    subscriptions: number;
-    mostPopularService: string;
-  }> {
-    try {
-      await this.connectMongoose();
-      const db = await Database.getDb();
-
-      // Count transactions by type (excluding deposits, withdrawals, and referral_bonus)
-      const airtimeTransactions = await db.collection("transactions").countDocuments({
-        type: "payment",
-        description: { $regex: "airtime|airtel|mtn|glo|9mobile", $options: "i" }
-      });
-
-      const dataTransactions = await db.collection("transactions").countDocuments({
-        type: "payment",
-        description: { $regex: "data|internet|bundle", $options: "i" }
-      });
-
-      const billPayments = await db.collection("transactions").countDocuments({
-        type: "payment",
-        description: { $regex: "electricity|dstv|gotv|startimes|water", $options: "i" }
-      });
-
-      // For subscriptions, we'll count transactions that mention "subscription"
-      const subscriptions = await db.collection("transactions").countDocuments({
-        type: "payment",
-        description: { $regex: "subscription|subscribe", $options: "i" }
-      });
-
-      // Determine most popular service
-      const serviceCounts = [
-        { name: "Airtime", count: airtimeTransactions },
-        { name: "Data", count: dataTransactions },
-        { name: "Bills", count: billPayments },
-        { name: "Subscriptions", count: subscriptions }
-      ];
-
-      const mostPopularService = serviceCounts.reduce((prev, current) =>
-        (prev.count > current.count) ? prev : current
-      ).name;
-
-      return {
-        airtimeTransactions,
-        dataTransactions,
-        billPayments,
-        subscriptions,
-        mostPopularService: mostPopularService || "Airtime"
-      };
-    } catch (error) {
-      console.error("Error getting service usage stats:", error);
-      return {
-        airtimeTransactions: 0,
-        dataTransactions: 0,
-        billPayments: 0,
-        subscriptions: 0,
-        mostPopularService: "Airtime"
-      };
-    }
-  }
-
-  static async getAllUsers(): Promise<DatabaseUser[]> {
-    try {
-      await this.connectMongoose();
-      const db = await Database.getDb();
-
-      // Get all users with role "user"
-      const users = await db.collection("users").find({ role: "user" }).toArray();
-
-      return users.map((user: any) => ({
-        ...user,
-        id: user._id.toString(),
-      }));
-    } catch (error) {
-      console.error("Error getting all users:", error);
-      return [];
-    }
-  }
-
-  static async saveVerificationToken(userId: string, token: string, expires: number): Promise<void> {
-    const db = await Database.getDb();
-    await db.collection("verification_tokens").insertOne({
-      userId,
-      token,
-      expires: new Date(expires),
-      used: false,
-      createdAt: new Date(),
-    });
-  }
-
-  static async getVerificationToken(token: string): Promise<any | null> {
-    const db = await Database.getDb();
-    return await db.collection("verification_tokens").findOne({ token, used: false });
-  }
-
-  static async markTokenAsUsed(token: string): Promise<void> {
-    const db = await Database.getDb();
-    await db.collection("verification_tokens").updateOne(
-      { token },
-      { $set: { used: true, updatedAt: new Date() } }
-    );
-  }
-
-  static async savePasswordResetToken(userId: string, token: string, expires: number): Promise<void> {
-    const db = await Database.getDb();
-    await db.collection("password_reset_tokens").insertOne({
-      userId,
-      token,
-      expires: new Date(expires),
-      used: false,
-      createdAt: new Date(),
-    });
-  }
-
-  static async getPasswordResetToken(token: string): Promise<any | null> {
-    const db = await Database.getDb();
-    return await db.collection("password_reset_tokens").findOne({ token, used: false });
-  }
-
-  static async markPasswordResetTokenAsUsed(token: string): Promise<void> {
-    const db = await Database.getDb();
-    await db.collection("password_reset_tokens").updateOne(
-      { token },
-      { $set: { used: true, updatedAt: new Date() } }
-    );
-  }
-  static async deleteUser(userId: string): Promise<boolean> {
-    try {
-      const db = await Database.getDb();
-      const userObjectId = new ObjectId(userId);
-
-      // 1. Delete Transactions
-      await db.collection("transactions").deleteMany({ userId });
-
-      // 2. Delete Notifications
-      await this.connectMongoose();
-      await Notification.deleteMany({ userId: userObjectId });
-
-      // 3. Delete Referrals
-      await db.collection("referrals").deleteMany({ referrerId: userId });
-      await db.collection("referrals").deleteMany({ referredId: userId });
-
-      // 4. Delete Tokens
-      await db.collection("verification_tokens").deleteMany({ userId });
-      await db.collection("password_reset_tokens").deleteMany({ userId });
-
-      // 5. Delete User
-      const result = await db.collection("users").deleteOne({ _id: userObjectId });
-
-      return result.deletedCount > 0;
-    } catch (error) {
-      console.error("Error deleting user:", error);
-      throw error;
-    }
-  }
-
-  static async addLinkedAccount(userId: string, account: Omit<LinkedAccount, "id">): Promise<LinkedAccount> {
-    console.log(`[Database.addLinkedAccount] Starting for userId: ${userId}, account: ${JSON.stringify(account)}`);
-    try {
-      const db = await Database.getDb();
-      const newAccount: LinkedAccount = {
-        ...account,
-        id: new ObjectId().toString(),
-      };
-
-      console.log(`[Database.addLinkedAccount] Generated newAccount: ${JSON.stringify(newAccount)}`);
-
-      // If this is the first account or set as primary, update other accounts
-      // Only attempt to update if linkedAccounts exists and has items
-      if (newAccount.isPrimary) {
-        const user = await db.collection("users").findOne({ _id: new ObjectId(userId) });
-        if (user && user.linkedAccounts && user.linkedAccounts.length > 0) {
-          console.log(`[Database.addLinkedAccount] Setting others to non-primary`);
-          await db.collection("users").updateOne(
-            { _id: new ObjectId(userId) },
-            { $set: { "linkedAccounts.$[].isPrimary": false } }
-          );
-        } else {
-          console.log(`[Database.addLinkedAccount] No existing accounts to update or user not found`);
-        }
-      }
-
-      console.log(`[Database.addLinkedAccount] Pushing new account`);
-      await db.collection("users").updateOne(
-        { _id: new ObjectId(userId) },
-        {
-          $push: { linkedAccounts: newAccount },
-          $set: { updatedAt: new Date() }
-        }
-      );
-
-      // If primary, update the main payoutAccount for compatibility
-      if (newAccount.isPrimary) {
-        console.log(`[Database.addLinkedAccount] Updating payoutAccount`);
-        await this.updateUserPayoutAccountById(userId, {
-          bank: newAccount.bank,
-          accountNumber: newAccount.accountNumber,
-          accountName: newAccount.accountName
-        });
-      }
-
-      console.log(`[Database.addLinkedAccount] Success`);
-      return newAccount;
-
-    } catch (error) {
-      console.error(`[Database.addLinkedAccount] Error:`, error);
-      throw error;
-    }
-  }
-
-  static async removeLinkedAccount(userId: string, accountId: string): Promise<void> {
-    const db = await Database.getDb();
-    await db.collection("users").updateOne(
+    await database.collection("users").updateOne(
       { _id: new ObjectId(userId) },
       {
-        $pull: { linkedAccounts: { id: accountId } },
-        $set: { updatedAt: new Date() }
+        $inc: { walletBalance: amount },
+        $set: { updatedAt: new Date() },
       }
-    );
+    )
   }
 
-  static async setPrimaryLinkedAccount(userId: string, accountId: string): Promise<void> {
-    const db = await Database.getDb();
+  // =========================
+  // REFERRALS
+  // =========================
 
-    // 1. Unset primary for all
-    await db.collection("users").updateOne(
-      { _id: new ObjectId(userId) },
-      { $set: { "linkedAccounts.$[].isPrimary": false } }
-    );
+  static async createReferral(data: {
+    referrerId: string
+    referredId: string
+    level: number
+    bonusAmount: number
+    status: string
+  }) {
+    const database = await this.getDb()
 
-    // 2. Set primary for selected
-    await db.collection("users").updateOne(
-      { _id: new ObjectId(userId), "linkedAccounts.id": accountId },
-      { $set: { "linkedAccounts.$.isPrimary": true } }
-    );
+    await database.collection("referrals").insertOne({
+      ...data,
+      createdAt: new Date(),
+    })
+  }
 
-    // 3. Update root payoutAccount
-    const user = await this.findUserById(userId);
-    const account = user?.linkedAccounts?.find(a => a.id === accountId);
+  static async getReferral(referrerId: string, referredId: string) {
+    const database = await this.getDb()
 
-    if (account) {
-      await this.updateUserPayoutAccountById(userId, {
-        bank: account.bank,
-        accountNumber: account.accountNumber,
-        accountName: account.accountName
-      });
+    return database.collection("referrals").findOne({
+      referrerId,
+      referredId,
+    })
+  }
+
+  static async getUserReferrals(userId: string) {
+    const database = await this.getDb()
+
+    return database.collection("referrals").find({
+      referrerId: userId,
+      status: "active",
+    }).toArray()
+  }
+
+  // =========================
+  // TRANSACTIONS
+  // =========================
+
+  static async createTransaction(data: {
+    userId: string
+    type: string
+    amount: number
+    description: string
+    status: string
+    metadata?: any
+  }) {
+    const database = await this.getDb()
+
+    await database.collection("transactions").insertOne({
+      ...data,
+      createdAt: new Date(),
+    })
+  }
+
+  // =========================
+  // RANK SYSTEM
+  // =========================
+
+  static async getUserRank(userId: string) {
+    const database = await this.getDb()
+
+    const totalReferrals = await database.collection("referrals").countDocuments({
+      referrerId: userId,
+      status: "active",
+    })
+
+    let rank = "Starter"
+
+    if (totalReferrals >= 50) rank = "Diamond"
+    else if (totalReferrals >= 20) rank = "Gold"
+    else if (totalReferrals >= 10) rank = "Silver"
+    else if (totalReferrals >= 5) rank = "Bronze"
+
+    return {
+      rank,
+      stats: {
+        totalReferrals,
+      },
     }
   }
 
-  static async updateUserPayoutSchedule(userId: string, schedule: PayoutSchedule): Promise<void> {
-    const db = await Database.getDb();
-    await db.collection("users").updateOne(
-      { _id: new ObjectId(userId) },
-      { $set: { payoutSchedule: schedule, updatedAt: new Date() } }
-    );
+  // =========================
+  // EMAIL VERIFICATION
+  // =========================
+
+  static async saveVerificationToken(
+    userId: string,
+    token: string,
+    expiresAt: Date
+  ) {
+    const database = await this.getDb()
+
+    await database.collection("verificationTokens").insertOne({
+      userId,
+      token,
+      expiresAt,
+      createdAt: new Date(),
+    })
   }
 
-  static async updateUserNotificationPreferences(userId: string, preferences: NotificationPreferences): Promise<void> {
-    const db = await Database.getDb();
-    await db.collection("users").updateOne(
-      { _id: new ObjectId(userId) },
-      { $set: { notificationPreferences: preferences, updatedAt: new Date() } }
-    );
+  static async findVerificationToken(token: string) {
+    const database = await this.getDb()
+
+    return database.collection("verificationTokens").findOne({
+      token,
+    })
   }
 
-  // Overloaded to support ID or email
-  static async updateUserPayoutAccount(identifier: string, payoutAccount: { bank: string; accountNumber: string; accountName: string }, isId: boolean = false): Promise<DatabaseUser | null> {
-    const db = await Database.getDb();
-    const filter = isId ? { _id: new ObjectId(identifier) } : { email: identifier };
+  static async deleteVerificationToken(token: string) {
+    const database = await this.getDb()
 
-    await db.collection("users").updateOne(
-      filter,
-      { $set: { payoutAccount, updatedAt: new Date() } }
-    );
-    return null; // Simplified return
+    await database.collection("verificationTokens").deleteOne({
+      token,
+    })
   }
 }

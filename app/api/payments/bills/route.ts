@@ -4,13 +4,21 @@ import { Database } from "@/lib/database"
 import { handleApiError, AuthenticationError, ValidationError, InsufficientBalanceError, NotFoundError } from "@/lib/errors"
 
 export async function POST(request: NextRequest) {
+  let serviceType: string | undefined;
+  let provider: string | undefined;
+  let amount: number | undefined;
+  let recipient: string | undefined;
   try {
     const session = await getSession()
     if (!session) {
       throw new AuthenticationError();
     }
 
-    const { serviceType, provider, amount, recipient, customerInfo } = await request.json()
+    const { serviceType: serviceTypeValue, provider: providerValue, amount: amountValue, recipient: recipientValue, customerInfo } = await request.json()
+    serviceType = serviceTypeValue;
+    provider = providerValue;
+    amount = amountValue;
+    recipient = recipientValue;
 
     if (!serviceType || !provider || !amount || !recipient) {
       throw new ValidationError("All fields are required");
@@ -72,7 +80,11 @@ export async function POST(request: NextRequest) {
       subaData,
     });
   } catch (error) {
-    console.error("Bill payment error:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    return handleApiError(error as Error, {
+      route: '/api/payments/bills',
+      serviceType,
+      provider,
+      amount,
+    });
   }
 }

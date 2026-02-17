@@ -4,15 +4,16 @@ export const revalidate = 0; // no ISR caching
 
 import { NextResponse } from "next/server"
 import { getSession } from "@/lib/auth"
+import { handleApiError, AuthenticationError, AuthorizationError } from "@/lib/errors"
 
 export async function GET() {
   try {
     const session = await getSession()
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      throw new AuthenticationError();
     }
     if (session.user.role !== "admin") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+      throw new AuthorizationError();
     }
 
     const referralsData = {
@@ -64,7 +65,8 @@ export async function GET() {
 
     return NextResponse.json(referralsData)
   } catch (error) {
-    console.error("Admin referrals error:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    return handleApiError(error as Error, {
+      route: '/api/admin/referrals',
+    });
   }
 }

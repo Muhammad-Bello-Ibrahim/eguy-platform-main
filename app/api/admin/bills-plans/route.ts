@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Database } from "@/lib/database";
 import BillsPlan from "@/lib/models/BillsPlan";
+import { handleApiError, ValidationError, DatabaseError } from "@/lib/errors";
 
 export async function GET() {
   try {
@@ -8,8 +9,9 @@ export async function GET() {
     const plans = await BillsPlan.find({ isActive: true }).sort({ createdAt: -1 });
     return NextResponse.json(plans);
   } catch (error) {
-    console.error("Error fetching bills plans:", error);
-    return NextResponse.json({ error: "Failed to fetch bills plans" }, { status: 500 });
+    return handleApiError(error as Error, {
+      route: '/api/admin/bills-plans',
+    });
   }
 }
 
@@ -36,7 +38,9 @@ export async function POST(request: NextRequest) {
     await plan.save();
     return NextResponse.json(plan, { status: 201 });
   } catch (error) {
-    console.error("Error creating bills plan:", error);
-    return NextResponse.json({ error: "Failed to create bills plan" }, { status: 500 });
+    return handleApiError(error as Error, {
+      route: '/api/admin/bills-plans',
+      method: 'POST',
+    });
   }
 }

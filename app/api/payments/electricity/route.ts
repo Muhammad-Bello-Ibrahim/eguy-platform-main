@@ -4,13 +4,21 @@ import { Database } from "@/lib/database"
 import { handleApiError, AuthenticationError, ValidationError, InsufficientBalanceError, NotFoundError } from "@/lib/errors"
 
 export async function POST(request: NextRequest) {
+  let disco: string | undefined;
+  let meterType: string | undefined;
+  let meterNumber: string | undefined;
+  let amount: number | undefined;
   try {
     const session = await getSession()
     if (!session) {
       throw new AuthenticationError();
     }
 
-    const { disco, meterType, meterNumber, amount } = await request.json()
+    const { disco: discoValue, meterType: meterTypeValue, meterNumber: meterNumberValue, amount: amountValue } = await request.json()
+    disco = discoValue;
+    meterType = meterTypeValue;
+    meterNumber = meterNumberValue;
+    amount = amountValue;
 
     if (!disco || !meterType || !meterNumber || !amount) {
       throw new ValidationError("All fields are required");
@@ -71,8 +79,12 @@ export async function POST(request: NextRequest) {
       subaData,
     });
   } catch (error) {
-    console.error("Electricity payment error:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    return handleApiError(error as Error, {
+      route: '/api/payments/electricity',
+      disco,
+      meterNumber,
+      amount,
+    });
   }
 }
 

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Database } from "@/lib/database";
 import BillsPlan from "@/lib/models/BillsPlan";
+import { handleApiError, NotFoundError, ValidationError } from "@/lib/errors";
 
 export async function PUT(
   request: NextRequest,
@@ -27,13 +28,15 @@ export async function PUT(
     );
 
     if (!updatedPlan) {
-      return NextResponse.json({ error: "Bills plan not found" }, { status: 404 });
+      throw new NotFoundError("Bills plan");
     }
 
     return NextResponse.json(updatedPlan);
   } catch (error) {
-    console.error("Error updating bills plan:", error);
-    return NextResponse.json({ error: "Failed to update bills plan" }, { status: 500 });
+    return handleApiError(error as Error, {
+      route: '/api/admin/bills-plans/[id]',
+      planId: params?.id,
+    });
   }
 }
 
@@ -46,12 +49,14 @@ export async function DELETE(
     const deletedPlan = await BillsPlan.findByIdAndDelete(params.id);
 
     if (!deletedPlan) {
-      return NextResponse.json({ error: "Bills plan not found" }, { status: 404 });
+      throw new NotFoundError("Bills plan");
     }
 
     return NextResponse.json({ message: "Bills plan deleted successfully" });
   } catch (error) {
-    console.error("Error deleting bills plan:", error);
-    return NextResponse.json({ error: "Failed to delete bills plan" }, { status: 500 });
+    return handleApiError(error as Error, {
+      route: '/api/admin/bills-plans/[id]',
+      planId: params?.id,
+    });
   }
 }

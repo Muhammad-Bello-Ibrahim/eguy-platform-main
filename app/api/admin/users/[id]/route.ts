@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { getSession } from "@/lib/auth"
 import { Database } from "@/lib/database"
+import { handleApiError, AuthenticationError, AuthorizationError, ValidationError, NotFoundError } from "@/lib/errors"
 
 export async function PUT(
   request: Request,
@@ -9,11 +10,11 @@ export async function PUT(
   try {
     const session = await getSession()
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      throw new AuthenticationError();
     }
     const user = (session as any).user;
     if (user.role !== "admin") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+      throw new AuthorizationError();
     }
 
     const userId = params.id
@@ -69,7 +70,9 @@ export async function PUT(
       }
     })
   } catch (error) {
-    console.error("Admin user update error:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    return handleApiError(error as Error, {
+      route: '/api/admin/users/[id]',
+      userId: params?.id,
+    });
   }
 }

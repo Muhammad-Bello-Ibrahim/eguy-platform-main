@@ -1,43 +1,54 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { Database } from "@/lib/database"
-import { hashPassword, createSession, generateReferralCode } from "@/lib/auth"
-import { handleApiError, ValidationError, DatabaseError } from "@/lib/errors"
+import { hashPassword, createSession } from "@/lib/auth"
+import { handleApiError, ValidationError } from "@/lib/errors"
 
 export async function POST(request: NextRequest) {
+  let email: string | undefined;
+
   try {
-    const { fullName, email, phone, password, transactionPin, referralCode, dob, address } = await request.json()
+    const {
+      fullName,
+      email: emailValue,
+      phone,
+      password,
+      transactionPin,
+      referralCode,
+      dob,
+      address
+    } = await request.json()
 
-    // Validate input
+    email = emailValue
+
     if (!fullName || !email || !phone || !password || !transactionPin) {
-      throw new ValidationError("All fields are required");
+      throw new ValidationError("All fields are required")
     }
 
-    // Check if user already exists
-    const existingUserByEmail = await Database.findUserByEmail(email)
-    if (existingUserByEmail) {
-      throw new ValidationError("User with this email already exists");
+    // Check duplicates
+    if (await Database.findUserByEmail(email)) {
+      throw new ValidationError("User with this email already exists")
     }
 
-    const existingUserByPhone = await Database.findUserByPhone(phone)
-    if (existingUserByPhone) {
-      throw new ValidationError("User with this phone number already exists");
+    if (await Database.findUserByPhone(phone)) {
+      throw new ValidationError("User with this phone number already exists")
     }
 
-    // Hash password
+    // Hash credentials
     const passwordHash = await hashPassword(password)
-    // Hash PIN (reusing password hashing for secure PIN storage)
     const pinHash = await hashPassword(transactionPin)
 
-    // Find referrer if referral code provided
+    // Validate referral code (do NOT create tree yet)
     let referredBy: string | undefined
+
     if (referralCode) {
-      const referrer = await Database.findUserByReferralCode(referralCode);
-      if (referrer) {
-        referredBy = referrer.id;
+      const referrer = await Database.findUserByReferralCode(referralCode)
+      if (!referrer) {
+        throw new ValidationError("Invalid referral code")
       }
+      referredBy = referrer.id
     }
 
-    // Create user
+    // Create user (NO referral tree created here)
     const user = await Database.createUser({
       fullName,
       email,
@@ -47,20 +58,20 @@ export async function POST(request: NextRequest) {
       dob,
       address,
       walletBalance: 0,
-      referralCode: "", // Referral code generated upon ElevateX activation
+      referralCode: "", // generated only on activation
       referredBy,
+      elevatexActivated: false,
       kycStatus: "pending",
       status: "active",
-      role: "user", // default role
+      role: "user"
     })
 
-    // Referral relationship is created when the user activates ElevateX via /api/elevatex/activate
-
-    // Send verification email
+    // Email verification
     const crypto = await import("crypto")
     const token = crypto.randomBytes(32).toString("hex")
-    const expires = Date.now() + 1000 * 60 * 60 // 1 hour
+    const expires = Date.now() + 1000 * 60 * 60
     await Database.saveVerificationToken(user.id, token, expires)
+
     const { sendVerificationEmail } = await import("@/lib/email")
     await sendVerificationEmail(user.email, token)
 
@@ -79,7 +90,7 @@ export async function POST(request: NextRequest) {
     })
 
     return NextResponse.json({
-      message: "User created successfully. Please check your email to verify your account.",
+      message: "User created successfully. Please verify your email.",
       user: {
         id: user.id,
         fullName: user.fullName,
@@ -89,10 +100,11 @@ export async function POST(request: NextRequest) {
         referralCode: user.referralCode,
       },
     })
+
   } catch (error) {
     return handleApiError(error as Error, {
-      route: '/api/auth/signup',
+      route: "/api/auth/signup",
       email,
-    });
+    })
   }
 }

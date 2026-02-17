@@ -4,13 +4,21 @@ import { Database } from "@/lib/database"
 import { handleApiError, AuthenticationError, ValidationError, InsufficientBalanceError, NotFoundError } from "@/lib/errors"
 
 export async function POST(request: NextRequest) {
+  let network: string | undefined;
+  let phone: string | undefined;
+  let plan: string | undefined;
+  let amount: number | undefined;
   try {
     const session = await getSession()
     if (!session) {
       throw new AuthenticationError();
     }
 
-    const { network, phone, plan, amount } = await request.json()
+    const { network: networkValue, phone: phoneValue, plan: planValue, amount: amountValue } = await request.json()
+    network = networkValue;
+    phone = phoneValue;
+    plan = planValue;
+    amount = amountValue;
 
     if (!network || !phone || !plan || !amount) {
       throw new ValidationError("All fields are required");

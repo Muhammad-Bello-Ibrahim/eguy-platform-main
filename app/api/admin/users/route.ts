@@ -4,6 +4,7 @@ export const revalidate = 0;
 import { NextResponse } from "next/server"
 import { getSession } from "@/lib/auth"
 import { Database } from "@/lib/database"
+import { handleApiError, AuthenticationError, AuthorizationError } from "@/lib/errors"
 
 export async function GET() {
   try {

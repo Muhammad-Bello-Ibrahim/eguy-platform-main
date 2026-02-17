@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { getSession } from "@/lib/auth"
+import { handleApiError, AuthenticationError, AuthorizationError, ValidationError } from "@/lib/errors"
 
 export const dynamic = "force-dynamic"
 export const revalidate = 0
@@ -9,10 +10,10 @@ export async function GET() {
   try {
     const session = await getSession()
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      throw new AuthenticationError();
     }
     if (session.user.role !== "admin") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+      throw new AuthorizationError();
     }
 
     // TODO: Implement actual database queries for settings
@@ -74,10 +75,10 @@ export async function PUT(request: Request) {
   try {
     const session = await getSession()
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      throw new AuthenticationError();
     }
     if (session.user.role !== "admin") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+      throw new AuthorizationError();
     }
 
     const body = await request.json()
@@ -88,7 +89,8 @@ export async function PUT(request: Request) {
       settings: body
     })
   } catch (error) {
-    console.error("Admin settings update error:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    return handleApiError(error as Error, {
+      route: '/api/admin/settings',
+    });
   }
 }

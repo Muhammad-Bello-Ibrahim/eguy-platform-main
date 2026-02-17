@@ -4,8 +4,10 @@ import { verifyPassword, createSession } from "@/lib/auth"
 import { handleApiError, AuthenticationError, NotFoundError, AuthorizationError } from "@/lib/errors"
 
 export async function POST(request: NextRequest) {
+  let emailOrPhone: string | undefined;
   try {
-    const { emailOrPhone, password } = await request.json()
+    const { emailOrPhone: emailOrPhoneValue, password } = await request.json()
+    emailOrPhone = emailOrPhoneValue;
 
     // Validate input
     if (!emailOrPhone || !password) {

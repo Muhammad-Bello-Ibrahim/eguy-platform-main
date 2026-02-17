@@ -88,6 +88,7 @@ export class InsufficientBalanceError extends AppError {
  * Structured error logger
  */
 export function logError(error: Error | AppError, context?: Record<string, any>) {
+    // Build comprehensive error data
     const errorData = {
         message: error.message,
         name: error.name,
@@ -101,7 +102,16 @@ export function logError(error: Error | AppError, context?: Record<string, any>)
         ...context,
     };
 
-    console.error('[ERROR]', JSON.stringify(errorData, null, 2));
+    // Log the original error object for full debugging capability
+    console.error('[ERROR] Original Error:', error);
+
+    // Log structured error data
+    console.error('[ERROR] Structured Data:', JSON.stringify(errorData, null, 2));
+
+    // Log error cause chain if available (for wrapped errors)
+    if ('cause' in error && error.cause) {
+        console.error('[ERROR] Caused by:', error.cause);
+    }
 
     // In production, send to error tracking service (Sentry, LogRocket, etc.)
     if (process.env.NODE_ENV === 'production' && process.env.ERROR_TRACKING_ENABLED === 'true') {

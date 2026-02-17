@@ -4,6 +4,7 @@ export const revalidate = 0;
 import { NextResponse, NextRequest } from "next/server"
 import { getSession } from "@/lib/auth"
 import { Database, Transaction } from "@/lib/database"
+import { handleApiError, AuthenticationError, AuthorizationError, ValidationError, NotFoundError } from "@/lib/errors"
 
 export async function GET(request: NextRequest) {
   try {
@@ -126,7 +127,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const transaction = await Database.findTransactionByReference(transactionId) ||
-                        await Database.getAllTransactions().then(txs => txs.find(tx => tx.id === transactionId))
+      await Database.getAllTransactions().then(txs => txs.find(tx => tx.id === transactionId))
 
     if (!transaction) {
       return NextResponse.json({ error: "Transaction not found" }, { status: 404 })

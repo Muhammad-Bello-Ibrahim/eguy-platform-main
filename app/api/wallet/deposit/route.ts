@@ -4,15 +4,18 @@ import { Database } from "@/lib/database"
 import { handleApiError, AuthenticationError, ValidationError, ExternalAPIError } from "@/lib/errors"
 
 export async function POST(request: NextRequest) {
+  let session;
+  let amount: number | undefined;
   try {
-    const session = await getSession()
+    session = await getSession()
     if (!session || !session.user) {
       throw new AuthenticationError();
     }
 
     const user = session.user as any;
 
-    const { amount } = await request.json()
+    const { amount: amountValue } = await request.json()
+    amount = amountValue;
 
     if (!amount || amount <= 0) {
       throw new ValidationError("Invalid deposit amount");
@@ -70,7 +73,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     return handleApiError(error as Error, {
       route: '/api/wallet/deposit',
-      userId: (await getSession())?.user?.id,
+      userId: session?.user?.id,
       amount,
     });
   }

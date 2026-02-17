@@ -5,13 +5,19 @@ import { handleApiError, AuthenticationError, ValidationError, InsufficientBalan
 
 
 export async function POST(request: NextRequest) {
+  let network: string | undefined;
+  let phone: string | undefined;
+  let amount: number | undefined;
   try {
     const session = await getSession()
     if (!session) {
       throw new AuthenticationError();
     }
 
-    const { network, phone, amount } = await request.json()
+    const { network: networkValue, phone: phoneValue, amount: amountValue } = await request.json()
+    network = networkValue;
+    phone = phoneValue;
+    amount = amountValue;
 
     if (!network || !phone || !amount) {
       throw new ValidationError("All fields are required");

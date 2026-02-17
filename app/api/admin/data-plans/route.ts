@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { handleApiError, ExternalAPIError } from "@/lib/errors";
 
 export const dynamic = "force-dynamic";
 
@@ -56,9 +57,10 @@ export async function GET() {
 
     return NextResponse.json(plans);
   } catch (error) {
-    console.error("Error fetching data plans:", error);
-    // Fallback? Or return error
-    return NextResponse.json({ error: "Failed to fetch plans" }, { status: 500 });
+    return handleApiError(error as Error, {
+      route: '/api/admin/data-plans',
+      service: 'SubAndGain',
+    });
   }
 }
 
