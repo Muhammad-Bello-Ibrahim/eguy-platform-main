@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
+import { AirtimeSkeleton } from './skeletons';
 
 interface Plan {
     _id: string;
@@ -62,6 +63,10 @@ const BuyAirtimePage = () => {
         };
         fetchData();
     }, []);
+
+    if (loading) {
+        return <AirtimeSkeleton />;
+    }
 
     const handleNetworkSelect = (network: string) => {
         setSelectedNetwork(network);
@@ -178,7 +183,7 @@ const BuyAirtimePage = () => {
                             </label>
                             <div className="relative group">
                                 <input
-                                    className="w-full bg-slate-100 dark:bg-input-dark border-none rounded-2xl py-4 px-5 text-lg font-bold placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:ring-2 focus:ring-primary transition-all"
+                                    className="w-full bg-slate-100 dark:bg-black/20 border-none rounded-2xl py-4 px-5 text-lg font-bold placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:ring-2 focus:ring-primary transition-all"
                                     placeholder="0801 234 5678"
                                     type="tel"
                                     value={phoneNumber}
@@ -205,7 +210,7 @@ const BuyAirtimePage = () => {
                                             onClick={() => setAmount(amt.toString())}
                                             className={`py-4 rounded-2xl font-bold border-2 transition-all ${amount === amt.toString()
                                                 ? 'bg-primary/20 dark:bg-primary/20 text-primary border-primary'
-                                                : 'bg-slate-100 dark:bg-surface-dark text-slate-900 dark:text-slate-100 border-transparent hover:border-primary'
+                                                : 'bg-slate-100 dark:bg-black/20 text-slate-900 dark:text-slate-100 border-transparent hover:border-primary'
                                                 }`}
                                         >
                                             ₦{amt}
@@ -214,7 +219,7 @@ const BuyAirtimePage = () => {
                                 </div>
                                 <div className="relative group mt-2">
                                     <input
-                                        className="w-full bg-slate-100 dark:bg-input-dark border-none rounded-2xl py-4 px-5 text-lg font-bold placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:ring-2 focus:ring-primary transition-all"
+                                        className="w-full bg-slate-100 dark:bg-black/20 border-none rounded-2xl py-4 px-5 text-lg font-bold placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:ring-2 focus:ring-primary transition-all"
                                         placeholder="Enter Custom Amount"
                                         type="number"
                                         value={amount}

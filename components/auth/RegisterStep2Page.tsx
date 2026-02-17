@@ -64,7 +64,7 @@ export default function RegisterStep2Page() {
                             </label>
                             <div className="relative">
                                 <input
-                                    className="w-full h-14 bg-white dark:bg-surface-dark border-0 rounded-2xl px-5 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary appearance-none outline-none"
+                                    className="w-full h-14 bg-white dark:bg-black/20 border-0 rounded-2xl px-5 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary appearance-none outline-none"
                                     type="date"
                                     value={dob}
                                     onChange={(e) => setDob(e.target.value)}
@@ -85,7 +85,7 @@ export default function RegisterStep2Page() {
                                     <span className="material-icons-round text-slate-400 text-xl">phone</span>
                                 </div>
                                 <input
-                                    className="w-full h-14 bg-white dark:bg-surface-dark border-0 rounded-2xl pl-12 pr-5 text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-primary outline-none"
+                                    className="w-full h-14 bg-white dark:bg-black/20 border-0 rounded-2xl pl-12 pr-5 text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-primary outline-none"
                                     placeholder="080 123 45678"
                                     type="tel"
                                     value={phone}
@@ -102,7 +102,7 @@ export default function RegisterStep2Page() {
                             </label>
                             <div className="relative">
                                 <textarea
-                                    className="w-full bg-white dark:bg-surface-dark border-0 rounded-2xl px-5 py-4 text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-primary resize-none outline-none"
+                                    className="w-full bg-white dark:bg-black/20 border-0 rounded-2xl px-5 py-4 text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-primary resize-none outline-none"
                                     placeholder="Street, City, Zip Code"
                                     rows={3}
                                     value={address}

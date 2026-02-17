@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2, CheckCircle, AlertCircle, Zap } from 'lucide-react';
+import { ElectricitySkeleton } from './skeletons';
 
 const ElectricityBillPage = () => {
     const router = useRouter();
@@ -15,6 +16,17 @@ const ElectricityBillPage = () => {
     const [customerName, setCustomerName] = useState<string | null>(null);
     const [validationError, setValidationError] = useState<string | null>(null);
     const [processing, setProcessing] = useState(false);
+    const [loading, setLoading] = useState(true);
+
+    // Simulate initial load (for consistency with other pages)
+    React.useEffect(() => {
+        const timer = setTimeout(() => setLoading(false), 500);
+        return () => clearTimeout(timer);
+    }, []);
+
+    if (loading) {
+        return <ElectricitySkeleton />;
+    }
 
     const discos = [
         { id: 'AEDC', name: 'Abuja Electric (AEDC)' },

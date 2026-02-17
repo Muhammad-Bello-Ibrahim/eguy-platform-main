@@ -149,13 +149,13 @@ export default function RegisterStep3Page() {
                                     value={pin}
                                     onChange={(value) => setPin(value)}
                                 >
-                                    <InputOTPGroup>
-                                        <InputOTPSlot index={0} className="w-10 h-14 text-lg font-bold border-2 border-primary/20 rounded-l-lg" />
-                                        <InputOTPSlot index={1} className="w-10 h-14 text-lg font-bold border-y-2 border-r-2 border-primary/20" />
-                                        <InputOTPSlot index={2} className="w-10 h-14 text-lg font-bold border-y-2 border-r-2 border-primary/20" />
-                                        <InputOTPSlot index={3} className="w-10 h-14 text-lg font-bold border-y-2 border-r-2 border-primary/20" />
-                                        <InputOTPSlot index={4} className="w-10 h-14 text-lg font-bold border-y-2 border-r-2 border-primary/20" />
-                                        <InputOTPSlot index={5} className="w-10 h-14 text-lg font-bold border-y-2 border-r-2 border-primary/20 rounded-r-lg" />
+                                    <InputOTPGroup className="gap-2">
+                                        <InputOTPSlot index={0} className="w-12 h-16 text-lg font-bold border-2 border-primary/20 rounded-lg" />
+                                        <InputOTPSlot index={1} className="w-12 h-16 text-lg font-bold border-2 border-primary/20 rounded-lg" />
+                                        <InputOTPSlot index={2} className="w-12 h-16 text-lg font-bold border-2 border-primary/20 rounded-lg" />
+                                        <InputOTPSlot index={3} className="w-12 h-16 text-lg font-bold border-2 border-primary/20 rounded-lg" />
+                                        <InputOTPSlot index={4} className="w-12 h-16 text-lg font-bold border-2 border-primary/20 rounded-lg" />
+                                        <InputOTPSlot index={5} className="w-12 h-16 text-lg font-bold border-2 border-primary/20 rounded-lg" />
                                     </InputOTPGroup>
                                 </InputOTP>
                             </div>
@@ -172,7 +172,7 @@ export default function RegisterStep3Page() {
                                 <label className="block text-sm font-bold uppercase tracking-wider text-slate-400 dark:text-primary/40">Account Password</label>
                                 <div className="relative">
                                     <input
-                                        className="w-full h-14 bg-white dark:bg-surface-dark/50 border-2 border-primary/20 focus:border-primary rounded-lg px-4 pr-12 outline-none transition-colors"
+                                        className="w-full h-14 bg-white dark:bg-black/20 border-2 border-primary/20 focus:border-primary rounded-lg px-4 pr-12 outline-none transition-colors"
                                         type={showPassword ? "text" : "password"}
                                         placeholder="••••••••••••"
                                         value={password}
@@ -189,22 +189,22 @@ export default function RegisterStep3Page() {
                                 </div>
                                 <div className="flex gap-1 mt-2">
                                     <div className={`h-1 flex-1 rounded-full ${password.length > 0 ? (
-                                            passwordStrength === 'weak' ? 'bg-red-500' :
-                                                passwordStrength === 'strong' ? 'bg-yellow-500' :
-                                                    'bg-green-500'
-                                        ) : 'bg-primary/20'
+                                        passwordStrength === 'weak' ? 'bg-red-500' :
+                                            passwordStrength === 'strong' ? 'bg-yellow-500' :
+                                                'bg-green-500'
+                                    ) : 'bg-primary/20'
                                         }`}></div>
                                     <div className={`h-1 flex-1 rounded-full ${passwordStrength === 'strong' || passwordStrength === 'very-strong' ? (
-                                            passwordStrength === 'strong' ? 'bg-yellow-500' : 'bg-green-500'
-                                        ) : 'bg-primary/20'
+                                        passwordStrength === 'strong' ? 'bg-yellow-500' : 'bg-green-500'
+                                    ) : 'bg-primary/20'
                                         }`}></div>
                                     <div className={`h-1 flex-1 rounded-full ${passwordStrength === 'very-strong' ? 'bg-green-500' : 'bg-primary/20'
                                         }`}></div>
                                     <span className={`text-[10px] font-bold ml-2 uppercase ${password.length > 0 ? (
-                                            passwordStrength === 'weak' ? 'text-red-500' :
-                                                passwordStrength === 'strong' ? 'text-yellow-500' :
-                                                    'text-green-500'
-                                        ) : 'text-slate-500'
+                                        passwordStrength === 'weak' ? 'text-red-500' :
+                                            passwordStrength === 'strong' ? 'text-yellow-500' :
+                                                'text-green-500'
+                                    ) : 'text-slate-500'
                                         }`}>
                                         {password.length > 0 ? passwordStrength.replace('-', ' ') : 'Weak'}
                                     </span>
@@ -214,7 +214,7 @@ export default function RegisterStep3Page() {
                                 <label className="block text-sm font-bold uppercase tracking-wider text-slate-400 dark:text-primary/40">Verify Password</label>
                                 <div className="relative">
                                     <input
-                                        className="w-full h-14 bg-white dark:bg-surface-dark/50 border-2 border-primary/20 focus:border-primary rounded-lg px-4 pr-12 outline-none transition-colors"
+                                        className="w-full h-14 bg-white dark:bg-black/20 border-2 border-primary/20 focus:border-primary rounded-lg px-4 pr-12 outline-none transition-colors"
                                         placeholder="Confirm your password"
                                         type={showConfirmPassword ? "text" : "password"}
                                         value={confirmPassword}

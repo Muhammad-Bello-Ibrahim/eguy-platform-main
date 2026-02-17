@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { CableSkeleton } from './skeletons';
 
 interface CablePackage {
     billsCode: string;
@@ -53,6 +54,10 @@ const CableSubscriptionPage = () => {
 
         fetchBundles();
     }, []);
+
+    if (loadingBundles) {
+        return <CableSkeleton />;
+    }
 
     const getProviderName = (p: string) => {
         switch (p) {
