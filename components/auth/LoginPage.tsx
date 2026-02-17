@@ -1,16 +1,25 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { isBiometricAvailable, authenticateWithBiometric, getBiometricName } from '@/lib/biometric';
+import { useToast } from '@/hooks/use-toast';
 
 export default function LoginPage() {
     const router = useRouter();
+    const { toast } = useToast();
     const [isLoading, setIsLoading] = useState(false);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
+    const [biometricAvailable, setBiometricAvailable] = useState(false);
+    const [isBiometricLoading, setIsBiometricLoading] = useState(false);
+
+    useEffect(() => {
+        setBiometricAvailable(isBiometricAvailable());
+    }, []);
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -34,6 +43,47 @@ export default function LoginPage() {
             setError('An error occurred. Please try again.');
         } finally {
             setIsLoading(false);
+        }
+    };
+
+    const handleBiometricLogin = async () => {
+        if (!email) {
+            setError('Please enter your email first');
+            return;
+        }
+
+        setIsBiometricLoading(true);
+        setError('');
+
+        try {
+            // Authenticate with biometric
+            const authData = await authenticateWithBiometric([]);
+
+            // Send to server for verification
+            const res = await fetch('/api/auth/biometric/authenticate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    credentialId: authData.credentialId,
+                    email,
+                }),
+            });
+
+            if (res.ok) {
+                toast({
+                    title: 'Success!',
+                    description: `Authenticated with ${getBiometricName()}`,
+                });
+                router.push('/dashboard');
+            } else {
+                const data = await res.json();
+                setError(data.error || 'Biometric authentication failed');
+            }
+        } catch (error: any) {
+            console.error('Biometric login error:', error);
+            setError(error.message || 'Biometric authentication failed');
+        } finally {
+            setIsBiometricLoading(false);
         }
     };
 
@@ -127,14 +177,27 @@ export default function LoginPage() {
                         </div>
 
                         {/* Biometric Section */}
-                        <div className="flex justify-center">
-                            <button className="flex flex-col items-center space-y-2 group" type="button">
-                                <div className="w-14 h-14 bg-neutral-900 border border-white/5 rounded-full flex items-center justify-center text-slate-400 group-hover:text-primary group-hover:border-primary/30 group-hover:bg-primary/5 transition-all shadow-inner">
-                                    <span className="material-icons-round text-3xl">fingerprint</span>
-                                </div>
-                                <span className="text-[10px] font-bold uppercase tracking-tighter text-slate-500 group-hover:text-primary transition-colors">Touch ID</span>
-                            </button>
-                        </div>
+                        {biometricAvailable && (
+                            <div className="flex justify-center">
+                                <button
+                                    className="flex flex-col items-center space-y-2 group"
+                                    type="button"
+                                    onClick={handleBiometricLogin}
+                                    disabled={isBiometricLoading || !email}
+                                >
+                                    <div className="w-14 h-14 bg-neutral-900 border border-white/5 rounded-full flex items-center justify-center text-slate-400 group-hover:text-primary group-hover:border-primary/30 group-hover:bg-primary/5 transition-all shadow-inner group-disabled:opacity-50 group-disabled:cursor-not-allowed">
+                                        {isBiometricLoading ? (
+                                            <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                                        ) : (
+                                            <span className="material-icons-round text-3xl">fingerprint</span>
+                                        )}
+                                    </div>
+                                    <span className="text-[10px] font-bold uppercase tracking-tighter text-slate-500 group-hover:text-primary transition-colors">
+                                        {getBiometricName()}
+                                    </span>
+                                </button>
+                            </div>
+                        )}
                     </form>
                 </div>
 

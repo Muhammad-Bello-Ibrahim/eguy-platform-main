@@ -11,5 +11,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "User not found" }, { status: 404 })
   }
   // Check verification status
-  return NextResponse.json({ verified: user.kycStatus === "verified" })
+  return NextResponse.json({
+    verified: user.kycStatus === "verified",
+    userId: user.id
+  })
 }

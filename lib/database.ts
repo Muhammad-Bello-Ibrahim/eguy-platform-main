@@ -13,8 +13,18 @@ export interface DatabaseUser {
   referralCode?: string
   referredBy?: string
   elevatexActivated?: boolean
+  biometricEnabled?: boolean
+  biometricCredentials?: BiometricCredential[]
   createdAt?: Date
   updatedAt?: Date
+}
+
+export interface BiometricCredential {
+  id: string
+  publicKey: string
+  counter: number
+  createdAt: Date
+  deviceName?: string
 }
 
 export interface LinkedAccount {
@@ -321,5 +331,66 @@ export class Database {
       userId,
       _id: new ObjectId(notificationId)
     })
+  }
+
+  // =========================
+  // BIOMETRIC AUTHENTICATION
+  // =========================
+
+  static async saveBiometricCredential(userId: string, credential: BiometricCredential) {
+    const db = await this.getDb()
+    await db.collection("users").updateOne(
+      { _id: new ObjectId(userId) },
+      {
+        $push: { biometricCredentials: credential } as any,
+        $set: {
+          biometricEnabled: true,
+          updatedAt: new Date()
+        }
+      }
+    )
+  }
+
+  static async getBiometricCredentials(userId: string): Promise<BiometricCredential[]> {
+    const db = await this.getDb()
+    const user = await db.collection("users").findOne(
+      { _id: new ObjectId(userId) },
+      { projection: { biometricCredentials: 1 } }
+    )
+    return user?.biometricCredentials || []
+  }
+
+  static async toggleBiometric(userId: string, enabled: boolean) {
+    const db = await this.getDb()
+    await db.collection("users").updateOne(
+      { _id: new ObjectId(userId) },
+      {
+        $set: {
+          biometricEnabled: enabled,
+          updatedAt: new Date()
+        }
+      }
+    )
+  }
+
+  static async removeBiometricCredential(userId: string, credentialId: string) {
+    const db = await this.getDb()
+    await db.collection("users").updateOne(
+      { _id: new ObjectId(userId) },
+      {
+        $pull: { biometricCredentials: { id: credentialId } } as any,
+        $set: { updatedAt: new Date() }
+      }
+    )
+  }
+
+  static async findUserByCredentialId(credentialId: string) {
+    const db = await this.getDb()
+    const user = await db.collection("users").findOne({
+      "biometricCredentials.id": credentialId,
+      biometricEnabled: true
+    })
+    if (!user) return null
+    return { ...user, id: user._id.toString() }
   }
 }

@@ -14,6 +14,7 @@ export default function RegisterStep3Page() {
     const [passwordStrength, setPasswordStrength] = useState<'weak' | 'strong' | 'very-strong'>('weak');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
+    const [biometricEnabled, setBiometricEnabled] = useState(true);
 
     const checkPasswordStrength = (pass: string) => {
         if (pass.length < 8) return 'weak';
@@ -87,6 +88,11 @@ export default function RegisterStep3Page() {
                 sessionStorage.removeItem('register_dob');
                 sessionStorage.removeItem('register_phone');
                 sessionStorage.removeItem('register_address');
+
+                // Save biometric preference
+                if (biometricEnabled) {
+                    sessionStorage.setItem('register_biometric', 'true');
+                }
 
                 router.push(`/verify-prompt?email=${encodeURIComponent(email || '')}`);
             } else {
@@ -244,7 +250,12 @@ export default function RegisterStep3Page() {
                                 </div>
                             </div>
                             <label className="relative inline-flex items-center cursor-pointer">
-                                <input defaultChecked className="sr-only peer" type="checkbox" />
+                                <input
+                                    checked={biometricEnabled}
+                                    onChange={(e) => setBiometricEnabled(e.target.checked)}
+                                    className="sr-only peer"
+                                    type="checkbox"
+                                />
                                 <div className="w-12 h-6 bg-slate-400/20 peer-focus:outline-none rounded-full peer dark:bg-neutral-900 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
                             </label>
                         </div>
