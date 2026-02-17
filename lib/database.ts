@@ -17,6 +17,14 @@ export interface DatabaseUser {
   updatedAt?: Date
 }
 
+export interface LinkedAccount {
+  id: string
+  bank: string
+  accountNumber: string
+  accountName: string
+  isPrimary?: boolean
+}
+
 export class Database {
   // =========================
   // SAFE CONNECTION HANDLER

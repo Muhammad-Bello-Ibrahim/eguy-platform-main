@@ -247,7 +247,7 @@ export function ReceiptModal({ transaction, isOpen, onClose }: ReceiptModalProps
             <div className="flex items-center justify-between text-sm">
               <span className="text-slate-400">Reference</span>
               <span className="text-white font-mono text-xs bg-slate-800/50 px-2 py-1 rounded select-all">
-                {transaction.reference || transaction.id.slice(0, 18) + '...'}
+                {transaction.reference || (transaction.id ? transaction.id.slice(0, 18) + '...' : 'N/A')}
               </span>
             </div>
 

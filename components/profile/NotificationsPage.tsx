@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { NotificationsSkeleton } from './skeletons';
 
 const Toggle = ({ checked, onChange }: { checked: boolean; onChange: () => void }) => (
     <div
@@ -101,6 +102,10 @@ export default function NotificationsPage() {
             ]
         }
     ];
+
+    if (loading) {
+        return <NotificationsSkeleton />;
+    }
 
     return (
         <div className="bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-sans min-h-screen pb-32">

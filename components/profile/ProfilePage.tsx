@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTheme } from 'next-themes';
+import { ProfileSkeleton } from './skeletons';
 
 export default function ProfilePage() {
     const router = useRouter();
@@ -45,11 +46,7 @@ export default function ProfilePage() {
     };
 
     if (isLoading) {
-        return (
-            <div className="flex items-center justify-center min-h-screen bg-slate-50 dark:bg-slate-900">
-                <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-            </div>
-        );
+        return <ProfileSkeleton />;
     }
 
     const displayName = user?.fullName || user?.firstName || user?.username || "User";
@@ -79,11 +76,11 @@ export default function ProfilePage() {
 
                     {/* Tier Badge */}
                     <div className={`mt-4 inline-flex items-center gap-2 border px-4 py-1.5 rounded-full ${user?.rank === 'Pinnacle' ? 'bg-red-500/10 border-red-500/30 text-red-600' :
-                            user?.rank === 'Premium' ? 'bg-orange-500/10 border-orange-500/30 text-orange-600' :
-                                user?.rank === 'Expansion' ? 'bg-purple-500/10 border-purple-500/30 text-purple-600' :
-                                    user?.rank === 'Growth' ? 'bg-green-500/10 border-green-500/30 text-green-600' :
-                                        user?.rank === 'Basic' ? 'bg-blue-500/10 border-blue-500/30 text-blue-600' :
-                                            'bg-slate-500/10 border-slate-500/30 text-slate-600'
+                        user?.rank === 'Premium' ? 'bg-orange-500/10 border-orange-500/30 text-orange-600' :
+                            user?.rank === 'Expansion' ? 'bg-purple-500/10 border-purple-500/30 text-purple-600' :
+                                user?.rank === 'Growth' ? 'bg-green-500/10 border-green-500/30 text-green-600' :
+                                    user?.rank === 'Basic' ? 'bg-blue-500/10 border-blue-500/30 text-blue-600' :
+                                        'bg-slate-500/10 border-slate-500/30 text-slate-600'
                         }`}>
                         <span className="material-icons-round text-sm">workspace_premium</span>
                         <span className="text-xs font-bold uppercase tracking-widest">

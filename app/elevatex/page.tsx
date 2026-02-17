@@ -14,6 +14,8 @@ import { WithdrawModal } from "@/components/dashboard/withdraw-modal";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { NetworkTree } from "@/components/elevatex/NetworkTree";
+import { ElevateXPageSkeleton } from "@/components/elevatex/skeletons";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // Format currency
 const formatCurrency = (amount: number) => {
@@ -145,9 +147,7 @@ export default function ElevatexPage() {
 
 	if (isLoading) {
 		return (
-			<div className="min-h-screen bg-[#131321] flex items-center justify-center">
-				<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#47f0d1]"></div>
-			</div>
+			<ElevateXPageSkeleton />
 		);
 	}
 
@@ -301,7 +301,21 @@ export default function ElevatexPage() {
 
 					<div className="space-y-3">
 						{transactionsLoading ? (
-							<div className="text-center py-4 text-slate-500 text-xs">Loading activity...</div>
+							<div className="space-y-3">
+								{[1, 2, 3].map((i) => (
+									<div key={i} className="flex items-center p-4 border border-white/10 rounded-2xl bg-white/5">
+										<Skeleton className="w-10 h-10 rounded-xl bg-slate-800 shrink-0" />
+										<div className="ml-3 flex-1 space-y-2">
+											<Skeleton className="h-3 w-32 bg-slate-800" />
+											<Skeleton className="h-2 w-20 bg-slate-800" />
+										</div>
+										<div className="ml-4 space-y-2 flex flex-col items-end">
+											<Skeleton className="h-3 w-16 bg-slate-800" />
+											<Skeleton className="h-2 w-12 bg-slate-800" />
+										</div>
+									</div>
+								))}
+							</div>
 						) : elevatexTransactions.length === 0 ? (
 							<div className="text-center py-8 border border-white/10 rounded-2xl bg-white/5">
 								<p className="text-slate-400 text-sm">No recent activity</p>

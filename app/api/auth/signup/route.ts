@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
     // Send verification email
     const crypto = await import("crypto")
     const token = crypto.randomBytes(32).toString("hex")
-    const expires = Date.now() + 1000 * 60 * 60 // 1 hour
+    const expires = new Date(Date.now() + 1000 * 60 * 60) // 1 hour
     await Database.saveVerificationToken(user.id, token, expires)
     const { sendVerificationEmail } = await import("@/lib/email")
     await sendVerificationEmail(user.email, token)

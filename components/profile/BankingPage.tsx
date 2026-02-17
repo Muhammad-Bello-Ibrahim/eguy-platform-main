@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { LinkedAccount } from '@/lib/database';
 import { SelectBankModal } from './SelectBankModal';
+import { BankingSkeleton } from './skeletons';
 
 export default function BankingPage() {
     const router = useRouter();
@@ -99,6 +100,10 @@ export default function BankingPage() {
             fetchAccounts();
         }
     };
+
+    if (loading) {
+        return <BankingSkeleton />;
+    }
 
     return (
         <div className="bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-sans min-h-screen pb-32">

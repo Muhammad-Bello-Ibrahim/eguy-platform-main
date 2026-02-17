@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { PayoutsSkeleton } from './skeletons';
 
 export default function PayoutsPage() {
     const router = useRouter();
@@ -58,6 +59,10 @@ export default function PayoutsPage() {
             setSaving(false);
         }
     };
+
+    if (loading) {
+        return <PayoutsSkeleton />;
+    }
 
     return (
         <div className="bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-sans min-h-screen pb-32">
