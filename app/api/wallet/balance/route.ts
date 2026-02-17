@@ -1,18 +1,17 @@
 import { NextResponse } from "next/server"
 import { getSession } from "@/lib/auth"
 import { Database } from "@/lib/database"
-import { handleApiError, AuthenticationError, NotFoundError } from "@/lib/errors"
 
 export async function GET() {
   try {
     const session = await getSession()
     if (!session) {
-      throw new AuthenticationError();
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
     const user = await Database.findUserById(session.user.id)
     if (!user) {
-      throw new NotFoundError("User");
+      return NextResponse.json({ error: "User not found" }, { status: 404 })
     }
 
     return NextResponse.json({
@@ -20,9 +19,7 @@ export async function GET() {
       currency: "NGN",
     })
   } catch (error) {
-    return handleApiError(error as Error, {
-      route: '/api/wallet/balance',
-      userId: (await getSession())?.user?.id,
-    });
+    console.error("Balance fetch error:", error)
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }

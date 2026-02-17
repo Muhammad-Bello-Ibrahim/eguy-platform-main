@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import DataPlan from "@/lib/models/DataPlan";
 import { Database } from "@/lib/database";
-import { handleApiError, ValidationError, DatabaseError } from "@/lib/errors";
 
 export const dynamic = "force-dynamic";
 
@@ -14,8 +13,7 @@ export async function POST(req: NextRequest) {
     const plan = await DataPlan.create(body);
     return NextResponse.json(plan, { status: 201 });
   } catch (error) {
-    return handleApiError(error as Error, {
-      route: '/api/admin/data-plans/add',
-    });
+    console.error("Error creating data plan:", error);
+    return NextResponse.json({ error: "Failed to create plan" }, { status: 500 });
   }
 }

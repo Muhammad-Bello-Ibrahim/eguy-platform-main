@@ -1,13 +1,10 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { Database } from "@/lib/database"
 import { verifyPassword, createSession } from "@/lib/auth"
-import { handleApiError, AuthenticationError, NotFoundError, AuthorizationError } from "@/lib/errors"
 
 export async function POST(request: NextRequest) {
-  let emailOrPhone: string | undefined;
   try {
-    const { emailOrPhone: emailOrPhoneValue, password } = await request.json()
-    emailOrPhone = emailOrPhoneValue;
+    const { emailOrPhone, password } = await request.json()
 
     // Validate input
     if (!emailOrPhone || !password) {
@@ -21,24 +18,24 @@ export async function POST(request: NextRequest) {
     }
 
     if (!user) {
-      throw new NotFoundError("User");
+      return NextResponse.json({ error: "Invalid credentials" }, { status: 401 })
     }
 
     // Verify password
     const isValidPassword = await verifyPassword(password, user.passwordHash)
     if (!isValidPassword) {
-      throw new AuthenticationError("Invalid credentials");
+      return NextResponse.json({ error: "Invalid credentials" }, { status: 401 })
     }
 
     // Check if user is active
     if (user.status !== "active") {
-      throw new AuthorizationError("Account is suspended or inactive");
+      return NextResponse.json({ error: "Account is suspended or inactive" }, { status: 403 })
     }
 
     // Fetch latest user data from DB before creating session
     const latestUser = await Database.findUserById(user.id);
     if (!latestUser) {
-      throw new NotFoundError("User");
+      return NextResponse.json({ error: "User not found after login" }, { status: 404 });
     }
     await createSession({
       id: latestUser.id,
@@ -66,9 +63,15 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    return handleApiError(error as Error, {
-      route: '/api/auth/signin',
-      emailOrPhone,
-    });
+    console.error("Signin error:", error);
+    // Log the actual error for debugging
+    if (error instanceof Error) {
+      console.error("Error details:", {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      });
+    }
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

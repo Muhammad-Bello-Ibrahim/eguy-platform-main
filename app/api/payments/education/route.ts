@@ -1,20 +1,15 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getSession } from "@/lib/auth"
 import { Database } from "@/lib/database"
-import { handleApiError, AuthenticationError, ValidationError, InsufficientBalanceError, NotFoundError } from "@/lib/errors"
 
 export async function POST(request: NextRequest) {
-  let service: string | undefined;
-  let amount: number | undefined;
   try {
     const session = await getSession()
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const { service: serviceValue, bills_code, regNumber, amount: amountValue } = await request.json()
-    service = serviceValue;
-    amount = amountValue;
+    const { service, bills_code, regNumber, amount } = await request.json()
 
     if (!service || !bills_code || !regNumber || !amount) {
       return NextResponse.json({ error: "All fields are required" }, { status: 400 })
@@ -73,11 +68,8 @@ export async function POST(request: NextRequest) {
       subaData,
     });
   } catch (error) {
-    return handleApiError(error as Error, {
-      route: '/api/payments/education',
-      service,
-      amount,
-    });
+    console.error("Education payment error:", error)
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }
 

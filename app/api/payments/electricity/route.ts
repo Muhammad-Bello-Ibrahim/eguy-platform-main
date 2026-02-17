@@ -1,35 +1,24 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getSession } from "@/lib/auth"
 import { Database } from "@/lib/database"
-import { handleApiError, AuthenticationError, ValidationError, InsufficientBalanceError, NotFoundError } from "@/lib/errors"
 
 export async function POST(request: NextRequest) {
-  let disco: string | undefined;
-  let meterType: string | undefined;
-  let meterNumber: string | undefined;
-  let amount: number | undefined;
   try {
     const session = await getSession()
     if (!session) {
-      throw new AuthenticationError();
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const { disco: discoValue, meterType: meterTypeValue, meterNumber: meterNumberValue, amount: amountValue } = await request.json()
-    disco = discoValue;
-    meterType = meterTypeValue;
-    meterNumber = meterNumberValue;
-    amount = amountValue;
+    const { disco, meterType, meterNumber, amount } = await request.json()
 
     if (!disco || !meterType || !meterNumber || !amount) {
-      throw new ValidationError("All fields are required");
+      return NextResponse.json({ error: "All fields are required" }, { status: 400 })
     }
 
+    // Check user wallet balance
     const user = await Database.findUserById(session.user.id)
-    if (!user) {
-      throw new NotFoundError("User");
-    }
-    if (user.walletBalance < amount) {
-      throw new InsufficientBalanceError(amount, user.walletBalance);
+    if (!user || user.walletBalance < amount) {
+      return NextResponse.json({ error: "Insufficient wallet balance" }, { status: 400 })
     }
 
     // Check SubAndGain API credentials
@@ -79,12 +68,8 @@ export async function POST(request: NextRequest) {
       subaData,
     });
   } catch (error) {
-    return handleApiError(error as Error, {
-      route: '/api/payments/electricity',
-      disco,
-      meterNumber,
-      amount,
-    });
+    console.error("Electricity payment error:", error)
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }
 

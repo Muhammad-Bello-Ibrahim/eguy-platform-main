@@ -3,16 +3,15 @@ export const revalidate = 0;
 
 import { NextResponse } from "next/server"
 import { getSession } from "@/lib/auth"
-import { handleApiError, AuthenticationError, AuthorizationError } from "@/lib/errors"
 
 export async function GET() {
   try {
     const session = await getSession()
     if (!session) {
-      throw new AuthenticationError();
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
     if (session.user.role !== "admin") {
-      throw new AuthorizationError();
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
 
     // TODO: Implement actual database queries for subscriptions data
@@ -76,8 +75,7 @@ export async function GET() {
 
     return NextResponse.json(subscriptionsData)
   } catch (error) {
-    return handleApiError(error as Error, {
-      route: '/api/admin/subscriptions',
-    });
+    console.error("Admin subscriptions error:", error)
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }

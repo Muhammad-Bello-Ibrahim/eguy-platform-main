@@ -1,35 +1,24 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getSession } from "@/lib/auth"
 import { Database } from "@/lib/database"
-import { handleApiError, AuthenticationError, ValidationError, InsufficientBalanceError, NotFoundError } from "@/lib/errors"
 
 export async function POST(request: NextRequest) {
-  let network: string | undefined;
-  let phone: string | undefined;
-  let plan: string | undefined;
-  let amount: number | undefined;
   try {
     const session = await getSession()
     if (!session) {
-      throw new AuthenticationError();
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const { network: networkValue, phone: phoneValue, plan: planValue, amount: amountValue } = await request.json()
-    network = networkValue;
-    phone = phoneValue;
-    plan = planValue;
-    amount = amountValue;
+    const { network, phone, plan, amount } = await request.json()
 
     if (!network || !phone || !plan || !amount) {
-      throw new ValidationError("All fields are required");
+      return NextResponse.json({ error: "All fields are required" }, { status: 400 })
     }
 
+    // Check user wallet balance
     const user = await Database.findUserById((session.user as any).id)
-    if (!user) {
-      throw new NotFoundError("User");
-    }
-    if (user.walletBalance < amount) {
-      throw new InsufficientBalanceError(amount, user.walletBalance);
+    if (!user || user.walletBalance < amount) {
+      return NextResponse.json({ error: "Insufficient wallet balance" }, { status: 400 })
     }
 
     // Check SubAndGain API credentials
@@ -102,12 +91,7 @@ export async function POST(request: NextRequest) {
       subaData,
     });
   } catch (error) {
-    return handleApiError(error as Error, {
-      route: '/api/payments/data',
-      network,
-      phone,
-      plan,
-      amount,
-    });
+    console.error("Data purchase error:", error)
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }

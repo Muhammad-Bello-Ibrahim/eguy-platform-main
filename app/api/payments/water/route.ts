@@ -1,22 +1,15 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getSession } from "@/lib/auth"
 import { Database } from "@/lib/database"
-import { handleApiError, AuthenticationError, ValidationError, InsufficientBalanceError, NotFoundError } from "@/lib/errors"
 
 export async function POST(request: NextRequest) {
-  let provider: string | undefined;
-  let meterNumber: string | undefined;
-  let amount: number | undefined;
   try {
     const session = await getSession()
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const { provider: providerValue, meterNumber: meterNumberValue, amount: amountValue, customerInfo } = await request.json()
-    provider = providerValue;
-    meterNumber = meterNumberValue;
-    amount = amountValue;
+    const { provider, meterNumber, amount, customerInfo } = await request.json()
 
     if (!provider || !meterNumber || !amount) {
       return NextResponse.json({ error: "All fields are required" }, { status: 400 })
@@ -81,11 +74,7 @@ export async function POST(request: NextRequest) {
       subaData,
     });
   } catch (error) {
-    return handleApiError(error as Error, {
-      route: '/api/payments/water',
-      provider,
-      meterNumber,
-      amount,
-    });
+    console.error("Water payment error:", error)
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }

@@ -2,52 +2,44 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { Database } from "@/lib/database";
-import { handleApiError, AuthenticationError, NotFoundError, ValidationError } from "@/lib/errors";
 
 export async function GET(request: NextRequest) {
-    try {
-        const session = await getSession();
-        if (!session || !session.user?.email) {
-            throw new AuthenticationError();
-        }
-
-        const user = await Database.findUserByEmail(session.user.email);
-        if (!user) {
-            throw new NotFoundError("User");
-        }
-
-        return NextResponse.json({
-            payoutSchedule: user.payoutSchedule || {
-                frequency: 'weekly',
-                minPayout: 1500,
-                preferredDay: 'F'
-            }
-        });
-    } catch (error) {
-        return handleApiError(error as Error, {
-            route: '/api/user/payouts',
-            method: 'GET',
-        });
+    const session = await getSession();
+    if (!session || !session.user?.email) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    const user = await Database.findUserByEmail(session.user.email);
+    if (!user) {
+        return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    return NextResponse.json({
+        payoutSchedule: user.payoutSchedule || {
+            frequency: 'weekly',
+            minPayout: 1500,
+            preferredDay: 'F'
+        }
+    });
 }
 
 export async function PUT(request: NextRequest) {
-    try {
-        const session = await getSession();
-        if (!session || !session.user?.email || !session.user.id) {
-            throw new AuthenticationError();
-        }
+    const session = await getSession();
+    if (!session || !session.user?.email || !session.user.id) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
+    try {
         const body = await request.json();
         const { frequency, minPayout, preferredDay } = body;
 
         // Validate
         if (!['daily', 'weekly', 'monthly'].includes(frequency)) {
-            throw new ValidationError("Invalid frequency");
+            return NextResponse.json({ error: "Invalid frequency" }, { status: 400 });
         }
 
         if (typeof minPayout !== 'number' || minPayout < 100) {
-            throw new ValidationError("Invalid minimum payout");
+            return NextResponse.json({ error: "Invalid minimum payout" }, { status: 400 });
         }
 
         await Database.updateUserPayoutSchedule(session.user.id, {
@@ -58,9 +50,7 @@ export async function PUT(request: NextRequest) {
 
         return NextResponse.json({ success: true });
     } catch (error) {
-        return handleApiError(error as Error, {
-            route: '/api/user/payouts',
-            method: 'PUT',
-        });
+        console.error("Error updating payout schedule:", error);
+        return NextResponse.json({ error: "Internal server error" }, { status: 500 });
     }
 }

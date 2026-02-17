@@ -1,7 +1,7 @@
 import { MongoClient, Db, ObjectId } from "mongodb"
 
-let client: MongoClient
-let db: Db
+let cachedClient: MongoClient | null = null
+let cachedDb: Db | null = null
 
 export interface DatabaseUser {
   id: string
@@ -9,48 +9,49 @@ export interface DatabaseUser {
   email: string
   phone: string
   passwordHash: string
-  transactionPin?: string
   walletBalance: number
   referralCode?: string
   referredBy?: string
   elevatexActivated?: boolean
-  kycStatus?: string
-  status?: string
-  role?: string
   createdAt?: Date
   updatedAt?: Date
 }
 
 export class Database {
   // =========================
-  // CONNECTION
+  // SAFE CONNECTION HANDLER
   // =========================
-
-  private static async connect() {
-    if (!client) {
-      client = new MongoClient(process.env.MONGODB_URI as string)
-      await client.connect()
-      db = client.db(process.env.MONGODB_DB)
-      console.log("✅ MongoDB Connected")
-    }
-  }
 
   private static async getDb(): Promise<Db> {
-    await this.connect()
-    return db
+    if (cachedDb) return cachedDb
+
+    if (!process.env.MONGODB_URI) {
+      throw new Error("MONGODB_URI is not defined")
+    }
+
+    const client = new MongoClient(process.env.MONGODB_URI)
+
+    await client.connect()
+
+    cachedClient = client
+    cachedDb = client.db(process.env.MONGODB_DB)
+
+    console.log("✅ MongoDB Connected")
+
+    return cachedDb
   }
 
   // =========================
-  // USER METHODS
+  // USERS
   // =========================
 
   static async createUser(data: Partial<DatabaseUser>) {
-    const database = await this.getDb()
+    const db = await this.getDb()
 
-    const result = await database.collection("users").insertOne({
+    const result = await db.collection("users").insertOne({
       ...data,
       walletBalance: data.walletBalance ?? 0,
-      elevatexActivated: data.elevatexActivated ?? false,
+      elevatexActivated: false,
       createdAt: new Date(),
       updatedAt: new Date(),
     })
@@ -58,105 +59,63 @@ export class Database {
     return {
       id: result.insertedId.toString(),
       ...data,
-    } as DatabaseUser
+    }
   }
 
-  static async findUserByEmail(email: string): Promise<DatabaseUser | null> {
-    const database = await this.getDb()
-    const user = await database.collection("users").findOne({ email })
+  static async findUserByEmail(email: string) {
+    const db = await this.getDb()
+    const user = await db.collection("users").findOne({ email })
     if (!user) return null
     return { ...user, id: user._id.toString() }
   }
 
-  static async findUserByPhone(phone: string): Promise<DatabaseUser | null> {
-    const database = await this.getDb()
-    const user = await database.collection("users").findOne({ phone })
+  // ✅ ADDED THIS METHOD
+  static async findUserByPhone(phone: string) {
+    const db = await this.getDb()
+    const user = await db.collection("users").findOne({ phone })
     if (!user) return null
     return { ...user, id: user._id.toString() }
   }
 
-  static async findUserById(id: string): Promise<DatabaseUser | null> {
-    const database = await this.getDb()
-    const user = await database
-      .collection("users")
-      .findOne({ _id: new ObjectId(id) })
+  static async findUserById(id: string) {
+    const db = await this.getDb()
+    const user = await db.collection("users").findOne({
+      _id: new ObjectId(id),
+    })
     if (!user) return null
     return { ...user, id: user._id.toString() }
   }
 
-  static async findUserByReferralCode(
-    code: string
-  ): Promise<DatabaseUser | null> {
-    const database = await this.getDb()
-    const user = await database.collection("users").findOne({ referralCode: code })
+  static async findUserByReferralCode(code: string) {
+    const db = await this.getDb()
+    const user = await db.collection("users").findOne({
+      referralCode: code,
+    })
     if (!user) return null
     return { ...user, id: user._id.toString() }
   }
 
-  static async updateUserById(id: string, updates: Partial<DatabaseUser>) {
-    const database = await this.getDb()
-    await database.collection("users").updateOne(
+  static async updateUserById(id: string, updates: any) {
+    const db = await this.getDb()
+    const result = await db.collection("users").findOneAndUpdate(
       { _id: new ObjectId(id) },
-      {
-        $set: {
-          ...updates,
-          updatedAt: new Date(),
-        },
-      }
+      { $set: { ...updates, updatedAt: new Date() } },
+      { returnDocument: "after" }
     )
-  }
 
-  // =========================
-  // WALLET
-  // =========================
+    if (!result) return null;
+    return { ...result, id: result._id.toString() }
+  }
 
   static async updateUserWallet(userId: string, amount: number) {
-    const database = await this.getDb()
-
-    await database.collection("users").updateOne(
+    const db = await this.getDb()
+    await db.collection("users").updateOne(
       { _id: new ObjectId(userId) },
       {
         $inc: { walletBalance: amount },
         $set: { updatedAt: new Date() },
       }
     )
-  }
-
-  // =========================
-  // REFERRALS
-  // =========================
-
-  static async createReferral(data: {
-    referrerId: string
-    referredId: string
-    level: number
-    bonusAmount: number
-    status: string
-  }) {
-    const database = await this.getDb()
-
-    await database.collection("referrals").insertOne({
-      ...data,
-      createdAt: new Date(),
-    })
-  }
-
-  static async getReferral(referrerId: string, referredId: string) {
-    const database = await this.getDb()
-
-    return database.collection("referrals").findOne({
-      referrerId,
-      referredId,
-    })
-  }
-
-  static async getUserReferrals(userId: string) {
-    const database = await this.getDb()
-
-    return database.collection("referrals").find({
-      referrerId: userId,
-      status: "active",
-    }).toArray()
   }
 
   // =========================
@@ -170,40 +129,91 @@ export class Database {
     description: string
     status: string
     metadata?: any
+    reference?: string
   }) {
-    const database = await this.getDb()
-
-    await database.collection("transactions").insertOne({
+    const db = await this.getDb()
+    await db.collection("transactions").insertOne({
       ...data,
       createdAt: new Date(),
     })
   }
 
-  // =========================
-  // RANK SYSTEM
-  // =========================
+  static async getUserTransactions(userId: string) {
+    const db = await this.getDb()
+    return db
+      .collection("transactions")
+      .find({ userId })
+      .sort({ createdAt: -1 })
+      .toArray()
+  }
 
-  static async getUserRank(userId: string) {
-    const database = await this.getDb()
-
-    const totalReferrals = await database.collection("referrals").countDocuments({
-      referrerId: userId,
-      status: "active",
+  static async findTransactionByReference(reference: string) {
+    const db = await this.getDb()
+    const transaction = await db.collection("transactions").findOne({
+      $or: [
+        { reference: reference },
+        { "metadata.reference": reference }
+      ]
     })
+    if (!transaction) return null
+    return { ...transaction, id: transaction._id.toString() }
+  }
 
-    let rank = "Starter"
-
-    if (totalReferrals >= 50) rank = "Diamond"
-    else if (totalReferrals >= 20) rank = "Gold"
-    else if (totalReferrals >= 10) rank = "Silver"
-    else if (totalReferrals >= 5) rank = "Bronze"
-
-    return {
-      rank,
-      stats: {
-        totalReferrals,
+  static async updateTransactionStatusAtomic(
+    reference: string,
+    expectedStatus: string,
+    newStatus: string
+  ) {
+    const db = await this.getDb()
+    const result = await db.collection("transactions").findOneAndUpdate(
+      {
+        $or: [
+          { reference: reference },
+          { "metadata.reference": reference }
+        ],
+        status: expectedStatus,
       },
-    }
+      {
+        $set: {
+          status: newStatus,
+          updatedAt: new Date(),
+        },
+      },
+      { returnDocument: "after" }
+    )
+
+    return result !== null
+  }
+
+  // =========================
+  // REFERRALS
+  // =========================
+
+  static async createReferral(data: {
+    referrerId: string
+    referredId: string
+    level: number
+    bonusAmount: number
+    status: string
+  }) {
+    const db = await this.getDb()
+    await db.collection("referrals").insertOne({
+      ...data,
+      createdAt: new Date(),
+    })
+  }
+
+  static async getUserReferrals(userId: string) {
+    const db = await this.getDb()
+    return db.collection("referrals").find({ referrerId: userId }).toArray()
+  }
+
+  static async getReferral(referrerId: string, referredId: string) {
+    const db = await this.getDb()
+    return db.collection("referrals").findOne({
+      referrerId,
+      referredId,
+    })
   }
 
   // =========================
@@ -215,9 +225,8 @@ export class Database {
     token: string,
     expiresAt: Date
   ) {
-    const database = await this.getDb()
-
-    await database.collection("verificationTokens").insertOne({
+    const db = await this.getDb()
+    await db.collection("verificationTokens").insertOne({
       userId,
       token,
       expiresAt,
@@ -225,19 +234,84 @@ export class Database {
     })
   }
 
-  static async findVerificationToken(token: string) {
-    const database = await this.getDb()
-
-    return database.collection("verificationTokens").findOne({
-      token,
-    })
+  static async getVerificationToken(token: string) {
+    const db = await this.getDb()
+    return db.collection("verificationTokens").findOne({ token })
   }
 
   static async deleteVerificationToken(token: string) {
-    const database = await this.getDb()
+    const db = await this.getDb()
+    await db.collection("verificationTokens").deleteOne({ token })
+  }
 
-    await database.collection("verificationTokens").deleteOne({
-      token,
+  // =========================
+  // NOTIFICATIONS
+  // =========================
+
+  static async createNotification(data: {
+    userId: string
+    type: string
+    title: string
+    message: string
+    amount?: number
+    status?: string
+    actionUrl?: string
+  }) {
+    const db = await this.getDb()
+    await db.collection("notifications").insertOne({
+      ...data,
+      read: false,
+      createdAt: new Date(),
+    })
+  }
+
+  static async getUserNotifications(userId: string, options: { type?: string, limit?: number, offset?: number } = {}) {
+    const db = await this.getDb()
+    const query: any = { userId }
+
+    if (options.type && options.type !== "all") {
+      if (options.type === "unread") {
+        query.read = false
+      } else {
+        query.type = options.type
+      }
+    }
+
+    return db
+      .collection("notifications")
+      .find(query)
+      .sort({ createdAt: -1 })
+      .skip(options.offset || 0)
+      .limit(options.limit || 20)
+      .toArray()
+  }
+
+  static async getUnreadNotificationCount(userId: string) {
+    const db = await this.getDb()
+    return db.collection("notifications").countDocuments({
+      userId,
+      read: false
+    })
+  }
+
+  static async markNotificationsAsRead(userId: string, notificationIds: string[]) {
+    const db = await this.getDb()
+    await db.collection("notifications").updateMany(
+      {
+        userId,
+        _id: { $in: notificationIds.map(id => new ObjectId(id)) }
+      },
+      {
+        $set: { read: true }
+      }
+    )
+  }
+
+  static async deleteNotification(userId: string, notificationId: string) {
+    const db = await this.getDb()
+    await db.collection("notifications").deleteOne({
+      userId,
+      _id: new ObjectId(notificationId)
     })
   }
 }

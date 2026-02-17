@@ -9,8 +9,30 @@ export default function RegisterStep3Page() {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [pin, setPin] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [passwordStrength, setPasswordStrength] = useState<'weak' | 'strong' | 'very-strong'>('weak');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
+
+    const checkPasswordStrength = (pass: string) => {
+        if (pass.length < 8) return 'weak';
+
+        const hasLetters = /[a-zA-Z]/.test(pass);
+        const hasNumbers = /[0-9]/.test(pass);
+        const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(pass);
+
+        if (pass.length >= 8 && hasLetters && hasNumbers && hasSpecial) return 'very-strong';
+        if (pass.length >= 8 && hasLetters && hasNumbers) return 'strong';
+
+        return 'weak';
+    };
+
+    const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newPass = e.target.value;
+        setPassword(newPass);
+        setPasswordStrength(checkPasswordStrength(newPass));
+    };
 
     const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -18,6 +40,11 @@ export default function RegisterStep3Page() {
 
         if (password !== confirmPassword) {
             setError('Passwords do not match');
+            return;
+        }
+
+        if (passwordStrength === 'weak') {
+            setError('Please choose a stronger password');
             return;
         }
 
@@ -146,33 +173,61 @@ export default function RegisterStep3Page() {
                                 <div className="relative">
                                     <input
                                         className="w-full h-14 bg-white dark:bg-surface-dark/50 border-2 border-primary/20 focus:border-primary rounded-lg px-4 pr-12 outline-none transition-colors"
-                                        type="password"
+                                        type={showPassword ? "text" : "password"}
                                         placeholder="••••••••••••"
                                         value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
+                                        onChange={handlePasswordChange}
                                         required
                                     />
-                                    <span className="material-icons-round absolute right-4 top-1/2 -translate-y-1/2 text-primary/60 cursor-pointer hover:text-primary">visibility_off</span>
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-primary/60 cursor-pointer hover:text-primary focus:outline-none"
+                                    >
+                                        <span className="material-icons-round">{showPassword ? 'visibility' : 'visibility_off'}</span>
+                                    </button>
                                 </div>
                                 <div className="flex gap-1 mt-2">
-                                    <div className="h-1 flex-1 rounded-full bg-primary"></div>
-                                    <div className="h-1 flex-1 rounded-full bg-primary/20"></div>
-                                    <div className="h-1 flex-1 rounded-full bg-primary/20"></div>
-                                    <div className="h-1 flex-1 rounded-full bg-primary/20"></div>
-                                    <span className="text-[10px] font-bold text-slate-500 ml-2 uppercase">Weak</span>
+                                    <div className={`h-1 flex-1 rounded-full ${password.length > 0 ? (
+                                            passwordStrength === 'weak' ? 'bg-red-500' :
+                                                passwordStrength === 'strong' ? 'bg-yellow-500' :
+                                                    'bg-green-500'
+                                        ) : 'bg-primary/20'
+                                        }`}></div>
+                                    <div className={`h-1 flex-1 rounded-full ${passwordStrength === 'strong' || passwordStrength === 'very-strong' ? (
+                                            passwordStrength === 'strong' ? 'bg-yellow-500' : 'bg-green-500'
+                                        ) : 'bg-primary/20'
+                                        }`}></div>
+                                    <div className={`h-1 flex-1 rounded-full ${passwordStrength === 'very-strong' ? 'bg-green-500' : 'bg-primary/20'
+                                        }`}></div>
+                                    <span className={`text-[10px] font-bold ml-2 uppercase ${password.length > 0 ? (
+                                            passwordStrength === 'weak' ? 'text-red-500' :
+                                                passwordStrength === 'strong' ? 'text-yellow-500' :
+                                                    'text-green-500'
+                                        ) : 'text-slate-500'
+                                        }`}>
+                                        {password.length > 0 ? passwordStrength.replace('-', ' ') : 'Weak'}
+                                    </span>
                                 </div>
                             </div>
                             <div className="space-y-2">
                                 <label className="block text-sm font-bold uppercase tracking-wider text-slate-400 dark:text-primary/40">Verify Password</label>
                                 <div className="relative">
                                     <input
-                                        className="w-full h-14 bg-white dark:bg-surface-dark/50 border-2 border-primary/20 focus:border-primary rounded-lg px-4 outline-none transition-colors"
+                                        className="w-full h-14 bg-white dark:bg-surface-dark/50 border-2 border-primary/20 focus:border-primary rounded-lg px-4 pr-12 outline-none transition-colors"
                                         placeholder="Confirm your password"
-                                        type="password"
+                                        type={showConfirmPassword ? "text" : "password"}
                                         value={confirmPassword}
                                         onChange={(e) => setConfirmPassword(e.target.value)}
                                         required
                                     />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-primary/60 cursor-pointer hover:text-primary focus:outline-none"
+                                    >
+                                        <span className="material-icons-round">{showConfirmPassword ? 'visibility' : 'visibility_off'}</span>
+                                    </button>
                                 </div>
                             </div>
                         </section>

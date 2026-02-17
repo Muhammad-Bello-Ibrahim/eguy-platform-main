@@ -1,35 +1,24 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getSession } from "@/lib/auth"
 import { Database } from "@/lib/database"
-import { handleApiError, AuthenticationError, ValidationError, InsufficientBalanceError, NotFoundError } from "@/lib/errors"
 
 export async function POST(request: NextRequest) {
-  let serviceType: string | undefined;
-  let provider: string | undefined;
-  let amount: number | undefined;
-  let recipient: string | undefined;
   try {
     const session = await getSession()
     if (!session) {
-      throw new AuthenticationError();
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const { serviceType: serviceTypeValue, provider: providerValue, amount: amountValue, recipient: recipientValue, customerInfo } = await request.json()
-    serviceType = serviceTypeValue;
-    provider = providerValue;
-    amount = amountValue;
-    recipient = recipientValue;
+    const { serviceType, provider, amount, recipient, customerInfo } = await request.json()
 
     if (!serviceType || !provider || !amount || !recipient) {
-      throw new ValidationError("All fields are required");
+      return NextResponse.json({ error: "All fields are required" }, { status: 400 })
     }
 
+    // Check user wallet balance
     const user = await Database.findUserById(session.user.id)
-    if (!user) {
-      throw new NotFoundError("User");
-    }
-    if (user.walletBalance < amount) {
-      throw new InsufficientBalanceError(amount, user.walletBalance);
+    if (!user || user.walletBalance < amount) {
+      return NextResponse.json({ error: "Insufficient wallet balance" }, { status: 400 })
     }
 
     // Check SubAndGain API credentials
@@ -80,11 +69,7 @@ export async function POST(request: NextRequest) {
       subaData,
     });
   } catch (error) {
-    return handleApiError(error as Error, {
-      route: '/api/payments/bills',
-      serviceType,
-      provider,
-      amount,
-    });
+    console.error("Bill payment error:", error)
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }

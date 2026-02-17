@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { AirtimePlan } from "@/lib/models/AirtimePlan";
-import { Database } from "@/lib/database";
-import { handleApiError, ValidationError, DatabaseError } from "@/lib/errors";
+import { } from "@/lib/models/AirtimePlan";
+import { Database } from "@/libAirtimePlan/database";
 
 export const dynamic = "force-dynamic";
 
@@ -14,8 +13,7 @@ export async function POST(req: NextRequest) {
     const plan = await AirtimePlan.create(body);
     return NextResponse.json(plan, { status: 201 });
   } catch (error) {
-    return handleApiError(error as Error, {
-      route: '/api/admin/airtime-plans/add',
-    });
+    console.error("Error creating airtime plan:", error);
+    return NextResponse.json({ error: "Failed to create plan" }, { status: 500 });
   }
 }
