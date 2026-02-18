@@ -105,9 +105,24 @@ export class Database {
     await db.collection("verification_tokens").insertOne({
       userId,
       token,
-      expires,
+      expiresAt: expires,
       createdAt: new Date(),
     })
+  }
+
+  static async getVerificationToken(token: string) {
+    const db = await this.getDb()
+    const tokenDoc = await db.collection("verification_tokens").findOne({ token })
+    if (!tokenDoc) return null
+    return {
+      ...tokenDoc,
+      expiresAt: tokenDoc.expiresAt ?? tokenDoc.expires,
+    }
+  }
+
+  static async deleteVerificationToken(token: string) {
+    const db = await this.getDb()
+    await db.collection("verification_tokens").deleteOne({ token })
   }
 
   // =========================
