@@ -60,6 +60,20 @@ export class Database {
     return { ...user, id: user._id.toString() }
   }
 
+  static async findUserByPhone(phone: string) {
+    const db = await this.getDb()
+    const user = await db.collection("users").findOne({ phone })
+    if (!user) return null
+    return { ...user, id: user._id.toString() }
+  }
+
+  static async findUserByReferralCode(referralCode: string) {
+    const db = await this.getDb()
+    const user = await db.collection("users").findOne({ referralCode })
+    if (!user) return null
+    return { ...user, id: user._id.toString() }
+  }
+
   static async findUserById(id: string) {
     const db = await this.getDb()
     const user = await db.collection("users").findOne({ _id: new ObjectId(id) })
@@ -84,6 +98,16 @@ export class Database {
       { _id: new ObjectId(userId) },
       { $inc: { walletBalance: amount }, $set: { updatedAt: new Date() } }
     )
+  }
+
+  static async saveVerificationToken(userId: string, token: string, expires: Date) {
+    const db = await this.getDb()
+    await db.collection("verification_tokens").insertOne({
+      userId,
+      token,
+      expires,
+      createdAt: new Date(),
+    })
   }
 
   // =========================
