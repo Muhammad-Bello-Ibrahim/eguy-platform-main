@@ -56,7 +56,8 @@ export function WithdrawModal({ isOpen, onClose, onSuccess }: WithdrawModalProps
 
   const [otp, setOtp] = useState("")
   const [transferCode, setTransferCode] = useState("")
-  const [step, setStep] = useState<'amount' | 'otp'>('amount')
+  const [step, setStep] = useState<'amount' | 'otp' | 'success' | 'failure'>('amount')
+  const [failureMessage, setFailureMessage] = useState("")
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -98,11 +99,14 @@ export function WithdrawModal({ isOpen, onClose, onSuccess }: WithdrawModalProps
       }
 
       setIsLoading(false)
+      setStep('success')
       onSuccess()
       toast({ title: "Withdrawal requested", description: "Your withdrawal is being processed." })
-      onClose()
     } catch (err: any) {
-      setError(err.message || "Withdrawal failed")
+      const message = err.message || "Withdrawal failed"
+      setError(message)
+      setFailureMessage(message)
+      setStep('failure')
       setIsLoading(false)
     }
   }
@@ -123,11 +127,14 @@ export function WithdrawModal({ isOpen, onClose, onSuccess }: WithdrawModalProps
       if (!response.ok) throw new Error(result.error || "OTP Verification failed")
 
       setIsLoading(false)
+      setStep('success')
       onSuccess()
       toast({ title: "Success", description: "Withdrawal confirmed successfully." })
-      onClose()
     } catch (err: any) {
-      setError(err.message || "Verification failed")
+      const message = err.message || "Verification failed"
+      setError(message)
+      setFailureMessage(message)
+      setStep('failure')
       setIsLoading(false)
     }
   }
@@ -140,6 +147,16 @@ export function WithdrawModal({ isOpen, onClose, onSuccess }: WithdrawModalProps
       setStep('amount')
       setAmount("")
       setOtp("")
+      setFailureMessage("")
+    }, 500)
+  }
+
+  const handleFailureClose = () => {
+    onClose()
+    setTimeout(() => {
+      setStep('amount')
+      setOtp("")
+      setFailureMessage("")
     }, 500)
   }
 
@@ -159,7 +176,7 @@ export function WithdrawModal({ isOpen, onClose, onSuccess }: WithdrawModalProps
         {/* Header */}
         <div className="flex justify-between items-center px-6 mb-6">
           <DialogTitle className="text-xl font-bold text-slate-900 dark:text-white">
-            {step === 'amount' ? 'Withdraw Funds' : step === 'otp' ? 'Enter OTP' : 'Success'}
+            {step === 'amount' ? 'Withdraw Funds' : step === 'otp' ? 'Enter OTP' : step === 'success' ? 'Success' : 'Failed'}
           </DialogTitle>
         </div>
 
@@ -328,7 +345,7 @@ export function WithdrawModal({ isOpen, onClose, onSuccess }: WithdrawModalProps
               </button>
             </div>
           </form>
-        ) : (
+        ) : step === 'success' ? (
           <div className="px-6 pb-10 space-y-6">
             <div className="text-center">
               <div className="w-16 h-16 bg-[#47f0d1]/10 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -385,6 +402,41 @@ export function WithdrawModal({ isOpen, onClose, onSuccess }: WithdrawModalProps
             >
               Done
             </Button>
+          </div>
+        ) : (
+          <div className="px-6 pb-10 space-y-6">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <ShieldCheck className="w-8 h-8 text-red-500" />
+              </div>
+              <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-1">Withdrawal Failed</h3>
+              <p className="text-slate-500 dark:text-zinc-400 text-sm">
+                {failureMessage || "We could not complete your withdrawal. Please try again."}
+              </p>
+            </div>
+
+            <div className="bg-red-500/5 border border-red-500/20 rounded-xl p-4 text-sm text-red-500 text-center">
+              If the issue persists, check your payout details or try again later.
+            </div>
+
+            <div className="flex gap-3">
+              <Button
+                onClick={() => {
+                  setStep('amount')
+                  setOtp("")
+                  setFailureMessage("")
+                }}
+                className="flex-1 bg-slate-100 text-slate-900 font-bold py-5 rounded-xl transition-all active:scale-[0.98]"
+              >
+                Try Again
+              </Button>
+              <Button
+                onClick={handleFailureClose}
+                className="flex-1 bg-[#47f0d1] hover:bg-[#47f0d1]/90 text-[#131321] font-extrabold py-5 rounded-xl transition-all shadow-[0_4px_20px_rgba(71,240,209,0.3)] active:scale-[0.98]"
+              >
+                Close
+              </Button>
+            </div>
           </div>
         )}
       </DialogContent>

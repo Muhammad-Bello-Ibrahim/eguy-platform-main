@@ -159,7 +159,7 @@ export function WalletDashboard() {
     const cashback = 0;
 
     return (
-        <div className="min-h-screen bg-[#10221e] text-slate-100 font-display pb-24">
+        <div className="min-h-screen bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display pb-24">
             {/* Header */}
             <DashboardHeader user={user} />
 
