@@ -13,75 +13,44 @@ export interface DatabaseUser {
   referralCode?: string
   referredBy?: string
   elevatexActivated?: boolean
-  biometricEnabled?: boolean
-  biometricCredentials?: BiometricCredential[]
+  directReferralsCount?: number
+  matrixParentId?: string
+  autoPlacedAt?: Date
+  level5EarningsCompleted?: boolean
   createdAt?: Date
   updatedAt?: Date
-  linkedAccounts?: LinkedAccount[]
-  payoutAccount?: LinkedAccount
-}
-
-export interface BiometricCredential {
-  id: string
-  publicKey: string
-  counter: number
-  createdAt: Date
-  deviceName?: string
-}
-
-export interface LinkedAccount {
-  id: string
-  bank: string
-  bankCode?: string // Added bankCode
-  accountNumber: string
-  accountName: string
-  isPrimary?: boolean
-  recipientCode?: string // Added recipientCode explicitly
 }
 
 export class Database {
   // =========================
-  // SAFE CONNECTION HANDLER
+  // SAFE CONNECTION
   // =========================
-
   private static async getDb(): Promise<Db> {
     if (cachedDb) return cachedDb
-
-    if (!process.env.MONGODB_URI) {
-      throw new Error("MONGODB_URI is not defined")
-    }
-
+    if (!process.env.MONGODB_URI) throw new Error("MONGODB_URI not defined")
     const client = new MongoClient(process.env.MONGODB_URI)
-
     await client.connect()
-
     cachedClient = client
     cachedDb = client.db(process.env.MONGODB_DB)
-
     console.log("✅ MongoDB Connected")
-
     return cachedDb
   }
 
   // =========================
   // USERS
   // =========================
-
   static async createUser(data: Partial<DatabaseUser>) {
     const db = await this.getDb()
-
     const result = await db.collection("users").insertOne({
       ...data,
       walletBalance: data.walletBalance ?? 0,
       elevatexActivated: false,
+      directReferralsCount: 0,
+      level5EarningsCompleted: false,
       createdAt: new Date(),
       updatedAt: new Date(),
     })
-
-    return {
-      id: result.insertedId.toString(),
-      ...data,
-    }
+    return { id: result.insertedId.toString(), ...data }
   }
 
   static async findUserByEmail(email: string) {
@@ -91,28 +60,9 @@ export class Database {
     return { ...user, id: user._id.toString() }
   }
 
-  // ✅ ADDED THIS METHOD
-  static async findUserByPhone(phone: string) {
-    const db = await this.getDb()
-    const user = await db.collection("users").findOne({ phone })
-    if (!user) return null
-    return { ...user, id: user._id.toString() }
-  }
-
   static async findUserById(id: string) {
     const db = await this.getDb()
-    const user = await db.collection("users").findOne({
-      _id: new ObjectId(id),
-    })
-    if (!user) return null
-    return { ...user, id: user._id.toString() }
-  }
-
-  static async findUserByReferralCode(code: string) {
-    const db = await this.getDb()
-    const user = await db.collection("users").findOne({
-      referralCode: code,
-    })
+    const user = await db.collection("users").findOne({ _id: new ObjectId(id) })
     if (!user) return null
     return { ...user, id: user._id.toString() }
   }
@@ -124,94 +74,21 @@ export class Database {
       { $set: { ...updates, updatedAt: new Date() } },
       { returnDocument: "after" }
     )
-
-    if (!result) return null;
-    return { ...result, id: result._id.toString() }
+    if (!result.value) return null
+    return { ...result.value, id: result.value._id.toString() }
   }
 
   static async updateUserWallet(userId: string, amount: number) {
     const db = await this.getDb()
     await db.collection("users").updateOne(
       { _id: new ObjectId(userId) },
-      {
-        $inc: { walletBalance: amount },
-        $set: { updatedAt: new Date() },
-      }
+      { $inc: { walletBalance: amount }, $set: { updatedAt: new Date() } }
     )
-  }
-
-  // =========================
-  // TRANSACTIONS
-  // =========================
-
-  static async createTransaction(data: {
-    userId: string
-    type: string
-    amount: number
-    description: string
-    status: string
-    metadata?: any
-    reference?: string
-  }) {
-    const db = await this.getDb()
-    await db.collection("transactions").insertOne({
-      ...data,
-      createdAt: new Date(),
-    })
-  }
-
-  static async getUserTransactions(userId: string) {
-    const db = await this.getDb()
-    return db
-      .collection("transactions")
-      .find({ userId })
-      .sort({ createdAt: -1 })
-      .toArray()
-  }
-
-  static async findTransactionByReference(reference: string) {
-    const db = await this.getDb()
-    const transaction = await db.collection("transactions").findOne({
-      $or: [
-        { reference: reference },
-        { "metadata.reference": reference }
-      ]
-    })
-    if (!transaction) return null
-    return { ...transaction, id: transaction._id.toString() }
-  }
-
-  static async updateTransactionStatusAtomic(
-    reference: string,
-    expectedStatus: string,
-    newStatus: string
-  ) {
-    const db = await this.getDb()
-    const result = await db.collection("transactions").findOneAndUpdate(
-      {
-        $or: [
-          { reference: reference },
-          { "metadata.reference": reference },
-          { "metadata.paystackTransfer.reference": reference }
-        ],
-        status: expectedStatus,
-      },
-      {
-        $set: {
-          status: newStatus,
-          updatedAt: new Date(),
-        },
-      },
-      { returnDocument: "after" }
-    )
-
-    return result !== null
   }
 
   // =========================
   // REFERRALS
   // =========================
-
   static async createReferral(data: {
     referrerId: string
     referredId: string
@@ -220,250 +97,73 @@ export class Database {
     status: string
   }) {
     const db = await this.getDb()
-    await db.collection("referrals").insertOne({
-      ...data,
-      createdAt: new Date(),
-    })
-  }
-
-  static async getUserReferrals(userId: string) {
-    const db = await this.getDb()
-    return db.collection("referrals").find({ referrerId: userId }).toArray()
+    await db.collection("referrals").insertOne({ ...data, createdAt: new Date() })
   }
 
   static async getReferral(referrerId: string, referredId: string) {
     const db = await this.getDb()
-    return db.collection("referrals").findOne({
-      referrerId,
-      referredId,
-    })
+    return db.collection("referrals").findOne({ referrerId, referredId })
   }
 
-  // =========================
-  // EMAIL VERIFICATION
-  // =========================
-
-  static async saveVerificationToken(
-    userId: string,
-    token: string,
-    expiresAt: Date
-  ) {
+  static async getUserReferrals(userId: string) {
     const db = await this.getDb()
-    await db.collection("verificationTokens").insertOne({
-      userId,
-      token,
-      expiresAt,
-      createdAt: new Date(),
-    })
-  }
-
-  static async getVerificationToken(token: string) {
-    const db = await this.getDb()
-    return db.collection("verificationTokens").findOne({ token })
-  }
-
-  static async deleteVerificationToken(token: string) {
-    const db = await this.getDb()
-    await db.collection("verificationTokens").deleteOne({ token })
-  }
-
-  // =========================
-  // NOTIFICATIONS
-  // =========================
-
-  static async createNotification(data: {
-    userId: string
-    type: string
-    title: string
-    message: string
-    amount?: number
-    status?: string
-    actionUrl?: string
-  }) {
-    const db = await this.getDb()
-    await db.collection("notifications").insertOne({
-      ...data,
-      read: false,
-      createdAt: new Date(),
-    })
-  }
-
-  static async getUserNotifications(userId: string, options: { type?: string, limit?: number, offset?: number } = {}) {
-    const db = await this.getDb()
-    const query: any = { userId }
-
-    if (options.type && options.type !== "all") {
-      if (options.type === "unread") {
-        query.read = false
-      } else {
-        query.type = options.type
-      }
-    }
-
-    return db
-      .collection("notifications")
-      .find(query)
+    return db.collection("referrals")
+      .find({ referrerId: userId })
       .sort({ createdAt: -1 })
-      .skip(options.offset || 0)
-      .limit(options.limit || 20)
       .toArray()
   }
 
-  static async getUnreadNotificationCount(userId: string) {
+  // =========================
+  // TRANSACTIONS
+  // =========================
+  static async createTransaction(data: {
+    userId: string
+    type: string
+    amount: number
+    description: string
+    status: string
+    metadata?: any
+  }) {
     const db = await this.getDb()
-    return db.collection("notifications").countDocuments({
-      userId,
-      read: false
-    })
+    await db.collection("transactions").insertOne({ ...data, createdAt: new Date() })
   }
 
-  static async markNotificationsAsRead(userId: string, notificationIds: string[]) {
+  static async getUserTransactions(userId: string) {
     const db = await this.getDb()
-    await db.collection("notifications").updateMany(
-      {
-        userId,
-        _id: { $in: notificationIds.map(id => new ObjectId(id)) }
-      },
-      {
-        $set: { read: true }
-      }
-    )
-  }
-
-  static async deleteNotification(userId: string, notificationId: string) {
-    const db = await this.getDb()
-    await db.collection("notifications").deleteOne({
-      userId,
-      _id: new ObjectId(notificationId)
-    })
+    return db.collection("transactions")
+      .find({ userId })
+      .sort({ createdAt: -1 })
+      .limit(50)
+      .toArray()
   }
 
   // =========================
-  // BIOMETRIC AUTHENTICATION
+  // ELEVATEX SPILLOVER HELPERS
   // =========================
+  static async findEligibleMatrixParent(): Promise<DatabaseUser | null> {
+    const db = await this.getDb()
+    const eligible = await db.collection("users")
+      .find({ elevatexActivated: true, directReferralsCount: { $lt: 5 }, level5EarningsCompleted: { $ne: true } })
+      .sort({ autoPlacedAt: 1, createdAt: 1 }) // FIFO placement
+      .limit(1)
+      .toArray()
+    if (eligible.length === 0) return null
+    return { ...eligible[0], id: eligible[0]._id.toString() }
+  }
 
-  static async saveBiometricCredential(userId: string, credential: BiometricCredential) {
+  static async incrementDirectCount(userId: string) {
     const db = await this.getDb()
     await db.collection("users").updateOne(
       { _id: new ObjectId(userId) },
-      {
-        $push: { biometricCredentials: credential } as any,
-        $set: {
-          biometricEnabled: true,
-          updatedAt: new Date()
-        }
-      }
+      { $inc: { directReferralsCount: 1 }, $set: { updatedAt: new Date() } }
     )
   }
 
-  static async getBiometricCredentials(userId: string): Promise<BiometricCredential[]> {
-    const db = await this.getDb()
-    const user = await db.collection("users").findOne(
-      { _id: new ObjectId(userId) },
-      { projection: { biometricCredentials: 1 } }
-    )
-    return user?.biometricCredentials || []
-  }
-
-  static async toggleBiometric(userId: string, enabled: boolean) {
+  static async markLevel5Completed(userId: string) {
     const db = await this.getDb()
     await db.collection("users").updateOne(
       { _id: new ObjectId(userId) },
-      {
-        $set: {
-          biometricEnabled: enabled,
-          updatedAt: new Date()
-        }
-      }
+      { $set: { level5EarningsCompleted: true, updatedAt: new Date() } }
     )
-  }
-
-  static async removeBiometricCredential(userId: string, credentialId: string) {
-    const db = await this.getDb()
-    await db.collection("users").updateOne(
-      { _id: new ObjectId(userId) },
-      {
-        $pull: { biometricCredentials: { id: credentialId } } as any,
-        $set: { updatedAt: new Date() }
-      }
-    )
-  }
-
-  static async findUserByCredentialId(credentialId: string) {
-    const db = await this.getDb()
-    const user = await db.collection("users").findOne({
-      "biometricCredentials.id": credentialId,
-      biometricEnabled: true
-    })
-    if (!user) return null
-    return { ...user, id: user._id.toString() }
-  }
-
-  // =========================
-  // BANKING
-  // =========================
-
-  static async addLinkedAccount(userId: string, account: Partial<LinkedAccount>) {
-    const db = await this.getDb()
-    const newAccount = { ...account, id: new ObjectId().toString() }
-
-    await db.collection("users").updateOne(
-      { _id: new ObjectId(userId) },
-      {
-        $push: { linkedAccounts: newAccount } as any,
-        $set: { updatedAt: new Date() }
-      }
-    )
-
-    if (account.isPrimary) {
-      await this.setPrimaryLinkedAccount(userId, newAccount.id);
-    }
-
-    return newAccount
-  }
-
-  static async removeLinkedAccount(userId: string, accountId: string) {
-    const db = await this.getDb()
-    await db.collection("users").updateOne(
-      { _id: new ObjectId(userId) },
-      {
-        $pull: { linkedAccounts: { id: accountId } } as any,
-        $set: { updatedAt: new Date() }
-      }
-    )
-
-    const user = await this.findUserById(userId);
-    if (user?.payoutAccount?.id === accountId) {
-      await db.collection("users").updateOne(
-        { _id: new ObjectId(userId) },
-        { $unset: { payoutAccount: "" } }
-      )
-    }
-  }
-
-  static async setPrimaryLinkedAccount(userId: string, accountId: string) {
-    const db = await this.getDb()
-
-    const user = await this.findUserById(userId);
-    if (!user || !(user as any).linkedAccounts) throw new Error("User or accounts not found");
-
-    const account = (user as any).linkedAccounts.find((a: any) => a.id === accountId);
-    if (!account) throw new Error("Account not found");
-
-    const updatedAccounts = (user as any).linkedAccounts.map((a: any) => ({
-      ...a,
-      isPrimary: a.id === accountId
-    }));
-
-    await db.collection("users").updateOne(
-      { _id: new ObjectId(userId) },
-      {
-        $set: {
-          linkedAccounts: updatedAccounts,
-          payoutAccount: { ...account, isPrimary: true },
-          updatedAt: new Date()
-        }
-      }
-    );
   }
 }
