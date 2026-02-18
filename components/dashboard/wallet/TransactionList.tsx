@@ -21,22 +21,11 @@ interface TransactionListProps {
 export function TransactionList({ transactions, isLoading }: TransactionListProps) {
     if (isLoading) {
         return (
-            <section className="mt-10">
-                <div className="flex items-center justify-between mb-4">
-                    <Skeleton className="h-5 w-52 bg-slate-100 dark:bg-slate-800/60" />
-                    <Skeleton className="h-8 w-8 rounded-lg bg-slate-100 dark:bg-slate-800/60" />
-                </div>
-                <div className="flex gap-2 p-1 rounded-xl mb-6">
-                    {[1, 2, 3].map((i) => (
-                        <Skeleton key={i} className="h-9 w-full rounded-lg bg-slate-100 dark:bg-slate-800/60" />
-                    ))}
-                </div>
-                <div className="space-y-4">
-                    {[1, 2, 3].map((i) => (
-                        <Skeleton key={i} className="h-20 w-full rounded-2xl bg-slate-100 dark:bg-slate-800/60" />
-                    ))}
-                </div>
-            </section>
+            <div className="space-y-4">
+                {[1, 2, 3].map((i) => (
+                    <Skeleton key={i} className="h-20 w-full rounded-2xl bg-white/5" />
+                ))}
+            </div>
         );
     }
 

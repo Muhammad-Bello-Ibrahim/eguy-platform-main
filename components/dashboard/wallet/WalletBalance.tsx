@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Eye, EyeOff } from "lucide-react";
 
 interface WalletBalanceProps {
@@ -42,36 +41,6 @@ export function WalletBalance({ balance, pendingBalance = 0, onWithdraw, isLoadi
     // Split balance for styling
     const formattedBalance = formatCurrency(balance);
     const [mainPart, decimalPart] = formattedBalance.split('.');
-
-    if (isLoading) {
-        return (
-            <section className="mt-4">
-                <div className="bg-white dark:bg-card-dark border border-slate-200 dark:border-slate-800/50 p-6 rounded-2xl shadow-2xl relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 blur-[60px] rounded-full -mr-16 -mt-16 pointer-events-none"></div>
-                    <div className="flex items-center justify-between mb-3">
-                        <Skeleton className="h-4 w-40 bg-slate-100 dark:bg-slate-800/60" />
-                        <Skeleton className="h-4 w-4 bg-slate-100 dark:bg-slate-800/60" />
-                    </div>
-                    <Skeleton className="h-10 w-56 mb-5 bg-slate-100 dark:bg-slate-800/60" />
-                    <div className="flex items-center gap-4 py-3 border-y border-slate-200 dark:border-slate-800/40 mb-6">
-                        <div className="flex-1 space-y-2">
-                            <Skeleton className="h-3 w-24 bg-slate-100 dark:bg-slate-800/60" />
-                            <Skeleton className="h-4 w-28 bg-slate-100 dark:bg-slate-800/60" />
-                        </div>
-                        <div className="w-px h-8 bg-slate-200 dark:bg-slate-800/60"></div>
-                        <div className="flex-1 space-y-2">
-                            <Skeleton className="h-3 w-24 bg-slate-100 dark:bg-slate-800/60" />
-                            <Skeleton className="h-4 w-28 bg-slate-100 dark:bg-slate-800/60" />
-                        </div>
-                    </div>
-                    <div className="flex gap-3">
-                        <Skeleton className="h-12 w-full rounded-xl bg-slate-100 dark:bg-slate-800/60" />
-                        <Skeleton className="h-12 w-full rounded-xl bg-slate-100 dark:bg-slate-800/60" />
-                    </div>
-                </div>
-            </section>
-        );
-    }
 
     return (
         <section className="mt-4">

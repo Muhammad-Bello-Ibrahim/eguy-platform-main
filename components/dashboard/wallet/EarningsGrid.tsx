@@ -1,7 +1,6 @@
 "use client";
 
 import React from 'react';
-import { Skeleton } from "@/components/ui/skeleton";
 
 interface EarningsGridProps {
     directEarnings: number;
@@ -28,28 +27,7 @@ export function EarningsGrid({ directEarnings, networkEarnings, bonus, cashback,
         { title: "Cashback", amount: cashback, icon: "loyalty" },
     ];
 
-    if (isLoading) {
-        return (
-            <section className="mt-8">
-                <div className="flex items-center justify-between mb-4">
-                    <Skeleton className="h-5 w-48 bg-slate-100 dark:bg-slate-800/60" />
-                    <Skeleton className="h-4 w-20 bg-slate-100 dark:bg-slate-800/60" />
-                </div>
-                <div className="flex gap-3 overflow-x-auto no-scrollbar -mx-4 px-4 pb-4">
-                    {[1, 2, 3, 4].map((i) => (
-                        <div
-                            key={i}
-                            className="min-w-[140px] bg-white dark:bg-card-dark p-4 rounded-xl border border-slate-200 dark:border-slate-800/30 flex-shrink-0 shadow-sm"
-                        >
-                            <Skeleton className="h-6 w-6 mb-3 bg-slate-100 dark:bg-slate-800/60" />
-                            <Skeleton className="h-3 w-24 mb-2 bg-slate-100 dark:bg-slate-800/60" />
-                            <Skeleton className="h-5 w-20 bg-slate-100 dark:bg-slate-800/60" />
-                        </div>
-                    ))}
-                </div>
-            </section>
-        );
-    }
+    if (isLoading) return null; // Or skeleton
 
     return (
         <section className="mt-8">
