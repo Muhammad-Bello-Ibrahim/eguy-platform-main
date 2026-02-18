@@ -13,6 +13,7 @@ export default function BottomNavWrapper() {
         pathname.startsWith('/profile') ||
         pathname.startsWith('/elevatex') ||
         pathname.startsWith('/notifications') ||
+        pathname.startsWith('/wallet') ||
         pathname.startsWith('/settings');
 
     // Hide on auth pages or specific sub-pages if needed, but the current requirement says "through out the dashboard pages"

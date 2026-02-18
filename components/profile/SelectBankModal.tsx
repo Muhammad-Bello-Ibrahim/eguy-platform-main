@@ -26,7 +26,7 @@ interface Bank {
 interface SelectBankModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onSelect: (bankName: string, accountNumber: string, accountName: string) => Promise<void>;
+    onSelect: (bankName: string, accountNumber: string, accountName: string, bankCode: string) => Promise<void>;
 }
 
 const POPULAR_BANKS_UI = [
@@ -152,7 +152,7 @@ export function SelectBankModal({ isOpen, onClose, onSelect }: SelectBankModalPr
 
         setSubmitting(true);
         try {
-            await onSelect(selectedBank!.name, accountNumber, accountName);
+            await onSelect(selectedBank!.name, accountNumber, accountName, selectedBank!.code);
             onClose();
             // Reset state
             setTimeout(() => {

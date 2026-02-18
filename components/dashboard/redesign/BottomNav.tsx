@@ -31,7 +31,7 @@ export function BottomNav() {
                 </button>
 
                 <button
-                    onClick={() => router.push('/dashboard')}
+                    onClick={() => router.push('/wallet')}
                     className={pathname === '/wallet' ? getLinkClass('/wallet') : "flex flex-col items-center gap-1 text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 transition-colors"}
                 >
                     <span className="material-icons-round">account_balance_wallet</span>

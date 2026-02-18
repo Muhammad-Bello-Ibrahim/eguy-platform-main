@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
 
     try {
         const body = await request.json();
-        const { bank, accountNumber, accountName } = body;
+        const { bank, bankCode, accountNumber, accountName } = body;
 
         if (!bank || !accountNumber || !accountName) {
             return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -46,6 +46,7 @@ export async function POST(request: NextRequest) {
 
         const newAccount = await Database.addLinkedAccount(user.id, {
             bank,
+            bankCode, // Added bankCode
             accountNumber,
             accountName,
             isPrimary: isFirstAccount

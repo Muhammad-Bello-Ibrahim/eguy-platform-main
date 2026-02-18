@@ -9,11 +9,12 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const transactions = await Database.getUserTransactions(session.user.id)
+    const { user } = session as any;
+    const transactions = await Database.getUserTransactions(user.id)
 
     return NextResponse.json({
       transactions: transactions.map((t) => ({
-        id: t.id,
+        id: t._id.toString(),
         type: t.type,
         amount: t.amount,
         description: t.description,

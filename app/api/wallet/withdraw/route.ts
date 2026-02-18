@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
           type: "nuban",
           name: user.payoutAccount.accountName,
           account_number: user.payoutAccount.accountNumber,
-          bank_code: user.payoutAccount.bank,
+          bank_code: user.payoutAccount.bankCode || user.payoutAccount.bank, // Prefer bankCode
           currency: "NGN"
         })
       });
@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
       }
       recipientCode = recipientData.data.recipient_code;
       // Save recipientCode to user profile
-      await Database.updateUserByEmail(session.user.email, {
+      await Database.updateUserById(user.id, {
         payoutAccount: { ...user.payoutAccount, recipientCode }
       });
     }
@@ -77,18 +77,29 @@ export async function POST(request: NextRequest) {
     }
     // Deduct from wallet
     const newBalance = user.walletBalance - amount;
-    await Database.updateUserByEmail(session.user.email, { walletBalance: newBalance });
+    await Database.updateUserById(user.id, { walletBalance: newBalance });
     // Create transaction
     await Database.createTransaction({
       userId: user.id,
       type: "withdrawal",
       amount,
-      description: `Withdrawal to ${user.payoutAccount.bank} ${user.payoutAccount.accountNumber}`,
-      status: "pending",
+      description: `Withdrawal to ${user.payoutAccount.bankCode} ${user.payoutAccount.accountNumber}`,
+      status: "pending", // Always pending initially
       metadata: { payoutAccount: user.payoutAccount, paystackTransfer: transferData.data },
       createdAt: new Date(),
       updatedAt: new Date(),
     } as any);
+
+    // Check if OTP is required
+    if (transferData.data.status === 'otp') {
+      return NextResponse.json({
+        success: true,
+        requiresOtp: true,
+        transferCode: transferData.data.transfer_code,
+        message: transferData.message
+      });
+    }
+
     return NextResponse.json({ success: true, transfer: transferData.data });
   } catch (error: any) {
     console.error("Withdrawal error:", error);

@@ -30,13 +30,14 @@ export default function BankingPage() {
         }
     };
 
-    const handleAddAccount = async (bankName: string, accountNumber: string, accountName: string) => {
+    const handleAddAccount = async (bankName: string, accountNumber: string, accountName: string, bankCode: string) => {
         try {
             const res = await fetch('/api/user/banking', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     bank: bankName,
+                    bankCode, // Send bankCode
                     accountNumber,
                     accountName
                 })
@@ -153,7 +154,7 @@ export default function BankingPage() {
                                         )}
                                         {!account.isPrimary && (
                                             <button
-                                                onClick={() => handleDelete(account.id, account.isPrimary)}
+                                                onClick={() => handleDelete(account.id, !!account.isPrimary)}
                                                 className="w-8 h-8 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center hover:bg-red-50 dark:hover:bg-red-500/20 text-slate-400 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-500 transition-all opacity-0 group-hover:opacity-100"
                                             >
                                                 <span className="material-icons-round text-lg">delete</span>

@@ -19,10 +19,16 @@ export async function GET() {
     console.log("Fetched referrals:", referrals);
 
     const stats = {
-      referralCode: user?.referralCode,
+      referralCode: (user as any)?.referralCode,
       totalReferrals: referrals.length,
       activeReferrals: referrals.filter((r) => r.status === "active").length,
       totalEarnings: referrals.reduce((sum, r) => sum + (r.bonusAmount || 0), 0),
+      directEarnings: referrals
+        .filter(r => r.level === 1)
+        .reduce((sum, r) => sum + (r.bonusAmount || 0), 0),
+      networkEarnings: referrals
+        .filter(r => r.level > 1)
+        .reduce((sum, r) => sum + (r.bonusAmount || 0), 0),
       referralsByLevel: {
         level1: referrals.filter((r) => r.level === 1).length,
         level2: referrals.filter((r) => r.level === 2).length,

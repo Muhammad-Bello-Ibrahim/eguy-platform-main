@@ -17,6 +17,8 @@ export interface DatabaseUser {
   biometricCredentials?: BiometricCredential[]
   createdAt?: Date
   updatedAt?: Date
+  linkedAccounts?: LinkedAccount[]
+  payoutAccount?: LinkedAccount
 }
 
 export interface BiometricCredential {
@@ -30,9 +32,11 @@ export interface BiometricCredential {
 export interface LinkedAccount {
   id: string
   bank: string
+  bankCode?: string // Added bankCode
   accountNumber: string
   accountName: string
   isPrimary?: boolean
+  recipientCode?: string // Added recipientCode explicitly
 }
 
 export class Database {
@@ -187,7 +191,8 @@ export class Database {
       {
         $or: [
           { reference: reference },
-          { "metadata.reference": reference }
+          { "metadata.reference": reference },
+          { "metadata.paystackTransfer.reference": reference }
         ],
         status: expectedStatus,
       },
@@ -392,5 +397,73 @@ export class Database {
     })
     if (!user) return null
     return { ...user, id: user._id.toString() }
+  }
+
+  // =========================
+  // BANKING
+  // =========================
+
+  static async addLinkedAccount(userId: string, account: Partial<LinkedAccount>) {
+    const db = await this.getDb()
+    const newAccount = { ...account, id: new ObjectId().toString() }
+
+    await db.collection("users").updateOne(
+      { _id: new ObjectId(userId) },
+      {
+        $push: { linkedAccounts: newAccount } as any,
+        $set: { updatedAt: new Date() }
+      }
+    )
+
+    if (account.isPrimary) {
+      await this.setPrimaryLinkedAccount(userId, newAccount.id);
+    }
+
+    return newAccount
+  }
+
+  static async removeLinkedAccount(userId: string, accountId: string) {
+    const db = await this.getDb()
+    await db.collection("users").updateOne(
+      { _id: new ObjectId(userId) },
+      {
+        $pull: { linkedAccounts: { id: accountId } } as any,
+        $set: { updatedAt: new Date() }
+      }
+    )
+
+    const user = await this.findUserById(userId);
+    if (user?.payoutAccount?.id === accountId) {
+      await db.collection("users").updateOne(
+        { _id: new ObjectId(userId) },
+        { $unset: { payoutAccount: "" } }
+      )
+    }
+  }
+
+  static async setPrimaryLinkedAccount(userId: string, accountId: string) {
+    const db = await this.getDb()
+
+    const user = await this.findUserById(userId);
+    if (!user || !(user as any).linkedAccounts) throw new Error("User or accounts not found");
+
+    const account = (user as any).linkedAccounts.find((a: any) => a.id === accountId);
+    if (!account) throw new Error("Account not found");
+
+    const updatedAccounts = (user as any).linkedAccounts.map((a: any) => ({
+      ...a,
+      isPrimary: a.id === accountId
+    }));
+
+    await db.collection("users").updateOne(
+      { _id: new ObjectId(userId) },
+      {
+        $set: {
+          linkedAccounts: updatedAccounts,
+          payoutAccount: { ...account, isPrimary: true },
+          updatedAt: new Date()
+        }
+      }
+    );
   }
 }
