@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
   // Update parent's direct count
   if (matrixParentId) await Database.incrementDirectCount(matrixParentId)
 
-  // Multi-level bonuses
+  // Multi-level bonuses and referral records
   let currentUser = user
   const bonusLevels = [200, 150, 100, 50, 50]
 
@@ -67,6 +67,16 @@ export async function POST(request: NextRequest) {
 
     const bonus = bonusLevels[level - 1]
     await Database.updateUserWallet(parent.id, bonus)
+    
+    // Create referral record for tracking multi-level referrals
+    await Database.createReferral({
+      referrerId: parent.id,
+      referredId: user.id,
+      level: level,
+      bonusAmount: bonus,
+      status: "active"
+    })
+    
     await Database.createTransaction({
       userId: parent.id,
       type: "referral_bonus",

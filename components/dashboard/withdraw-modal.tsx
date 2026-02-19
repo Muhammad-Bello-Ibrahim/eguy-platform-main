@@ -56,8 +56,7 @@ export function WithdrawModal({ isOpen, onClose, onSuccess }: WithdrawModalProps
 
   const [otp, setOtp] = useState("")
   const [transferCode, setTransferCode] = useState("")
-  const [step, setStep] = useState<'amount' | 'otp' | 'success' | 'failure'>('amount')
-  const [failureMessage, setFailureMessage] = useState("")
+  const [step, setStep] = useState<'amount' | 'otp'>('amount')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -99,14 +98,11 @@ export function WithdrawModal({ isOpen, onClose, onSuccess }: WithdrawModalProps
       }
 
       setIsLoading(false)
-      setStep('success')
       onSuccess()
       toast({ title: "Withdrawal requested", description: "Your withdrawal is being processed." })
+      onClose()
     } catch (err: any) {
-      const message = err.message || "Withdrawal failed"
-      setError(message)
-      setFailureMessage(message)
-      setStep('failure')
+      setError(err.message || "Withdrawal failed")
       setIsLoading(false)
     }
   }
@@ -127,14 +123,11 @@ export function WithdrawModal({ isOpen, onClose, onSuccess }: WithdrawModalProps
       if (!response.ok) throw new Error(result.error || "OTP Verification failed")
 
       setIsLoading(false)
-      setStep('success')
       onSuccess()
       toast({ title: "Success", description: "Withdrawal confirmed successfully." })
+      onClose()
     } catch (err: any) {
-      const message = err.message || "Verification failed"
-      setError(message)
-      setFailureMessage(message)
-      setStep('failure')
+      setError(err.message || "Verification failed")
       setIsLoading(false)
     }
   }
@@ -147,16 +140,6 @@ export function WithdrawModal({ isOpen, onClose, onSuccess }: WithdrawModalProps
       setStep('amount')
       setAmount("")
       setOtp("")
-      setFailureMessage("")
-    }, 500)
-  }
-
-  const handleFailureClose = () => {
-    onClose()
-    setTimeout(() => {
-      setStep('amount')
-      setOtp("")
-      setFailureMessage("")
     }, 500)
   }
 
@@ -176,7 +159,7 @@ export function WithdrawModal({ isOpen, onClose, onSuccess }: WithdrawModalProps
         {/* Header */}
         <div className="flex justify-between items-center px-6 mb-6">
           <DialogTitle className="text-xl font-bold text-slate-900 dark:text-white">
-            {step === 'amount' ? 'Withdraw Funds' : step === 'otp' ? 'Enter OTP' : step === 'success' ? 'Success' : 'Failed'}
+            {step === 'amount' ? 'Withdraw Funds' : step === 'otp' ? 'Enter OTP' : 'Success'}
           </DialogTitle>
         </div>
 
@@ -345,98 +328,23 @@ export function WithdrawModal({ isOpen, onClose, onSuccess }: WithdrawModalProps
               </button>
             </div>
           </form>
-        ) : step === 'success' ? (
-          <div className="px-6 pb-10 space-y-6">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-[#47f0d1]/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <ShieldCheck className="w-8 h-8 text-[#47f0d1]" />
-              </div>
-              <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-1">Withdrawal Successful</h3>
-              <p className="text-slate-500 dark:text-zinc-400 text-sm">
-                Your funds are on the way to your bank account.
+        ) : (
+          <div className="px-6 pb-10 text-center space-y-6">
+            <div className="w-20 h-20 bg-[#47f0d1]/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <ShieldCheck className="w-10 h-10 text-[#47f0d1]" />
+            </div>
+            <div>
+              <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Withdrawal Successful</h3>
+              <p className="text-slate-500 dark:text-zinc-400">
+                Your request for <span className="text-[#47f0d1] font-bold">{formatCurrency(Number.parseFloat(amount))}</span> has been processed successfully.
               </p>
             </div>
-
-            {/* Receipt Card */}
-            <div className="bg-slate-50 dark:bg-zinc-900/40 border border-slate-200 dark:border-white/5 rounded-xl p-5 space-y-4">
-              <div className="flex justify-between items-start">
-                <div>
-                  <p className="text-xs text-slate-500 dark:text-zinc-500 uppercase tracking-wider font-semibold mb-1">Amount</p>
-                  <h4 className="text-2xl font-bold text-[#47f0d1]">{formatCurrency(Number.parseFloat(amount))}</h4>
-                </div>
-              </div>
-
-              <div className="h-px bg-slate-200 dark:bg-white/5 border-dashed border-b"></div>
-
-              <div className="space-y-3">
-                <div className="flex justify-between text-sm">
-                  <span className="text-slate-500 dark:text-zinc-500">Bank Name</span>
-                  <span className="text-slate-900 dark:text-white font-medium">{payoutAccount?.bank}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-slate-500 dark:text-zinc-500">Account Number</span>
-                  <span className="text-slate-900 dark:text-white font-medium">{payoutAccount?.accountNumber}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-slate-500 dark:text-zinc-500">Account Name</span>
-                  <span className="text-slate-900 dark:text-white font-medium text-right max-w-[150px] truncate">{payoutAccount?.accountName}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-slate-500 dark:text-zinc-500">Transaction Fee</span>
-                  <span className="text-slate-900 dark:text-white font-medium">{formatCurrency(transactionFee)}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-slate-500 dark:text-zinc-500">Reference</span>
-                  <span className="text-slate-900 dark:text-white font-medium font-mono text-xs">{transferCode || "N/A"}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-slate-500 dark:text-zinc-500">Date</span>
-                  <span className="text-slate-900 dark:text-white font-medium">{new Date().toLocaleString()}</span>
-                </div>
-              </div>
-            </div>
-
             <Button
               onClick={handleSuccessClose}
               className="w-full bg-[#47f0d1] hover:bg-[#47f0d1]/90 text-[#131321] font-extrabold py-6 rounded-xl transition-all shadow-[0_4px_20px_rgba(71,240,209,0.3)] active:scale-[0.98] text-lg h-auto"
             >
               Done
             </Button>
-          </div>
-        ) : (
-          <div className="px-6 pb-10 space-y-6">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <ShieldCheck className="w-8 h-8 text-red-500" />
-              </div>
-              <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-1">Withdrawal Failed</h3>
-              <p className="text-slate-500 dark:text-zinc-400 text-sm">
-                {failureMessage || "We could not complete your withdrawal. Please try again."}
-              </p>
-            </div>
-
-            <div className="bg-red-500/5 border border-red-500/20 rounded-xl p-4 text-sm text-red-500 text-center">
-              If the issue persists, check your payout details or try again later.
-            </div>
-
-            <div className="flex gap-3">
-              <Button
-                onClick={() => {
-                  setStep('amount')
-                  setOtp("")
-                  setFailureMessage("")
-                }}
-                className="flex-1 bg-slate-100 text-slate-900 font-bold py-5 rounded-xl transition-all active:scale-[0.98]"
-              >
-                Try Again
-              </Button>
-              <Button
-                onClick={handleFailureClose}
-                className="flex-1 bg-[#47f0d1] hover:bg-[#47f0d1]/90 text-[#131321] font-extrabold py-5 rounded-xl transition-all shadow-[0_4px_20px_rgba(71,240,209,0.3)] active:scale-[0.98]"
-              >
-                Close
-              </Button>
-            </div>
           </div>
         )}
       </DialogContent>

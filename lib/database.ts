@@ -94,10 +94,13 @@ export class Database {
 
   static async updateUserWallet(userId: string, amount: number) {
     const db = await this.getDb()
-    await db.collection("users").updateOne(
-      { _id: new ObjectId(userId) },
+    const objectId = typeof userId === 'string' && userId.length === 24 ? new ObjectId(userId) : userId
+    const result = await db.collection("users").updateOne(
+      { _id: objectId },
       { $inc: { walletBalance: amount }, $set: { updatedAt: new Date() } }
     )
+    console.log("Wallet update result:", { userId, objectId, matchedCount: result.matchedCount, modifiedCount: result.modifiedCount })
+    return result
   }
 
   static async saveVerificationToken(userId: string, token: string, expires: Date) {
@@ -144,12 +147,41 @@ export class Database {
     return db.collection("referrals").findOne({ referrerId, referredId })
   }
 
-  static async getUserReferrals(userId: string) {
+  static async getUserReferrals(userId: string): Promise<any[]> {
     const db = await this.getDb()
-    return db.collection("referrals")
-      .find({ referrerId: userId })
-      .sort({ createdAt: -1 })
-      .toArray()
+    const allReferrals: any[] = []
+    const visited = new Set<string>()
+    
+    // BFS to build multi-level referral tree
+    const queue = [{ userId, level: 1 }]
+    
+    while (queue.length > 0) {
+      const { userId: currentId, level } = queue.shift()!
+      
+      if (visited.has(currentId) || level > 5) {
+        continue
+      }
+      visited.add(currentId)
+      
+      // Get direct referrals of current user
+      const directReferrals = await db.collection("referrals")
+        .find({ referrerId: currentId })
+        .sort({ createdAt: -1 })
+        .toArray()
+      
+      // Add to results with level assignment
+      for (const ref of directReferrals) {
+        const referralWithLevel = { ...ref, level }
+        allReferrals.push(referralWithLevel)
+        
+        // Queue the referred user to fetch their referrals at next level
+        if (level < 5) {
+          queue.push({ userId: ref.referredId, level: level + 1 })
+        }
+      }
+    }
+    
+    return allReferrals.sort((a: any, b: any) => (b.createdAt?.getTime?.() || 0) - (a.createdAt?.getTime?.() || 0))
   }
 
   // =========================
@@ -161,10 +193,19 @@ export class Database {
     amount: number
     description: string
     status: string
+    reference?: string
     metadata?: any
   }) {
     const db = await this.getDb()
-    await db.collection("transactions").insertOne({ ...data, createdAt: new Date() })
+    // Store userId as string for consistency
+    const transactionData = {
+      ...data,
+      userId: data.userId,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    }
+    const result = await db.collection("transactions").insertOne(transactionData)
+    return result.insertedId.toString()
   }
 
   static async getUserTransactions(userId: string) {
@@ -174,6 +215,61 @@ export class Database {
       .sort({ createdAt: -1 })
       .limit(50)
       .toArray()
+  }
+
+  static async findTransactionByReference(reference: string) {
+    const db = await this.getDb()
+    const tx = await db.collection("transactions").findOne({ reference })
+    if (!tx) return null
+    console.log("Found transaction by reference:", { reference, status: tx.status, userId: tx.userId })
+    return { 
+      ...tx, 
+      id: tx._id.toString()
+    }
+  }
+
+  static async updateTransactionStatusAtomic(reference: string, fromStatus: string, toStatus: string) {
+    const db = await this.getDb()
+    
+    // First verify the transaction is still in fromStatus
+    const currentTx = await db.collection("transactions").findOne({ reference })
+    console.log("Current transaction state:", { reference, currentStatus: currentTx?.status, fromStatus })
+    
+    if (!currentTx) {
+      console.log("Transaction not found")
+      return false
+    }
+    
+    if (currentTx.status !== fromStatus) {
+      console.log("Transaction status mismatch", { currentStatus: currentTx.status, expectedStatus: fromStatus })
+      return false
+    }
+    
+    // Update the transaction status
+    const result = await db.collection("transactions").updateOne(
+      { _id: currentTx._id },
+      { $set: { status: toStatus, updatedAt: new Date() } }
+    )
+    
+    console.log("Transaction status update result:", { reference, fromStatus, toStatus, matched: result.matchedCount, modified: result.modifiedCount })
+    return result.modifiedCount > 0
+  }
+
+  static async createNotification(data: {
+    userId: string
+    type: string
+    title: string
+    message: string
+    amount?: number
+    status?: string
+    actionUrl?: string
+  }) {
+    const db = await this.getDb()
+    await db.collection("notifications").insertOne({
+      ...data,
+      read: false,
+      createdAt: new Date(),
+    })
   }
 
   // =========================

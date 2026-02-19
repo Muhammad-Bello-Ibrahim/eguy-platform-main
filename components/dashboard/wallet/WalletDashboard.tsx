@@ -159,11 +159,11 @@ export function WalletDashboard() {
     const cashback = 0;
 
     return (
-        <div className="min-h-screen bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display pb-24">
+        <div className="min-h-screen bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display">
             {/* Header */}
             <DashboardHeader user={user} />
 
-            <main className="px-5 space-y-6 mt-6 max-w-md mx-auto lg:max-w-4xl">
+            <main className="px-4 space-y-6 mt-6 max-w-md mx-auto lg:max-w-4xl pb-24">
                 {/* Available Balance using new Stitch design */}
                 <WalletBalance
                     balance={user?.walletBalance || 0}
@@ -172,14 +172,11 @@ export function WalletDashboard() {
                     isLoading={isLoading}
                 />
 
-                {/* Quick Actions (Floating or just rely on bottom nav/modals) */}
-                {/* We can keep QuickActions if needed, but Stitch design focuses on Stats grid */}
-
                 {/* Earnings Breakdown */}
                 <EarningsGrid
                     directEarnings={stats?.directEarnings || 0}
                     networkEarnings={stats?.networkEarnings || 0}
-                    bonus={stats?.totalEarnings || 0} // Using total as bonus for now, or separate if API allows
+                    bonus={stats?.totalEarnings || 0}
                     cashback={cashback}
                     isLoading={isLoading}
                 />

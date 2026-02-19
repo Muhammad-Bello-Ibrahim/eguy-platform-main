@@ -79,12 +79,14 @@ export async function POST(request: NextRequest) {
     const newBalance = user.walletBalance - amount;
     await Database.updateUserById(user.id, { walletBalance: newBalance });
     // Create transaction
+    const paystackReference = transferData.data.reference;
     await Database.createTransaction({
       userId: user.id,
       type: "withdrawal",
       amount,
       description: `Withdrawal to ${user.payoutAccount.bankCode} ${user.payoutAccount.accountNumber}`,
       status: "pending", // Always pending initially
+      reference: paystackReference, // Store Paystack reference at root level
       metadata: { payoutAccount: user.payoutAccount, paystackTransfer: transferData.data },
       createdAt: new Date(),
       updatedAt: new Date(),
