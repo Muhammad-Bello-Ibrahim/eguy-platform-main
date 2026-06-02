@@ -3,6 +3,16 @@ import { MongoClient, Db, ObjectId } from "mongodb"
 let cachedClient: MongoClient | null = null
 let cachedDb: Db | null = null
 
+export interface LinkedAccount {
+  id: string
+  bank: string
+  bankCode?: string
+  accountNumber: string
+  accountName: string
+  isPrimary: boolean
+  createdAt?: Date
+}
+
 export interface DatabaseUser {
   id: string
   fullName: string
@@ -19,7 +29,9 @@ export interface DatabaseUser {
   level5EarningsCompleted?: boolean
   createdAt?: Date
   updatedAt?: Date
+  linkedAccounts?: LinkedAccount[]
 }
+
 
 export class Database {
   // =========================
@@ -52,33 +64,33 @@ export class Database {
     })
     return { id: result.insertedId.toString(), ...data }
   }
-
-  static async findUserByEmail(email: string) {
+  
+  static async findUserByEmail(email: string): Promise<DatabaseUser | null> {
     const db = await this.getDb()
     const user = await db.collection("users").findOne({ email })
     if (!user) return null
-    return { ...user, id: user._id.toString() }
+    return { ...user, id: user._id.toString() } as any
   }
 
-  static async findUserByPhone(phone: string) {
+  static async findUserByPhone(phone: string): Promise<DatabaseUser | null> {
     const db = await this.getDb()
     const user = await db.collection("users").findOne({ phone })
     if (!user) return null
-    return { ...user, id: user._id.toString() }
+    return { ...user, id: user._id.toString() } as any
   }
 
-  static async findUserByReferralCode(referralCode: string) {
+  static async findUserByReferralCode(referralCode: string): Promise<DatabaseUser | null> {
     const db = await this.getDb()
     const user = await db.collection("users").findOne({ referralCode })
     if (!user) return null
-    return { ...user, id: user._id.toString() }
+    return { ...user, id: user._id.toString() } as any
   }
 
-  static async findUserById(id: string) {
+  static async findUserById(id: string): Promise<DatabaseUser | null> {
     const db = await this.getDb()
     const user = await db.collection("users").findOne({ _id: new ObjectId(id) })
     if (!user) return null
-    return { ...user, id: user._id.toString() }
+    return { ...user, id: user._id.toString() } as any
   }
 
   static async updateUserById(id: string, updates: any) {
@@ -87,16 +99,27 @@ export class Database {
       { _id: new ObjectId(id) },
       { $set: { ...updates, updatedAt: new Date() } },
       { returnDocument: "after" }
-    )
-    if (!result.value) return null
+    ) as any
+    if (!result || !result.value) return null
+    return { ...result.value, id: result.value._id.toString() }
+  }
+
+  static async updateUserByEmail(email: string, updates: any) {
+    const db = await this.getDb()
+    const result = await db.collection("users").findOneAndUpdate(
+      { email },
+      { $set: { ...updates, updatedAt: new Date() } },
+      { returnDocument: "after" }
+    ) as any
+    if (!result || !result.value) return null
     return { ...result.value, id: result.value._id.toString() }
   }
 
   static async updateUserWallet(userId: string, amount: number) {
     const db = await this.getDb()
-    const objectId = typeof userId === 'string' && userId.length === 24 ? new ObjectId(userId) : userId
+    const objectId = typeof userId === 'string' && userId.length === 24 ? new ObjectId(userId) : (userId as any)
     const result = await db.collection("users").updateOne(
-      { _id: objectId },
+      { _id: objectId as any },
       { $inc: { walletBalance: amount }, $set: { updatedAt: new Date() } }
     )
     console.log("Wallet update result:", { userId, objectId, matchedCount: result.matchedCount, modifiedCount: result.modifiedCount })
@@ -228,6 +251,17 @@ export class Database {
     }
   }
 
+  static async findTransactionById(id: string) {
+    const db = await this.getDb()
+    const objectId = typeof id === 'string' && id.length === 24 ? new ObjectId(id) : id
+    const tx = await db.collection("transactions").findOne({ _id: objectId as any })
+    if (!tx) return null
+    return { 
+      ...tx, 
+      id: tx._id.toString()
+    }
+  }
+
   static async updateTransactionStatusAtomic(reference: string, fromStatus: string, toStatus: string) {
     const db = await this.getDb()
     
@@ -283,7 +317,7 @@ export class Database {
       .limit(1)
       .toArray()
     if (eligible.length === 0) return null
-    return { ...eligible[0], id: eligible[0]._id.toString() }
+    return { ...eligible[0], id: eligible[0]._id.toString() } as any
   }
 
   static async incrementDirectCount(userId: string) {
@@ -299,6 +333,48 @@ export class Database {
     await db.collection("users").updateOne(
       { _id: new ObjectId(userId) },
       { $set: { level5EarningsCompleted: true, updatedAt: new Date() } }
+    )
+  }
+
+  // =========================
+  // LINKED ACCOUNTS (BANKING)
+  // =========================
+  static async addLinkedAccount(userId: string, accountDetails: Omit<LinkedAccount, 'id'>) {
+    const db = await this.getDb()
+    const accountId = new ObjectId().toString()
+    const newAccount: LinkedAccount = {
+      id: accountId,
+      ...accountDetails,
+      createdAt: new Date()
+    }
+    await db.collection("users").updateOne(
+      { _id: new ObjectId(userId) },
+      { $push: { linkedAccounts: newAccount } as any }
+    )
+    return newAccount
+  }
+
+  static async removeLinkedAccount(userId: string, accountId: string) {
+    const db = await this.getDb()
+    await db.collection("users").updateOne(
+      { _id: new ObjectId(userId) },
+      { $pull: { linkedAccounts: { id: accountId } } as any }
+    )
+  }
+
+  static async setPrimaryLinkedAccount(userId: string, accountId: string) {
+    const db = await this.getDb()
+    const user = await db.collection("users").findOne({ _id: new ObjectId(userId) })
+    if (!user) return
+    
+    const linkedAccounts = (user.linkedAccounts || []).map((acc: any) => ({
+      ...acc,
+      isPrimary: acc.id === accountId
+    }))
+    
+    await db.collection("users").updateOne(
+      { _id: new ObjectId(userId) },
+      { $set: { linkedAccounts } }
     )
   }
 }

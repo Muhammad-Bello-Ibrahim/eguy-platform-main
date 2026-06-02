@@ -17,8 +17,9 @@ export async function POST(request: NextRequest) {
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
-    if (!user.payoutAccount) {
-      return NextResponse.json({ error: "No payout account found. Please add one in your profile." }, { status: 400 });
+    const payoutAccount = (user as any).linkedAccounts?.find((a: any) => a.isPrimary) || (user as any).linkedAccounts?.[0] || (user as any).payoutAccount;
+    if (!payoutAccount) {
+      return NextResponse.json({ error: "No payout account found. Please link one in your profile." }, { status: 400 });
     }
     if (user.walletBalance < amount) {
       return NextResponse.json({ error: "Insufficient wallet balance" }, { status: 400 });
@@ -29,7 +30,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Paystack secret key not configured" }, { status: 500 });
     }
     // Step 1: Create transfer recipient if not already created
-    let recipientCode = user.payoutAccount.recipientCode;
+    let recipientCode = payoutAccount.recipientCode;
     if (!recipientCode) {
       const recipientRes = await fetch("https://api.paystack.co/transferrecipient", {
         method: "POST",
@@ -39,9 +40,9 @@ export async function POST(request: NextRequest) {
         },
         body: JSON.stringify({
           type: "nuban",
-          name: user.payoutAccount.accountName,
-          account_number: user.payoutAccount.accountNumber,
-          bank_code: user.payoutAccount.bankCode || user.payoutAccount.bank, // Prefer bankCode
+          name: payoutAccount.accountName,
+          account_number: payoutAccount.accountNumber,
+          bank_code: payoutAccount.bankCode || payoutAccount.bank, // Prefer bankCode
           currency: "NGN"
         })
       });
@@ -52,9 +53,21 @@ export async function POST(request: NextRequest) {
       }
       recipientCode = recipientData.data.recipient_code;
       // Save recipientCode to user profile
-      await Database.updateUserById(user.id, {
-        payoutAccount: { ...user.payoutAccount, recipientCode }
-      });
+      if (user.linkedAccounts && user.linkedAccounts.length > 0) {
+        const updatedAccounts = user.linkedAccounts.map((acc: any) => {
+          if (acc.id === payoutAccount.id) {
+            return { ...acc, recipientCode };
+          }
+          return acc;
+        });
+        await Database.updateUserById(user.id, {
+          linkedAccounts: updatedAccounts
+        });
+      } else {
+        await Database.updateUserById(user.id, {
+          payoutAccount: { ...payoutAccount, recipientCode }
+        });
+      }
     }
     // Step 2: Initiate transfer
     const transferRes = await fetch("https://api.paystack.co/transfer", {
@@ -84,10 +97,10 @@ export async function POST(request: NextRequest) {
       userId: user.id,
       type: "withdrawal",
       amount,
-      description: `Withdrawal to ${user.payoutAccount.bankCode} ${user.payoutAccount.accountNumber}`,
+      description: `Withdrawal to ${payoutAccount.bankCode || payoutAccount.bank} ${payoutAccount.accountNumber}`,
       status: "pending", // Always pending initially
       reference: paystackReference, // Store Paystack reference at root level
-      metadata: { payoutAccount: user.payoutAccount, paystackTransfer: transferData.data },
+      metadata: { payoutAccount, paystackTransfer: transferData.data },
       createdAt: new Date(),
       updatedAt: new Date(),
     } as any);

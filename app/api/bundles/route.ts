@@ -24,18 +24,29 @@ export async function GET() {
     //  "GLO_PLAN": ...
     // }
 
-    const updatedData: any = {};
-
-    Object.keys(data).forEach(key => {
-      if (Array.isArray(data[key])) {
-        updatedData[key] = data[key].map((plan: any) => ({
+    const updatedData = Array.isArray(data) ? data.map((netObj: any) => {
+      const updatedBundle = Array.isArray(netObj.BUNDLE) ? netObj.BUNDLE.map((plan: any) => {
+        let rawPrice = "0";
+        if (plan.price) {
+          const priceObj = Array.isArray(plan.price) ? plan.price[0] : plan.price;
+          if (typeof priceObj === 'object' && priceObj !== null) {
+            rawPrice = priceObj.api_user || priceObj.free_user || priceObj.basic_user || Object.values(priceObj)[0] || "0";
+          } else {
+            rawPrice = String(plan.price);
+          }
+        }
+        const apiPrice = parseFloat(rawPrice) || 0;
+        const userPrice = apiPrice + 5;
+        return {
           ...plan,
-          price: (parseFloat(plan.price) + 5).toString()
-        }));
-      } else {
-        updatedData[key] = data[key];
-      }
-    });
+          price: userPrice.toString()
+        };
+      }) : [];
+      return {
+        ...netObj,
+        BUNDLE: updatedBundle
+      };
+    }) : data;
 
     return NextResponse.json(updatedData);
   } catch (e) {

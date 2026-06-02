@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
 
         // Check if account already exists
         const dbUser = await Database.findUserById(user.id);
-        const existing = dbUser?.linkedAccounts?.find(a => a.accountNumber === accountNumber && a.bank === bank);
+        const existing = dbUser?.linkedAccounts?.find((a: any) => a.accountNumber === accountNumber && a.bank === bank);
         if (existing) {
             return NextResponse.json({ error: "Account already linked" }, { status: 409 });
         }

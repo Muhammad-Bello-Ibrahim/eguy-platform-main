@@ -41,7 +41,9 @@ export function WithdrawModal({ isOpen, onClose, onSuccess }: WithdrawModalProps
         fetch("/api/wallet/balance").then(res => res.json())
       ]).then(([userData, balanceData]) => {
         if (userData.user) {
-          setPayoutAccount(userData.user.payoutAccount || null)
+          const linkedAccs = userData.user.linkedAccounts || []
+          const activeAccount = linkedAccs.find((a: any) => a.isPrimary) || linkedAccs[0] || userData.user.payoutAccount || null
+          setPayoutAccount(activeAccount)
         }
         if (balanceData.balance !== undefined) {
           setUserBalance(balanceData.balance)
