@@ -126,12 +126,13 @@ export class Database {
     return result
   }
 
-  static async saveVerificationToken(userId: string, token: string, expires: Date) {
+  static async saveVerificationToken(userId: string, token: string, expires: Date | number) {
     const db = await this.getDb()
+    const expiresAt = expires instanceof Date ? expires : new Date(expires)
     await db.collection("verification_tokens").insertOne({
       userId,
       token,
-      expiresAt: expires,
+      expiresAt,
       createdAt: new Date(),
     })
   }
@@ -375,6 +376,45 @@ export class Database {
     await db.collection("users").updateOne(
       { _id: new ObjectId(userId) },
       { $set: { linkedAccounts } }
+    )
+  }
+
+  // =========================
+  // PASSWORD RESET TOKENS
+  // =========================
+  static async savePasswordResetToken(userId: string, token: string, expires: number | Date) {
+    const db = await this.getDb()
+    const expiresAt = expires instanceof Date ? expires : new Date(expires)
+    // Delete any existing reset tokens for this user first
+    await db.collection("password_reset_tokens").deleteMany({ userId })
+    await db.collection("password_reset_tokens").insertOne({
+      userId,
+      token,
+      expiresAt,
+      used: false,
+      createdAt: new Date(),
+    })
+  }
+
+  static async getPasswordResetToken(token: string) {
+    const db = await this.getDb()
+    const tokenDoc = await db.collection("password_reset_tokens").findOne({
+      token,
+      used: false,
+    })
+    if (!tokenDoc) return null
+    return {
+      ...tokenDoc,
+      userId: tokenDoc.userId,
+      expires: tokenDoc.expiresAt,
+    }
+  }
+
+  static async markPasswordResetTokenAsUsed(token: string) {
+    const db = await this.getDb()
+    await db.collection("password_reset_tokens").updateOne(
+      { token },
+      { $set: { used: true, usedAt: new Date() } }
     )
   }
 }

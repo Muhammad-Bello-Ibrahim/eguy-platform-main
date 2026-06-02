@@ -1,122 +1,137 @@
 "use client";
 
-import React, { useState } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { ArrowLeft, ArrowRight, AtSign, KeyRound } from "lucide-react";
 
 export default function ForgotPasswordPage() {
-    const router = useRouter();
-    const [email, setEmail] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-    const [error, setError] = useState('');
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setIsLoading(true);
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setIsLoading(true);
-        setError('');
+    try {
+      const res = await fetch("/api/auth/reset-request", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
 
-        try {
-            const res = await fetch('/api/auth/reset-request', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email }),
-            });
+      if (res.ok) {
+        router.push("/forgot-password/sent");
+      } else {
+        const data = await res.json().catch(() => ({}));
+        setError(data?.message || "Something went wrong. Please try again.");
+      }
+    } catch {
+      setError("Network error. Please check your connection and try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-            if (res.ok) {
-                router.push('/forgot-password/sent');
-            } else {
-                const data = await res.json();
-                setError(data.error || 'Failed to send reset link');
-            }
-        } catch (err) {
-            setError('An error occurred. Please try again.');
-        } finally {
-            setIsLoading(false);
-        }
-    };
+  return (
+    <div className="min-h-screen bg-slate-50 dark:bg-[#0e0e1a] flex items-center justify-center p-5 font-sans">
+      {/* Glow orbs */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-[-20%] right-[-10%] w-[60%] h-[60%] bg-[#47f0d1]/[0.04] rounded-full blur-[120px]" />
+        <div className="absolute bottom-[-20%] left-[-10%] w-[60%] h-[60%] bg-[#47f0d1]/[0.03] rounded-full blur-[100px]" />
+      </div>
 
-    return (
-        <div className="bg-background-light dark:bg-[#131321] text-slate-900 dark:text-white min-h-screen flex items-center justify-center font-display antialiased">
-            {/* Main Container */}
-            <div className="relative w-full max-w-md bg-background-light dark:bg-[#131321] flex flex-col px-8 py-12 sm:rounded-3xl sm:shadow-xl sm:border sm:border-slate-200 sm:dark:border-white/10">
+      <div className="relative w-full max-w-[420px] bg-white dark:bg-[#13131f] border border-slate-100 dark:border-white/[0.06] rounded-3xl shadow-2xl shadow-black/10 dark:shadow-black/40 overflow-hidden">
+        <div className="p-8">
+          {/* Back button */}
+          <Link href="/login" className="inline-flex mb-6">
+            <span className="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-zinc-300 hover:bg-slate-200 dark:hover:bg-white/10 transition-colors">
+              <ArrowLeft className="w-5 h-5" />
+            </span>
+          </Link>
 
-                {/* Back Button Area */}
-                <div className="mb-8">
-                    <button
-                        onClick={() => router.back()}
-                        className="w-10 h-10 flex items-center justify-center rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
-                    >
-                        <span className="material-icons-round">arrow_back_ios_new</span>
-                    </button>
-                </div>
-
-                {/* Central Icon/Hero Section */}
-                <div className="flex flex-col items-center justify-center mb-10">
-                    <div className="relative group">
-                        {/* Soft Glow Background */}
-                        <div className="absolute inset-0 bg-primary/20 blur-[50px] rounded-full group-hover:bg-primary/30 transition-all"></div>
-                        {/* Icon Container */}
-                        <div className="relative w-24 h-24 bg-[#1a1a2e] border border-primary/20 rounded-full flex items-center justify-center shadow-[0_0_40px_rgba(71,240,209,0.15)] overflow-hidden">
-                            {/* Subtle Mesh Pattern */}
-                            <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-primary via-transparent to-transparent"></div>
-                            <span className="material-icons-round text-5xl text-primary drop-shadow-[0_0_10px_rgba(71,240,209,0.5)]">lock_reset</span>
-                        </div>
-                    </div>
-                    <h1 className="mt-8 text-3xl font-extrabold tracking-tight text-center bg-gradient-to-b from-white to-white/70 bg-clip-text text-transparent bg-background-dark dark:text-white">
-                        Reset Password
-                    </h1>
-                    <p className="mt-4 text-center text-slate-500 dark:text-slate-400 font-medium px-4 leading-relaxed">
-                        Enter your registered email below to receive secure recovery instructions.
-                    </p>
-                </div>
-
-                {/* Form Section */}
-                <form onSubmit={handleSubmit} className="flex-grow flex flex-col space-y-6">
-                    {error && (
-                        <div className="bg-red-500/10 border border-red-500/20 text-red-500 text-sm p-3 rounded-lg text-center font-bold">
-                            {error}
-                        </div>
-                    )}
-                    <div className="space-y-2">
-                        <label className="block text-sm font-semibold text-primary/80 ml-1" htmlFor="email">Email Address</label>
-                        <div className="relative group">
-                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                <span className="material-icons-round text-slate-500 text-xl group-focus-within:text-primary transition-colors">alternate_email</span>
-                            </div>
-                            <input
-                                className="block w-full pl-12 pr-4 py-5 bg-white dark:bg-[#1a1a2e] border-0 ring-1 ring-slate-200 dark:ring-white/10 rounded-2xl focus:ring-2 focus:ring-primary focus:bg-slate-50 dark:focus:bg-[#1f1f3a] text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 transition-all duration-300 outline-none"
-                                id="email"
-                                placeholder="name@example.com"
-                                type="email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                required
-                            />
-                        </div>
-                    </div>
-                    <button
-                        type="submit"
-                        disabled={isLoading}
-                        className="w-full bg-primary hover:bg-primary/90 active:scale-[0.98] text-[#131321] font-bold py-5 rounded-full shadow-lg shadow-primary/20 transition-all duration-300 flex items-center justify-center space-x-2 disabled:opacity-70 disabled:cursor-not-allowed"
-                    >
-                        <span>{isLoading ? 'Sending...' : 'Send Recovery Link'}</span>
-                        {!isLoading && <span className="material-icons-round text-lg">arrow_forward</span>}
-                    </button>
-                </form>
-
-                {/* Footer */}
-                <div className="mt-auto pt-8 text-center">
-                    <Link href="/login" className="inline-flex items-center text-sm font-semibold text-slate-400 hover:text-primary transition-colors">
-                        <span className="material-icons-round text-base mr-1">keyboard_return</span>
-                        Back to Login
-                    </Link>
-                </div>
-
-                {/* Abstract Background Decoration */}
-                <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-primary/5 rounded-full blur-[80px] pointer-events-none"></div>
-                <div className="absolute -top-24 -right-24 w-64 h-64 bg-primary/5 rounded-full blur-[80px] pointer-events-none"></div>
+          {/* Icon */}
+          <div className="flex justify-center mb-6">
+            <div className="w-16 h-16 bg-[#47f0d1]/10 border border-[#47f0d1]/20 rounded-2xl flex items-center justify-center shadow-[0_0_30px_rgba(71,240,209,0.2)]">
+              <KeyRound className="w-7 h-7 text-[#47f0d1]" />
             </div>
+          </div>
+
+          {/* Heading */}
+          <h1 className="text-2xl font-black text-slate-900 dark:text-white text-center mb-2">
+            Reset Password
+          </h1>
+          <p className="text-sm text-slate-500 dark:text-zinc-400 text-center mb-8 leading-relaxed">
+            Enter your email address and we&apos;ll send you a link to reset your password.
+          </p>
+
+          {/* Error */}
+          {error && (
+            <div className="mb-5 px-4 py-3 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm font-medium">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            {/* Email field */}
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-zinc-500 mb-2">
+                Email Address
+              </p>
+              <div className="relative group">
+                <AtSign className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 dark:text-zinc-600 group-focus-within:text-[#47f0d1] transition-colors pointer-events-none" />
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  required
+                  className="w-full bg-slate-50 dark:bg-zinc-900/60 border border-slate-200 dark:border-white/[0.08] rounded-2xl py-4 px-5 pl-12 text-base font-semibold placeholder:text-slate-400 dark:placeholder:text-zinc-600 focus:bg-white dark:focus:bg-[#1a1a2e] focus:border-[#47f0d1] focus:ring-4 focus:ring-[#47f0d1]/10 text-slate-900 dark:text-white transition-all outline-none"
+                />
+              </div>
+            </div>
+
+            {/* CTA */}
+            <button
+              type="submit"
+              disabled={isLoading || !email}
+              className="w-full h-14 bg-[#47f0d1] hover:bg-[#3de0c3] text-[#0e0e1a] rounded-2xl font-black text-base shadow-[0_8px_24px_rgba(71,240,209,0.25)] hover:shadow-[0_8px_24px_rgba(71,240,209,0.4)] active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed mt-2"
+            >
+              {isLoading ? (
+                <>
+                  <svg className="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                  </svg>
+                  Sending...
+                </>
+              ) : (
+                <>
+                  Send Recovery Link
+                  <ArrowRight className="w-5 h-5" />
+                </>
+              )}
+            </button>
+          </form>
+
+          {/* Divider */}
+          <div className="h-px bg-slate-100 dark:bg-white/[0.06] my-6" />
+
+          {/* Back to login */}
+          <p className="text-center text-sm text-slate-500 dark:text-zinc-400">
+            Remembered your password?{" "}
+            <Link
+              href="/login"
+              className="text-[#47f0d1] font-bold hover:underline transition-colors"
+            >
+              Back to Login
+            </Link>
+          </p>
         </div>
-    );
+      </div>
+    </div>
+  );
 }
