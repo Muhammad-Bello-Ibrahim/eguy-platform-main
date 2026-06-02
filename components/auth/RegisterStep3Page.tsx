@@ -2,6 +2,17 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import {
+    ArrowLeft,
+    Eye,
+    EyeOff,
+    Fingerprint,
+    Check,
+    ShieldCheck,
+    Sparkles,
+    Lock,
+    KeyRound,
+} from 'lucide-react';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 
 export default function RegisterStep3Page() {
@@ -18,14 +29,11 @@ export default function RegisterStep3Page() {
 
     const checkPasswordStrength = (pass: string) => {
         if (pass.length < 8) return 'weak';
-
         const hasLetters = /[a-zA-Z]/.test(pass);
         const hasNumbers = /[0-9]/.test(pass);
         const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(pass);
-
         if (pass.length >= 8 && hasLetters && hasNumbers && hasSpecial) return 'very-strong';
         if (pass.length >= 8 && hasLetters && hasNumbers) return 'strong';
-
         return 'weak';
     };
 
@@ -43,12 +51,10 @@ export default function RegisterStep3Page() {
             setError('Passwords do not match');
             return;
         }
-
         if (passwordStrength === 'weak') {
             setError('Please choose a stronger password');
             return;
         }
-
         if (pin.length !== 6) {
             setError('Please enter a 6-digit Transaction PIN');
             return;
@@ -56,12 +62,11 @@ export default function RegisterStep3Page() {
 
         setIsLoading(true);
 
-        // Retrieve data from Session Storage
         const fullName = sessionStorage.getItem('register_fullName');
         const email = sessionStorage.getItem('register_email');
         const referralCode = sessionStorage.getItem('register_referralCode');
         const dob = sessionStorage.getItem('register_dob');
-        const phone = sessionStorage.getItem('register_phone'); // Note: Phone from step 2
+        const phone = sessionStorage.getItem('register_phone');
         const address = sessionStorage.getItem('register_address');
 
         try {
@@ -76,111 +81,146 @@ export default function RegisterStep3Page() {
                     transactionPin: pin,
                     referralCode,
                     dob,
-                    address
+                    address,
                 }),
             });
 
             if (res.ok) {
-                // Clear session storage
                 sessionStorage.removeItem('register_fullName');
                 sessionStorage.removeItem('register_email');
                 sessionStorage.removeItem('register_referralCode');
                 sessionStorage.removeItem('register_dob');
                 sessionStorage.removeItem('register_phone');
                 sessionStorage.removeItem('register_address');
-
-                // Save biometric preference
                 if (biometricEnabled) {
                     sessionStorage.setItem('register_biometric', 'true');
                 }
-
                 router.push(`/verify-prompt?email=${encodeURIComponent(email || '')}`);
             } else {
                 const data = await res.json();
                 setError(data.error || 'Registration failed');
             }
-        } catch (err) {
+        } catch {
             setError('An error occurred. Please try again.');
         } finally {
             setIsLoading(false);
         }
     };
 
+    const strengthLabel = {
+        weak: 'Weak',
+        strong: 'Good',
+        'very-strong': 'Strong',
+    };
+    const strengthColor = {
+        weak: 'text-red-400',
+        strong: 'text-amber-400',
+        'very-strong': 'text-[#47f0d1]',
+    };
+    const strengthBarActive = {
+        weak: 'bg-red-400',
+        strong: 'bg-amber-400',
+        'very-strong': 'bg-[#47f0d1] shadow-[0_0_8px_rgba(71,240,209,0.5)]',
+    };
+
     return (
-        <div className="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen font-display flex justify-center items-center">
-            {/* Mobile Container (iOS Form Factor) */}
-            <div className="relative w-full max-w-[402px] h-[874px] bg-background-light dark:bg-background-dark overflow-hidden shadow-2xl border-x border-y border-transparent dark:border-primary/10 sm:rounded-[3rem] flex flex-col">
+        <div className="bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 min-h-screen flex justify-center font-sans">
+            <div className="w-full max-w-[430px] h-screen bg-white dark:bg-[#131321] relative overflow-hidden flex flex-col shadow-2xl border-x border-slate-100 dark:border-white/5">
 
-                {/* Network Background Pattern Overlay */}
-                <div className="absolute inset-0 pointer-events-none opacity-40" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, rgba(71, 240, 209, 0.05) 1px, transparent 0)', backgroundSize: '24px 24px' }}></div>
+                {/* Decorative Glows */}
+                <div className="absolute -top-24 -right-24 w-64 h-64 bg-[#47f0d1]/5 rounded-full blur-3xl pointer-events-none" />
+                <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-[#47f0d1]/5 rounded-full blur-3xl pointer-events-none" />
 
-                {/* Status Bar Simulation */}
-                <div className="h-12 w-full"></div>
+                {/* Header */}
+                <header className="pt-14 pb-4 px-8 flex items-center justify-between sticky top-0 bg-white/80 dark:bg-[#131321]/80 backdrop-blur-md z-20 border-b border-slate-100 dark:border-white/5">
+                    <button
+                        onClick={() => router.back()}
+                        className="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10 transition-colors"
+                    >
+                        <ArrowLeft className="w-5 h-5" />
+                    </button>
+                    <span className="text-sm font-bold text-[#47f0d1] flex items-center gap-1">
+                        Step 3 of 3 <Sparkles className="w-4 h-4 animate-pulse" />
+                    </span>
+                    <div className="w-10" />
+                </header>
 
-                {/* Progress Header */}
-                <div className="px-6 pt-2 pb-4 relative z-10">
-                    <div className="flex justify-between items-center mb-4">
-                        <button
-                            onClick={() => router.back()}
-                            className="w-10 h-10 flex items-center justify-center rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
-                        >
-                            <span className="material-icons-round">arrow_back_ios_new</span>
-                        </button>
-                        <span className="text-sm font-semibold text-primary/80">Step 3 of 3</span>
-                        <div className="w-10 h-10"></div> {/* Spacer */}
-                    </div>
-                    {/* Progress Bar */}
-                    <div className="w-full h-1.5 bg-primary/10 rounded-full overflow-hidden">
-                        <div className="h-full bg-primary w-full rounded-full transition-all duration-1000 shadow-[0_0_15px_rgba(71,240,209,0.3)]"></div>
-                    </div>
-                </div>
+                {/* Scrollable Content */}
+                <main className="flex-1 px-8 pt-6 pb-8 overflow-y-auto flex flex-col" style={{ scrollbarWidth: 'none' }}>
+                    <div className="flex-1">
 
-                {/* Main Content Area */}
-                <div className="flex-1 overflow-y-auto px-8 py-4 relative z-10">
-                    <header className="mb-8">
-                        <h1 className="text-3xl font-extrabold tracking-tight mb-2">Secure Your Account</h1>
-                        <p className="text-slate-500 dark:text-primary/60 text-sm leading-relaxed">
-                            Set up your secure credentials to protect your digital assets and transactions.
-                        </p>
-                    </header>
+                        {/* Title */}
+                        <div className="mb-6">
+                            <h1 className="text-3xl font-black tracking-tight mb-2 bg-gradient-to-br from-slate-950 to-slate-600 dark:from-white dark:to-slate-400 bg-clip-text text-transparent">
+                                Secure Your Account
+                            </h1>
+                            <p className="text-slate-500 dark:text-zinc-400 text-sm">
+                                Set up your secure credentials to protect your digital assets.
+                            </p>
+                        </div>
 
-                    <form onSubmit={handleRegister}>
-                        {/* 6-Digit PIN Section */}
-                        <section className="mb-8">
-                            <label className="block text-sm font-bold mb-4 uppercase tracking-wider text-slate-400 dark:text-primary/40">Transaction PIN</label>
-                            <p className="text-xs text-slate-500 mb-4">Create a 6-digit PIN for authorizing transactions.</p>
-                            <div className="flex justify-center">
-                                <InputOTP
-                                    maxLength={6}
-                                    value={pin}
-                                    onChange={(value) => setPin(value)}
-                                >
-                                    <InputOTPGroup className="gap-2">
-                                        <InputOTPSlot index={0} className="w-12 h-16 text-lg font-bold border-2 border-primary/20 rounded-lg" />
-                                        <InputOTPSlot index={1} className="w-12 h-16 text-lg font-bold border-2 border-primary/20 rounded-lg" />
-                                        <InputOTPSlot index={2} className="w-12 h-16 text-lg font-bold border-2 border-primary/20 rounded-lg" />
-                                        <InputOTPSlot index={3} className="w-12 h-16 text-lg font-bold border-2 border-primary/20 rounded-lg" />
-                                        <InputOTPSlot index={4} className="w-12 h-16 text-lg font-bold border-2 border-primary/20 rounded-lg" />
-                                        <InputOTPSlot index={5} className="w-12 h-16 text-lg font-bold border-2 border-primary/20 rounded-lg" />
-                                    </InputOTPGroup>
-                                </InputOTP>
+                        {/* Progress Bar — full */}
+                        <div className="mb-8">
+                            <div className="w-full h-1.5 bg-slate-100 dark:bg-zinc-800/50 rounded-full overflow-hidden">
+                                <div className="h-full bg-[#47f0d1] w-full rounded-full shadow-[0_0_10px_rgba(71,240,209,0.4)] transition-all duration-500" />
                             </div>
-                        </section>
+                        </div>
 
-                        {/* Password Section */}
-                        <section className="space-y-6 mb-8">
+                        <form onSubmit={handleRegister} id="step3-form" className="space-y-7">
+
+                            {/* Error Banner */}
                             {error && (
-                                <div className="bg-red-500/10 border border-red-500/20 text-red-500 text-sm p-3 rounded-lg text-center font-bold">
+                                <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm px-4 py-3 rounded-2xl text-center font-semibold">
                                     {error}
                                 </div>
                             )}
+
+                            {/* Transaction PIN */}
+                            <div className="space-y-3">
+                                <div className="flex items-center gap-2">
+                                    <KeyRound className="w-4 h-4 text-[#47f0d1]" />
+                                    <label className="text-xs font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest">
+                                        Transaction PIN
+                                    </label>
+                                </div>
+                                <p className="text-xs text-slate-400 dark:text-zinc-500">
+                                    Create a 6-digit PIN to authorize transactions.
+                                </p>
+                                <div className="flex justify-center py-2">
+                                    <InputOTP
+                                        maxLength={6}
+                                        value={pin}
+                                        onChange={(value) => setPin(value)}
+                                    >
+                                        <InputOTPGroup className="gap-3">
+                                            {[0, 1, 2, 3, 4, 5].map((i) => (
+                                                <InputOTPSlot
+                                                    key={i}
+                                                    index={i}
+                                                    className="w-11 h-14 text-xl font-black border-2 border-slate-100 dark:border-white/10 rounded-2xl bg-slate-50 dark:bg-zinc-800/40 text-slate-900 dark:text-white data-[active=true]:border-[#47f0d1] data-[active=true]:ring-[#47f0d1]/20 data-[active=true]:bg-white dark:data-[active=true]:bg-[#18182d] transition-all"
+                                                />
+                                            ))}
+                                        </InputOTPGroup>
+                                    </InputOTP>
+                                </div>
+                            </div>
+
+                            {/* Divider */}
+                            <div className="h-px bg-slate-100 dark:bg-white/5" />
+
+                            {/* Account Password */}
                             <div className="space-y-2">
-                                <label className="block text-sm font-bold uppercase tracking-wider text-slate-400 dark:text-primary/40">Account Password</label>
-                                <div className="relative">
+                                <div className="flex items-center gap-2">
+                                    <Lock className="w-4 h-4 text-[#47f0d1]" />
+                                    <label className="text-xs font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest">
+                                        Account Password
+                                    </label>
+                                </div>
+                                <div className="relative group">
                                     <input
-                                        className="w-full h-14 bg-white dark:bg-black/20 border-2 border-primary/20 focus:border-primary rounded-lg px-4 pr-12 outline-none transition-colors"
-                                        type={showPassword ? "text" : "password"}
-                                        placeholder="••••••••••••"
+                                        className="w-full bg-slate-50 dark:bg-zinc-800/40 border border-slate-100 dark:border-white/5 rounded-2xl py-4 px-5 pr-12 text-base font-bold placeholder:text-slate-400 dark:placeholder:text-zinc-600 focus:bg-white dark:focus:bg-[#18182d] focus:border-[#47f0d1] focus:ring-4 focus:ring-[#47f0d1]/10 text-slate-900 dark:text-white transition-all outline-none"
+                                        type={showPassword ? 'text' : 'password'}
+                                        placeholder="Create a strong password"
                                         value={password}
                                         onChange={handlePasswordChange}
                                         required
@@ -188,41 +228,37 @@ export default function RegisterStep3Page() {
                                     <button
                                         type="button"
                                         onClick={() => setShowPassword(!showPassword)}
-                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-primary/60 cursor-pointer hover:text-primary focus:outline-none"
+                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-zinc-500 hover:text-[#47f0d1] transition-colors"
                                     >
-                                        <span className="material-icons-round">{showPassword ? 'visibility' : 'visibility_off'}</span>
+                                        {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                                     </button>
                                 </div>
-                                <div className="flex gap-1 mt-2">
-                                    <div className={`h-1 flex-1 rounded-full ${password.length > 0 ? (
-                                        passwordStrength === 'weak' ? 'bg-red-500' :
-                                            passwordStrength === 'strong' ? 'bg-yellow-500' :
-                                                'bg-green-500'
-                                    ) : 'bg-primary/20'
-                                        }`}></div>
-                                    <div className={`h-1 flex-1 rounded-full ${passwordStrength === 'strong' || passwordStrength === 'very-strong' ? (
-                                        passwordStrength === 'strong' ? 'bg-yellow-500' : 'bg-green-500'
-                                    ) : 'bg-primary/20'
-                                        }`}></div>
-                                    <div className={`h-1 flex-1 rounded-full ${passwordStrength === 'very-strong' ? 'bg-green-500' : 'bg-primary/20'
-                                        }`}></div>
-                                    <span className={`text-[10px] font-bold ml-2 uppercase ${password.length > 0 ? (
-                                        passwordStrength === 'weak' ? 'text-red-500' :
-                                            passwordStrength === 'strong' ? 'text-yellow-500' :
-                                                'text-green-500'
-                                    ) : 'text-slate-500'
-                                        }`}>
-                                        {password.length > 0 ? passwordStrength.replace('-', ' ') : 'Weak'}
-                                    </span>
-                                </div>
+
+                                {/* Password Strength Meter */}
+                                {password.length > 0 && (
+                                    <div className="flex items-center gap-2 mt-1">
+                                        <div className="flex gap-1 flex-1">
+                                            <div className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${password.length > 0 ? strengthBarActive[passwordStrength] : 'bg-slate-100 dark:bg-zinc-800'}`} />
+                                            <div className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${passwordStrength === 'strong' || passwordStrength === 'very-strong' ? strengthBarActive[passwordStrength] : 'bg-slate-100 dark:bg-zinc-800'}`} />
+                                            <div className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${passwordStrength === 'very-strong' ? strengthBarActive[passwordStrength] : 'bg-slate-100 dark:bg-zinc-800'}`} />
+                                        </div>
+                                        <span className={`text-[10px] font-black uppercase tracking-wider ${strengthColor[passwordStrength]}`}>
+                                            {strengthLabel[passwordStrength]}
+                                        </span>
+                                    </div>
+                                )}
                             </div>
+
+                            {/* Confirm Password */}
                             <div className="space-y-2">
-                                <label className="block text-sm font-bold uppercase tracking-wider text-slate-400 dark:text-primary/40">Verify Password</label>
-                                <div className="relative">
+                                <label className="text-xs font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest ml-1">
+                                    Confirm Password
+                                </label>
+                                <div className="relative group">
                                     <input
-                                        className="w-full h-14 bg-white dark:bg-black/20 border-2 border-primary/20 focus:border-primary rounded-lg px-4 pr-12 outline-none transition-colors"
-                                        placeholder="Confirm your password"
-                                        type={showConfirmPassword ? "text" : "password"}
+                                        className="w-full bg-slate-50 dark:bg-zinc-800/40 border border-slate-100 dark:border-white/5 rounded-2xl py-4 px-5 pr-12 text-base font-bold placeholder:text-slate-400 dark:placeholder:text-zinc-600 focus:bg-white dark:focus:bg-[#18182d] focus:border-[#47f0d1] focus:ring-4 focus:ring-[#47f0d1]/10 text-slate-900 dark:text-white transition-all outline-none"
+                                        placeholder="Repeat your password"
+                                        type={showConfirmPassword ? 'text' : 'password'}
                                         value={confirmPassword}
                                         onChange={(e) => setConfirmPassword(e.target.value)}
                                         required
@@ -230,57 +266,89 @@ export default function RegisterStep3Page() {
                                     <button
                                         type="button"
                                         onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-primary/60 cursor-pointer hover:text-primary focus:outline-none"
+                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-zinc-500 hover:text-[#47f0d1] transition-colors"
                                     >
-                                        <span className="material-icons-round">{showConfirmPassword ? 'visibility' : 'visibility_off'}</span>
+                                        {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                                     </button>
                                 </div>
+                                {/* Match indicator */}
+                                {confirmPassword.length > 0 && (
+                                    <p className={`text-xs font-semibold ml-1 ${password === confirmPassword ? 'text-[#47f0d1]' : 'text-red-400'}`}>
+                                        {password === confirmPassword ? '✓ Passwords match' : '✗ Passwords do not match'}
+                                    </p>
+                                )}
                             </div>
-                        </section>
 
-                        {/* Biometric Toggle */}
-                        <div className="flex items-center justify-between p-4 bg-primary/5 border border-primary/20 rounded-xl mb-32">
-                            <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                                    <span className="material-icons-round text-primary">fingerprint</span>
+                            {/* Divider */}
+                            <div className="h-px bg-slate-100 dark:bg-white/5" />
+
+                            {/* Biometric Toggle */}
+                            <div className="flex items-center justify-between p-4 rounded-2xl bg-[#47f0d1]/5 border border-[#47f0d1]/15">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-xl bg-[#47f0d1]/10 flex items-center justify-center shrink-0">
+                                        <Fingerprint className="w-5 h-5 text-[#47f0d1]" />
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-bold text-slate-800 dark:text-white">Biometric Login</p>
+                                        <p className="text-[11px] text-slate-400 dark:text-zinc-500">Use Face ID or Fingerprint</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p className="text-sm font-bold">Biometric Login</p>
-                                    <p className="text-[11px] text-slate-500">Use FaceID or Fingerprint</p>
-                                </div>
+                                {/* Custom Toggle */}
+                                <button
+                                    type="button"
+                                    role="switch"
+                                    aria-checked={biometricEnabled}
+                                    onClick={() => setBiometricEnabled(!biometricEnabled)}
+                                    className={`relative w-12 h-6 rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[#47f0d1]/40 ${biometricEnabled ? 'bg-[#47f0d1] shadow-[0_0_12px_rgba(71,240,209,0.35)]' : 'bg-slate-200 dark:bg-zinc-700'}`}
+                                >
+                                    <span
+                                        className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-300 ${biometricEnabled ? 'translate-x-6' : 'translate-x-0'}`}
+                                    />
+                                </button>
                             </div>
-                            <label className="relative inline-flex items-center cursor-pointer">
-                                <input
-                                    checked={biometricEnabled}
-                                    onChange={(e) => setBiometricEnabled(e.target.checked)}
-                                    className="sr-only peer"
-                                    type="checkbox"
-                                />
-                                <div className="w-12 h-6 bg-slate-400/20 peer-focus:outline-none rounded-full peer dark:bg-neutral-900 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-                            </label>
-                        </div>
-                    </form>
-                </div>
 
-                {/* Fixed Footer Actions */}
-                <div className="absolute bottom-0 left-0 right-0 px-8 pb-10 pt-4 bg-background-light dark:bg-background-dark/80 backdrop-blur-md z-20 border-t border-primary/5">
-                    <button
-                        onClick={handleRegister}
-                        disabled={isLoading}
-                        className="w-full h-16 bg-primary text-background-dark font-extrabold rounded-xl shadow-lg shadow-primary/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 group disabled:opacity-70 disabled:cursor-not-allowed"
-                    >
-                        <span>{isLoading ? 'CREATING ACCOUNT...' : 'COMPLETE REGISTRATION'}</span>
-                        {!isLoading && <span className="material-icons-round group-hover:translate-x-1 transition-transform">arrow_forward</span>}
-                    </button>
-                    <p className="text-center text-[10px] mt-4 text-slate-500">
-                        By completing, you agree to our <a className="text-primary font-bold hover:underline" href="#">Terms of Service</a> and <a className="text-primary font-bold hover:underline" href="#">Security Policy</a>.
-                    </p>
-                </div>
+                            {/* Privacy Info */}
+                            <div className="flex gap-3 p-4 rounded-2xl bg-[#47f0d1]/5 border border-[#47f0d1]/15">
+                                <ShieldCheck className="w-5 h-5 text-[#47f0d1] shrink-0 mt-0.5" />
+                                <p className="text-xs text-slate-500 dark:text-zinc-400 leading-relaxed">
+                                    Your credentials are end-to-end encrypted. We never store your PIN or passwords in plain text.
+                                </p>
+                            </div>
+                        </form>
+                    </div>
 
-                {/* Abstract Security Shield Image - Decorative */}
-                <div className="absolute -right-20 -bottom-20 w-64 h-64 opacity-10 pointer-events-none z-0">
-                    <div className="w-full h-full bg-gradient-to-tr from-primary to-transparent rounded-full blur-3xl"></div>
-                </div>
+                    {/* Footer CTA */}
+                    <div className="mt-8 space-y-4">
+                        <button
+                            type="submit"
+                            form="step3-form"
+                            disabled={isLoading}
+                            className="w-full h-14 bg-[#47f0d1] hover:bg-[#47f0d1]/90 disabled:opacity-60 disabled:cursor-not-allowed text-[#131321] rounded-2xl font-black text-lg shadow-[0_10px_30px_rgba(71,240,209,0.25)] hover:shadow-[0_10px_30px_rgba(71,240,209,0.4)] active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                        >
+                            {isLoading ? (
+                                <>
+                                    <svg className="animate-spin w-5 h-5" viewBox="0 0 24 24" fill="none">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                                    </svg>
+                                    <span>Creating Account...</span>
+                                </>
+                            ) : (
+                                <>
+                                    <Check className="w-5 h-5" />
+                                    <span>Complete Registration</span>
+                                </>
+                            )}
+                        </button>
+
+                        <p className="text-center text-[11px] text-slate-400 dark:text-zinc-500">
+                            By completing, you agree to our{' '}
+                            <a className="text-[#47f0d1] font-bold hover:underline" href="#">Terms of Service</a>
+                            {' '}and{' '}
+                            <a className="text-[#47f0d1] font-bold hover:underline" href="#">Security Policy</a>.
+                        </p>
+                    </div>
+                </main>
             </div>
         </div>
     );

@@ -1,175 +1,137 @@
 "use client";
+
+import React, { Suspense, useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Skeleton } from "@/components/ui/skeleton";
-import React, { Suspense, useState, useEffect, useRef } from "react";
-import { Mail, CheckCircle2, ArrowRight, RefreshCw, Loader2, ShieldCheck } from "lucide-react";
-import Link from "next/link";
+import { Loader2 } from "lucide-react";
+import VerifyEmailModal from "@/components/auth/VerifyEmailModal";
 
 export default function VerifyPromptPage() {
-  return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    }>
-      <VerifyPromptContent />
-    </Suspense>
-  );
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#131321]">
+                <Loader2 className="h-8 w-8 animate-spin text-[#47f0d1]" />
+            </div>
+        }>
+            <VerifyPromptContent />
+        </Suspense>
+    );
 }
 
 function VerifyPromptContent() {
-  const params = useSearchParams();
-  const router = useRouter();
-  const email = params.get("email") || "";
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
-  const [cooldown, setCooldown] = useState(0);
-  const [polling, setPolling] = useState(true);
-  const cooldownRef = useRef<NodeJS.Timeout | null>(null);
+    const params = useSearchParams();
+    const router = useRouter();
+    const email = params.get("email") || "";
 
-  // Poll verification status every 3 seconds
-  useEffect(() => {
-    if (!email || !polling) return;
-    const interval = setInterval(async () => {
-      try {
-        const res = await fetch("/api/auth/verify-status", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email })
-        });
-        const data = await res.json();
-        if (data.verified) {
-          setPolling(false);
-          router.push("/welcome");
+    // Check immediately on mount if the user is already verified
+    const [checking, setChecking] = useState(true);
+    const [alreadyVerified, setAlreadyVerified] = useState(false);
+    const [countdown, setCountdown] = useState(3);
+
+    useEffect(() => {
+        if (!email) {
+            setChecking(false);
+            return;
         }
-      } catch { }
-    }, 3000);
-    return () => clearInterval(interval);
-  }, [email, polling, router]);
 
-  // Handle cooldown timer for resend button
-  useEffect(() => {
-    if (cooldown > 0) {
-      cooldownRef.current = setTimeout(() => setCooldown(cooldown - 1), 1000);
-    } else if (cooldownRef.current) {
-      clearTimeout(cooldownRef.current);
-    }
-    return () => {
-      if (cooldownRef.current) clearTimeout(cooldownRef.current);
-    };
-  }, [cooldown]);
+        // Hit verify-status to see if the DB already has them as verified
+        fetch("/api/auth/verify-status", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email }),
+        })
+            .then((r) => r.json())
+            .then((data) => {
+                if (data.verified) {
+                    // User is already verified — show "already verified" state briefly then redirect
+                    setAlreadyVerified(true);
+                    setChecking(false);
+                } else {
+                    setChecking(false);
+                }
+            })
+            .catch(() => setChecking(false));
+    }, [email]);
 
-  const handleResend = async () => {
-    setIsLoading(true);
-    setError("");
-    setSuccess("");
-    try {
-      const response = await fetch("/api/auth/verify-request", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email })
-      });
-      const data = await response.json();
-      if (!response.ok) {
-        // Improved error handling
-        if (data.error === "Token expired") {
-          setError("Your verification link has expired. Please request a new one.");
-        } else if (data.error === "Token invalid") {
-          setError("Invalid verification link. Please request a new one.");
-        } else if (data.error === "Token already used") {
-          setError("This link has already been used.");
-        } else {
-          setError(data.error || "Something went wrong");
+    // Countdown for already-verified auto-redirect
+    useEffect(() => {
+        if (!alreadyVerified) return;
+        if (countdown <= 0) {
+            router.push("/dashboard");
+            return;
         }
-        return;
-      }
-      setSuccess("Verification link resent! Please check your email.");
-      setCooldown(60);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
-    } finally {
-      setIsLoading(false);
+        const t = setTimeout(() => setCountdown((c) => c - 1), 1000);
+        return () => clearTimeout(t);
+    }, [alreadyVerified, countdown, router]);
+
+    if (checking) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#131321]">
+                <Loader2 className="h-8 w-8 animate-spin text-[#47f0d1]" />
+            </div>
+        );
     }
-  };
 
+    if (alreadyVerified) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#131321] p-4">
+                {/* Already-verified modal */}
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+                    <div className="relative w-full max-w-[380px] rounded-3xl bg-white dark:bg-[#131321] border border-slate-100 dark:border-white/10 shadow-2xl p-8 text-center animate-in fade-in zoom-in-95 duration-300 overflow-hidden">
+                        <div className="absolute -top-12 -right-12 w-32 h-32 bg-[#47f0d1]/10 rounded-full blur-3xl pointer-events-none" />
+                        <div className="absolute -bottom-12 -left-12 w-32 h-32 bg-[#47f0d1]/8 rounded-full blur-3xl pointer-events-none" />
 
-  return (
-    <div className="min-h-screen w-full flex items-center justify-center p-4 bg-background relative overflow-hidden">
-      {/* Animated Background */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-gradient-to-br from-indigo-500/10 to-purple-500/10 blur-[100px]" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-gradient-to-tl from-teal-500/10 to-emerald-500/10 blur-[100px]" />
-      </div>
+                        <div className="relative z-10">
+                            {/* Success Icon */}
+                            <div className="w-20 h-20 rounded-full bg-[#47f0d1]/15 shadow-[0_0_30px_rgba(71,240,209,0.3)] flex items-center justify-center mx-auto mb-5">
+                                <svg viewBox="0 0 48 48" className="w-10 h-10" fill="none">
+                                    <circle cx="24" cy="24" r="24" fill="rgba(71,240,209,0.15)" />
+                                    <path d="M14 24l7 7 13-13" stroke="#47f0d1" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                                </svg>
+                            </div>
 
-      <div className="w-full max-w-md bg-white/50 backdrop-blur-3xl rounded-3xl border border-white/20 shadow-2xl p-8 lg:p-10 relative z-10 text-center animate-in fade-in zoom-in-95 duration-300">
+                            <h2 className="text-2xl font-black tracking-tight mb-2 bg-gradient-to-br from-slate-900 to-slate-600 dark:from-white dark:to-slate-400 bg-clip-text text-transparent">
+                                Already Verified! ✅
+                            </h2>
+                            <p className="text-sm text-slate-500 dark:text-zinc-400 leading-relaxed mb-6">
+                                Your account is already verified. Redirecting you to your dashboard in{" "}
+                                <span className="font-black text-[#47f0d1]">{countdown}s</span>…
+                            </p>
 
-        <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6 text-primary animate-bounce-slow">
-          <Mail className="w-10 h-10" />
-        </div>
+                            {/* Progress bar */}
+                            <div className="w-full h-1.5 bg-slate-100 dark:bg-zinc-800 rounded-full overflow-hidden mb-6">
+                                <div
+                                    className="h-full bg-[#47f0d1] rounded-full transition-all duration-1000 shadow-[0_0_8px_rgba(71,240,209,0.5)]"
+                                    style={{ width: `${((3 - countdown) / 3) * 100}%` }}
+                                />
+                            </div>
 
-        <h1 className="text-2xl font-bold text-zinc-900 mb-2">Check your email</h1>
-
-        <p className="text-zinc-500 mb-8 leading-relaxed">
-          We've sent a verification link to <br />
-          <span className="font-semibold text-zinc-900">{email}</span>
-        </p>
-
-        <div className="space-y-4">
-          {success && (
-            <Alert className="rounded-xl border-emerald-200 bg-emerald-50 text-emerald-800 text-left">
-              <CheckCircle2 className="h-4 w-4" />
-              <AlertDescription className="font-medium ml-2">{success}</AlertDescription>
-            </Alert>
-          )}
-          {error && (
-            <Alert variant="destructive" className="rounded-xl border-red-200 bg-red-50 text-red-800 text-left">
-              <ShieldCheck className="h-4 w-4" />
-              <AlertDescription className="font-medium ml-2">{error}</AlertDescription>
-            </Alert>
-          )}
-
-          <Button
-            onClick={handleResend}
-            variant="outline"
-            className="w-full h-12 rounded-xl border-zinc-200 text-zinc-700 hover:bg-zinc-50 hover:text-zinc-900 font-medium transition-all"
-            disabled={isLoading || cooldown > 0}
-          >
-            {isLoading ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : cooldown > 0 ? (
-              <>Resend in {cooldown}s</>
-            ) : (
-              <>
-                <RefreshCw className="mr-2 h-4 w-4" /> Resend Email
-              </>
-            )}
-          </Button>
-
-          <div className="relative py-2">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t border-zinc-200" />
+                            <button
+                                onClick={() => router.push("/dashboard")}
+                                className="w-full h-12 rounded-2xl bg-[#47f0d1] hover:bg-[#47f0d1]/90 text-[#131321] font-black text-sm shadow-[0_8px_20px_rgba(71,240,209,0.25)] active:scale-95 transition-all"
+                            >
+                                Go to Dashboard Now
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-white/50 px-2 text-zinc-400">
-                or
-              </span>
+        );
+    }
+
+    // Normal state — show the verify modal on top of a minimal background
+    return (
+        <div className="min-h-screen bg-slate-50 dark:bg-[#131321]">
+            {/* Subtle background */}
+            <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                <div className="absolute -top-40 -right-40 w-96 h-96 bg-[#47f0d1]/5 rounded-full blur-3xl" />
+                <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-[#47f0d1]/3 rounded-full blur-3xl" />
             </div>
-          </div>
 
-          <Link href="/login" className="block w-full">
-            <Button className="w-full h-12 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white font-medium shadow-lg hover:shadow-zinc-500/20 transition-all">
-              Back to Login <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </Link>
+            <VerifyEmailModal
+                email={email}
+                required={true}
+            />
         </div>
-
-        <p className="mt-8 text-xs text-zinc-400">
-          Didn't receive the email? Check your spam folder or try another email address.
-        </p>
-      </div>
-    </div>
-  );
+    );
 }

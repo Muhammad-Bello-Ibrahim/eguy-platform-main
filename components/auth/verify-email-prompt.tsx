@@ -1,16 +1,13 @@
 "use client"
 import React, { useEffect, useState } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Loader2, ArrowRight, CheckCircle2, XCircle, ShieldCheck } from "lucide-react"
+import { Loader2, CheckCircle2, XCircle, ShieldCheck, ArrowRight } from "lucide-react"
 
 export function VerifyEmailPrompt() {
   const params = useSearchParams()
   const router = useRouter()
   const token = params.get("token") || ""
-  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle")
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "already_verified" | "error">("idle")
   const [message, setMessage] = useState("")
 
   useEffect(() => {
@@ -23,93 +20,110 @@ export function VerifyEmailPrompt() {
     fetch("/api/auth/verify-email", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token })
+      body: JSON.stringify({ token }),
     })
-      .then(res => res.json())
-      .then(data => {
-        if (data.error) {
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.alreadyVerified) {
+          setStatus("already_verified")
+          // Auto-redirect quickly
+          setTimeout(() => router.push("/dashboard"), 2000)
+        } else if (data.error) {
           setStatus("error")
           setMessage(data.error)
         } else {
           setStatus("success")
-          setMessage("Your email has been successfully verified.")
+          // Redirect to dashboard after session is refreshed
+          setTimeout(() => router.push("/dashboard"), 2500)
         }
       })
       .catch(() => {
         setStatus("error")
         setMessage("Something went wrong. Please try again.")
       })
-  }, [token])
+  }, [token, router])
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center p-4 bg-background relative overflow-hidden">
-      {/* Animated Background */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-gradient-to-bl from-green-500/10 to-emerald-500/10 blur-[100px]" />
-        <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-gradient-to-tr from-teal-500/10 to-cyan-500/10 blur-[100px]" />
-      </div>
+    <div className="min-h-screen w-full flex items-center justify-center p-4 bg-slate-50 dark:bg-[#131321] relative overflow-hidden">
+      {/* Glows */}
+      <div className="absolute -top-40 -right-40 w-96 h-96 bg-[#47f0d1]/5 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-[#47f0d1]/5 rounded-full blur-3xl pointer-events-none" />
 
-      <div className="w-full max-w-md bg-white/50 backdrop-blur-3xl rounded-3xl border border-white/20 shadow-2xl p-8 lg:p-10 relative z-10 text-center animate-in fade-in zoom-in-95 duration-300">
+      <div className="relative z-10 w-full max-w-[400px] bg-white dark:bg-[#131321] border border-slate-100 dark:border-white/10 rounded-3xl shadow-2xl p-8 text-center animate-in fade-in zoom-in-95 duration-300 overflow-hidden">
 
-        <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 animate-bounce-slow
-                ${status === 'loading' ? 'bg-blue-50 text-blue-500' :
-            status === 'success' ? 'bg-green-50 text-green-500' :
-              'bg-red-50 text-red-500'}`}>
-          {status === 'loading' && <Loader2 className="w-10 h-10 animate-spin" />}
-          {status === 'success' && <CheckCircle2 className="w-10 h-10" />}
-          {(status === 'error' || status === 'idle') && <XCircle className="w-10 h-10" />}
-        </div>
+        <div className="absolute -top-12 -right-12 w-32 h-32 bg-[#47f0d1]/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-12 -left-12 w-32 h-32 bg-[#47f0d1]/8 rounded-full blur-3xl pointer-events-none" />
 
-        <h1 className="text-2xl font-bold text-zinc-900 mb-2">
-          {status === 'loading' && "Verifying Email..."}
-          {status === 'success' && "Email Verified!"}
-          {status === 'error' && "Verification Failed"}
-          {status === 'idle' && "Invalid Link"}
-        </h1>
-
-        <p className="text-zinc-500 mb-8 leading-relaxed">
-          {status === 'loading' && "Please wait while we secure your account."}
-          {status === 'success' && "Thank you for verifying your email. You can now access all features of the platform."}
-          {status === 'error' && (message || "The verification link is invalid or has expired.")}
-          {status === 'idle' && "The link you followed is invalid."}
-        </p>
-
-        <div className="space-y-4">
-          {status === 'success' && (
-            <Button
-              onClick={() => router.push("/welcome")}
-              className="w-full h-12 rounded-xl bg-primary hover:bg-primary/90 text-white font-medium shadow-lg hover:shadow-primary/20 transition-all"
-            >
-              Continue to Welcome <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          )}
-
-          {(status === 'error' || status === 'idle') && (
-            <div className="space-y-3">
-              <Button
-                onClick={() => router.push("/verify-prompt")}
-                variant="outline"
-                className="w-full h-12 rounded-xl border-zinc-200 text-zinc-700 hover:bg-zinc-50 hover:text-zinc-900 font-medium transition-all"
-              >
-                Resend Verification Link
-              </Button>
-              <Link href="/signin" className="block w-full">
-                <Button variant="ghost" className="w-full h-12 rounded-xl text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100">
-                  Back to Sign In
-                </Button>
-              </Link>
-            </div>
-          )}
-        </div>
-
-        {status === 'success' && (
-          <div className="mt-8 pt-6 border-t border-zinc-100">
-            <div className="flex items-center justify-center gap-2 text-xs text-zinc-400">
-              <ShieldCheck className="w-4 h-4" />
-              <span>Secure Verification</span>
-            </div>
+        <div className="relative z-10">
+          {/* Icon */}
+          <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 transition-all duration-500 ${status === "loading"
+            ? "bg-slate-100 dark:bg-zinc-800/60"
+            : (status === "success" || status === "already_verified")
+              ? "bg-[#47f0d1]/15 shadow-[0_0_30px_rgba(71,240,209,0.3)]"
+              : "bg-red-50 dark:bg-red-500/10"
+            }`}>
+            {status === "loading" && <Loader2 className="w-10 h-10 text-[#47f0d1] animate-spin" />}
+            {(status === "success" || status === "already_verified") && (
+              <CheckCircle2 className="w-10 h-10 text-[#47f0d1]" />
+            )}
+            {(status === "error" || status === "idle") && <XCircle className="w-10 h-10 text-red-400" />}
           </div>
-        )}
+
+          {/* Title */}
+          <h1 className="text-2xl font-black tracking-tight mb-2 bg-gradient-to-br from-slate-900 to-slate-600 dark:from-white dark:to-slate-400 bg-clip-text text-transparent">
+            {status === "loading" && "Verifying…"}
+            {status === "success" && "Email Verified! 🎉"}
+            {status === "already_verified" && "Already Verified! ✅"}
+            {status === "error" && "Verification Failed"}
+            {status === "idle" && "Invalid Link"}
+          </h1>
+
+          {/* Message */}
+          <p className="text-sm text-slate-500 dark:text-zinc-400 leading-relaxed mb-8">
+            {status === "loading" && "Please wait while we secure your account…"}
+            {status === "success" && (
+              <>Your email has been verified successfully! Redirecting you to your dashboard<span className="inline-flex gap-0.5 ml-1"><span className="animate-bounce">.</span><span className="animate-bounce delay-75">.</span><span className="animate-bounce delay-150">.</span></span></>
+            )}
+            {status === "already_verified" && (
+              <>Your email is already verified. Taking you to your dashboard<span className="inline-flex gap-0.5 ml-1"><span className="animate-bounce">.</span><span className="animate-bounce delay-75">.</span><span className="animate-bounce delay-150">.</span></span></>
+            )}
+            {status === "error" && (message || "The verification link is invalid or has expired.")}
+            {status === "idle" && "The link you followed is invalid."}
+          </p>
+
+          {/* Actions */}
+          {(status === "success" || status === "already_verified") && (
+            <div className="space-y-3">
+              <button
+                onClick={() => router.push("/dashboard")}
+                className="w-full h-12 rounded-2xl bg-[#47f0d1] hover:bg-[#47f0d1]/90 text-[#131321] font-black text-sm shadow-[0_8px_20px_rgba(71,240,209,0.25)] hover:shadow-[0_8px_20px_rgba(71,240,209,0.4)] active:scale-95 transition-all flex items-center justify-center gap-2"
+              >
+                Go to Dashboard <ArrowRight className="w-4 h-4" />
+              </button>
+              <div className="flex items-center justify-center gap-2 text-xs text-slate-400 dark:text-zinc-500 mt-2">
+                <ShieldCheck className="w-4 h-4 text-[#47f0d1]" />
+                <span>Account secured &amp; verified</span>
+              </div>
+            </div>
+          )}
+
+          {(status === "error" || status === "idle") && (
+            <div className="space-y-3">
+              <button
+                onClick={() => router.push("/verify-prompt")}
+                className="w-full h-12 rounded-2xl bg-slate-100 dark:bg-zinc-800/60 text-slate-700 dark:text-zinc-200 font-bold text-sm hover:bg-slate-200 dark:hover:bg-zinc-700/60 transition-all"
+              >
+                Request New Link
+              </button>
+              <button
+                onClick={() => router.push("/login")}
+                className="w-full h-12 rounded-2xl bg-[#47f0d1] hover:bg-[#47f0d1]/90 text-[#131321] font-black text-sm shadow-[0_8px_20px_rgba(71,240,209,0.2)] active:scale-95 transition-all flex items-center justify-center gap-2"
+              >
+                Back to Login <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )
