@@ -1,21 +1,19 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Loader2, Wifi, Check, Sparkles } from "lucide-react"
+import { Loader2, Wifi, Check, Sparkles, KeyRound } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { Skeleton } from "@/components/ui/skeleton"
 import { SuccessModal } from "@/components/ui/success-modal"
 import { ErrorModal } from "@/components/ui/error-modal"
 import { cn } from "@/lib/utils"
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp"
-import { KeyRound } from "lucide-react"
 
 interface DataModalProps {
   isOpen: boolean
@@ -57,9 +55,11 @@ export function DataModal({ isOpen, onClose, onSuccess }: DataModalProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const [pin, setPin] = useState("")
+  const [showPin, setShowPin] = useState(false)
   const [successModalOpen, setSuccessModalOpen] = useState(false)
   const [errorModalOpen, setErrorModalOpen] = useState(false)
   const [transactionData, setTransactionData] = useState<any>(null)
+  const pinSectionRef = useRef<HTMLDivElement>(null)
   const { toast } = useToast()
 
   useEffect(() => {
@@ -69,7 +69,6 @@ export function DataModal({ isOpen, onClose, onSuccess }: DataModalProps) {
         const res = await fetch("/api/admin/data-plans");
         const data = await res.json();
         if (data && data.length > 0) {
-          // Group by network
           const grouped = data.reduce((acc: any, plan: any) => {
             if (!acc[plan.network]) acc[plan.network] = [];
             acc[plan.network].push(plan);
@@ -82,21 +81,16 @@ export function DataModal({ isOpen, onClose, onSuccess }: DataModalProps) {
             }))
           );
         } else {
-          // Fallback data
           const fallbackData = [
-            // MTN Plans
             { _id: '1', network: 'MTN', dataBundle: '500MB', dataPlan: 'MTN_500MB_SME', duration: '30 Days', type: 'SME', status: 'Active', price: 125, apiPrice: 119 },
             { _id: '2', network: 'MTN', dataBundle: '1GB', dataPlan: 'MTN_1GB_SME', duration: '30 Days', type: 'SME', status: 'Active', price: 245, apiPrice: 239 },
             { _id: '3', network: 'MTN', dataBundle: '2GB', dataPlan: 'MTN_2GB_SME', duration: '30 Days', type: 'SME', status: 'Active', price: 490, apiPrice: 480 },
             { _id: '4', network: 'MTN', dataBundle: '5GB', dataPlan: 'MTN_5GB_SME', duration: '30 Days', type: 'SME', status: 'Active', price: 1225, apiPrice: 1200 },
             { _id: '5', network: 'MTN', dataBundle: '1GB', dataPlan: 'MTN_1GB_GIFTING', duration: '30 Days', type: 'GIFTING', status: 'Active', price: 290, apiPrice: 280 },
-            // Airtel Plans
             { _id: '6', network: 'AIRTEL', dataBundle: '1GB', dataPlan: 'AIRTEL_1GB_SME', duration: '30 Days', type: 'SME', status: 'Active', price: 235, apiPrice: 230 },
             { _id: '7', network: 'AIRTEL', dataBundle: '2GB', dataPlan: 'AIRTEL_2GB_SME', duration: '30 Days', type: 'SME', status: 'Active', price: 470, apiPrice: 460 },
-            // Glo Plans
             { _id: '11', network: 'GLO', dataBundle: '1GB', dataPlan: 'GLO_1GB_CG', duration: '30 Days', type: 'CORPORATE GIFTING', status: 'Active', price: 250, apiPrice: 240 },
             { _id: '12', network: 'GLO', dataBundle: '2GB', dataPlan: 'GLO_2GB_CG', duration: '30 Days', type: 'CORPORATE GIFTING', status: 'Active', price: 500, apiPrice: 480 },
-            // 9Mobile Plans
             { _id: '16', network: '9MOBILE', dataBundle: '1GB', dataPlan: '9MOBILE_1GB_GIFTING', duration: '30 Days', type: 'GIFTING', status: 'Active', price: 400, apiPrice: 380 },
           ];
 
@@ -120,7 +114,6 @@ export function DataModal({ isOpen, onClose, onSuccess }: DataModalProps) {
     fetchBundles();
   }, []);
 
-  // Get available plan types for selected network
   const availableTypes = formData.network
     ? Array.from(new Set(
         bundles
@@ -130,7 +123,6 @@ export function DataModal({ isOpen, onClose, onSuccess }: DataModalProps) {
       ))
     : [];
 
-  // Filter plans based on selected network AND selected type
   const filteredPlans = formData.network && formData.type
     ? bundles
         .find((b) => b.NETWORK === formData.network)
@@ -144,8 +136,21 @@ export function DataModal({ isOpen, onClose, onSuccess }: DataModalProps) {
         ?.BUNDLE.find((p) => p.dataPlan === formData.plan)
       : null;
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  // Show PIN section automatically once bundle is selected
+  useEffect(() => {
+    const shouldShow = !!(formData.network && formData.phone && formData.plan && selectedPlan)
+    if (shouldShow && !showPin) {
+      setShowPin(true)
+      setTimeout(() => {
+        pinSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" })
+      }, 100)
+    } else if (!shouldShow) {
+      setShowPin(false)
+      setPin("")
+    }
+  }, [formData.network, formData.phone, formData.plan, selectedPlan])
+
+  const handlePurchase = async (currentPin: string) => {
     setError("")
     setIsLoading(true)
 
@@ -164,15 +169,13 @@ export function DataModal({ isOpen, onClose, onSuccess }: DataModalProps) {
     try {
       const response = await fetch("/api/payments/data", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           network: formData.network,
           phone: formData.phone,
           plan: selectedPlan.dataPlan,
           amount: selectedPlan.price,
-          pin,
+          pin: currentPin,
         }),
       })
 
@@ -182,7 +185,6 @@ export function DataModal({ isOpen, onClose, onSuccess }: DataModalProps) {
         throw new Error(data.error || "Data purchase failed")
       }
 
-      // Success
       setTransactionData({
         title: "Data Purchase Successful",
         description: `${selectedPlan.dataBundle} ${formData.network} data sent to ${formData.phone}`,
@@ -191,11 +193,11 @@ export function DataModal({ isOpen, onClose, onSuccess }: DataModalProps) {
         transactionId: data.reference
       })
       setSuccessModalOpen(true)
-
       onSuccess()
       onClose()
       setFormData({ network: "", phone: "", type: "", plan: "" })
       setPin("")
+      setShowPin(false)
     } catch (error) {
       setTransactionData({
         title: "Data Purchase Failed",
@@ -203,12 +205,20 @@ export function DataModal({ isOpen, onClose, onSuccess }: DataModalProps) {
         errorCode: "DATA_PURCHASE_ERROR"
       })
       setErrorModalOpen(true)
+      setPin("")
     } finally {
       setIsLoading(false)
     }
   }
 
-  // Format type nicely for UI (e.g. CORPORATE GIFTING -> Corporate Gifting)
+  // Auto-trigger when 4th digit entered
+  const handlePinChange = (value: string) => {
+    setPin(value)
+    if (value.length === 4 && !isLoading) {
+      handlePurchase(value)
+    }
+  }
+
   const formatPlanType = (type: string) => {
     if (!type) return "";
     return type
@@ -238,7 +248,7 @@ export function DataModal({ isOpen, onClose, onSuccess }: DataModalProps) {
             </DialogDescription>
           </DialogHeader>
 
-          <form onSubmit={handleSubmit} className="space-y-5 pt-2">
+          <div className="space-y-5 pt-2">
             {error && (
               <Alert variant="destructive" className="rounded-2xl border-red-500/20 bg-red-500/10 text-red-500 dark:text-red-400">
                 <AlertDescription className="font-semibold text-center">{error}</AlertDescription>
@@ -306,7 +316,7 @@ export function DataModal({ isOpen, onClose, onSuccess }: DataModalProps) {
                   />
                 </div>
 
-                {/* Type Selection (Dropdown) */}
+                {/* Type Selection */}
                 {formData.network && (
                   <div className="space-y-2">
                     <Label htmlFor="type" className="text-xs font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest ml-1">Data Type</Label>
@@ -355,7 +365,7 @@ export function DataModal({ isOpen, onClose, onSuccess }: DataModalProps) {
 
                 {/* Summary Box */}
                 {selectedPlan && (
-                  <div className="bg-[#47f0d1]/5 border border-[#47f0d1]/10 p-4.5 rounded-2xl transition-all duration-300">
+                  <div className="bg-[#47f0d1]/5 border border-[#47f0d1]/10 p-4 rounded-2xl transition-all duration-300">
                     <div className="flex justify-between items-center">
                       <div className="space-y-0.5">
                         <span className="text-xs text-slate-500 dark:text-zinc-500 font-bold uppercase tracking-widest">Total Amount</span>
@@ -366,51 +376,55 @@ export function DataModal({ isOpen, onClose, onSuccess }: DataModalProps) {
                   </div>
                 )}
 
-                {/* Transaction PIN */}
-                {selectedPlan && (
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2">
+                {/* Transaction PIN — slides up when bundle is selected */}
+                <div
+                  ref={pinSectionRef}
+                  className={cn(
+                    "overflow-hidden transition-all duration-500 ease-out"
+                  )}
+                  style={{
+                    maxHeight: showPin ? "220px" : "0px",
+                    opacity: showPin ? 1 : 0,
+                    transform: showPin ? "translateY(0)" : "translateY(16px)",
+                    transition: "max-height 0.55s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease, transform 0.55s cubic-bezier(0.16, 1, 0.3, 1)"
+                  }}
+                >
+                  <div className="pt-2 pb-1 space-y-3 border-t border-[#47f0d1]/10 mt-1">
+                    <div className="flex items-center gap-2 mt-3">
                       <KeyRound className="w-4 h-4 text-[#47f0d1]" />
-                      <Label htmlFor="pin" className="text-sm font-semibold text-slate-700 dark:text-zinc-300">Transaction PIN</Label>
+                      <Label className="text-sm font-semibold text-slate-700 dark:text-zinc-300">Enter 4-digit PIN to confirm</Label>
                     </div>
-                    <div className="flex justify-center py-1">
-                      <InputOTP
-                        maxLength={4}
-                        value={pin}
-                        onChange={(value) => setPin(value)}
-                      >
-                        <InputOTPGroup className="gap-3">
-                          {[0, 1, 2, 3].map((i) => (
-                            <InputOTPSlot
-                              key={i}
-                              index={i}
-                              className="w-11 h-14 text-xl font-black border-2 border-slate-100 dark:border-white/10 rounded-2xl bg-slate-50 dark:bg-zinc-800/40 text-slate-900 dark:text-white data-[active=true]:border-[#47f0d1] data-[active=true]:ring-[#47f0d1]/20 data-[active=true]:bg-white dark:data-[active=true]:bg-[#18182d] transition-all text-center"
-                            />
-                          ))}
-                        </InputOTPGroup>
-                      </InputOTP>
+                    <p className="text-xs text-slate-400 dark:text-zinc-500 ml-6">Entering the last digit will auto-process your purchase</p>
+                    <div className="flex justify-center py-2">
+                      {isLoading ? (
+                        <div className="flex items-center gap-3 py-4 text-[#47f0d1]">
+                          <Loader2 className="w-6 h-6 animate-spin" />
+                          <span className="font-semibold text-sm">Processing purchase...</span>
+                        </div>
+                      ) : (
+                        <InputOTP
+                          maxLength={4}
+                          value={pin}
+                          onChange={handlePinChange}
+                          autoFocus
+                        >
+                          <InputOTPGroup className="gap-3">
+                            {[0, 1, 2, 3].map((i) => (
+                              <InputOTPSlot
+                                key={i}
+                                index={i}
+                                className="w-14 h-16 text-xl font-black border-2 border-slate-100 dark:border-white/10 rounded-2xl bg-slate-50 dark:bg-zinc-800/40 text-slate-900 dark:text-white data-[active=true]:border-[#47f0d1] data-[active=true]:ring-[#47f0d1]/20 data-[active=true]:bg-white dark:data-[active=true]:bg-[#18182d] transition-all text-center"
+                              />
+                            ))}
+                          </InputOTPGroup>
+                        </InputOTP>
+                      )}
                     </div>
                   </div>
-                )}
-
-                {/* Submit Action */}
-                <Button
-                  type="submit"
-                  disabled={isLoading || !formData.network || !formData.phone || !formData.plan || pin.length !== 4}
-                  className="w-full h-14 rounded-2xl bg-[#47f0d1] hover:bg-[#47f0d1]/90 text-[#131321] font-black text-lg shadow-xl shadow-[#47f0d1]/10 hover:shadow-[#47f0d1]/20 active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed mt-4"
-                >
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                      Processing Purchase...
-                    </>
-                  ) : (
-                    "Confirm & Buy Data"
-                  )}
-                </Button>
+                </div>
               </>
             )}
-          </form>
+          </div>
         </DialogContent>
       </Dialog>
 

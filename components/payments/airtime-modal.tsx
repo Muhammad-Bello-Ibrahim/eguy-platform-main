@@ -1,19 +1,17 @@
 "use client"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Loader2, Smartphone, Check } from "lucide-react"
+import { Loader2, Smartphone, Check, KeyRound } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { Skeleton } from "@/components/ui/skeleton"
 import { SuccessModal } from "@/components/ui/success-modal"
 import { ErrorModal } from "@/components/ui/error-modal"
 import { cn } from "@/lib/utils"
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp"
-import { KeyRound } from "lucide-react"
 
 interface AirtimeModalProps {
   isOpen: boolean
@@ -32,9 +30,11 @@ export function AirtimeModal({ isOpen, onClose, onSuccess }: AirtimeModalProps) 
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const [pin, setPin] = useState("")
+  const [showPin, setShowPin] = useState(false)
   const [successModalOpen, setSuccessModalOpen] = useState(false)
   const [errorModalOpen, setErrorModalOpen] = useState(false)
   const [transactionData, setTransactionData] = useState<any>(null)
+  const pinSectionRef = useRef<HTMLDivElement>(null)
   const { toast } = useToast()
 
   useEffect(() => {
@@ -46,7 +46,6 @@ export function AirtimeModal({ isOpen, onClose, onSuccess }: AirtimeModalProps) 
         if (data && data.length > 0) {
           setPlans(data);
         } else {
-          // Fallback data
           setPlans([
             { _id: '1', network: 'MTN', amount: 100, price: 95, apiPrice: 90 },
             { _id: '2', network: 'MTN', amount: 200, price: 190, apiPrice: 180 },
@@ -66,11 +65,10 @@ export function AirtimeModal({ isOpen, onClose, onSuccess }: AirtimeModalProps) 
             { _id: '16', network: '9MOBILE', amount: 1000, price: 950, apiPrice: 900 },
           ]);
         }
-      } catch (e) {
+      } catch {
         setPlans([
           { _id: '1', network: 'MTN', amount: 100, price: 95, apiPrice: 90 },
           { _id: '2', network: 'MTN', amount: 200, price: 190, apiPrice: 180 },
-          // ... minimal fallback to save space if needed
         ]);
       }
       setFetching(false);
@@ -78,8 +76,22 @@ export function AirtimeModal({ isOpen, onClose, onSuccess }: AirtimeModalProps) 
     fetchPlans();
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  // Show PIN section automatically once network + phone + amount are all filled
+  useEffect(() => {
+    const shouldShow = !!(formData.network && formData.phone && formData.amount)
+    if (shouldShow && !showPin) {
+      setShowPin(true)
+      // Scroll PIN section into view after animation starts
+      setTimeout(() => {
+        pinSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" })
+      }, 100)
+    } else if (!shouldShow) {
+      setShowPin(false)
+      setPin("")
+    }
+  }, [formData.network, formData.phone, formData.amount])
+
+  const handlePurchase = async (currentPin: string) => {
     setError("")
     setIsLoading(true)
 
@@ -99,7 +111,7 @@ export function AirtimeModal({ isOpen, onClose, onSuccess }: AirtimeModalProps) 
     try {
       const response = await fetch("/api/payments/airtime", {
         method: "POST",
-        body: JSON.stringify({ ...formData, pin }),
+        body: JSON.stringify({ ...formData, pin: currentPin }),
         headers: { "Content-Type": "application/json" },
       })
 
@@ -117,11 +129,11 @@ export function AirtimeModal({ isOpen, onClose, onSuccess }: AirtimeModalProps) 
         transactionId: data.reference
       })
       setSuccessModalOpen(true)
-
       onSuccess()
       onClose()
       setFormData({ network: "", phone: "", amount: "" })
       setPin("")
+      setShowPin(false)
     } catch (error) {
       setTransactionData({
         title: "Airtime Purchase Failed",
@@ -129,8 +141,17 @@ export function AirtimeModal({ isOpen, onClose, onSuccess }: AirtimeModalProps) 
         errorCode: "AIRTIME_PURCHASE_ERROR"
       })
       setErrorModalOpen(true)
+      setPin("")
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  // Auto-trigger when 4th digit entered
+  const handlePinChange = (value: string) => {
+    setPin(value)
+    if (value.length === 4 && !isLoading) {
+      handlePurchase(value)
     }
   }
 
@@ -152,7 +173,7 @@ export function AirtimeModal({ isOpen, onClose, onSuccess }: AirtimeModalProps) 
             </DialogDescription>
           </DialogHeader>
 
-          <form onSubmit={handleSubmit} className="space-y-6 pt-2">
+          <div className="space-y-6 pt-2">
             {error && (
               <Alert variant="destructive" className="rounded-2xl border-red-100 bg-red-50/50">
                 <AlertDescription className="font-medium text-red-700 text-center">{error}</AlertDescription>
@@ -235,48 +256,56 @@ export function AirtimeModal({ isOpen, onClose, onSuccess }: AirtimeModalProps) 
                   </div>
                 )}
 
-                {/* Transaction PIN */}
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <KeyRound className="w-4 h-4 text-blue-600" />
-                    <Label htmlFor="pin" className="text-sm font-semibold text-gray-700">Transaction PIN</Label>
-                  </div>
-                  <div className="flex justify-center py-1">
-                    <InputOTP
-                      maxLength={4}
-                      value={pin}
-                      onChange={(value) => setPin(value)}
-                    >
-                      <InputOTPGroup className="gap-3">
-                        {[0, 1, 2, 3].map((i) => (
-                          <InputOTPSlot
-                            key={i}
-                            index={i}
-                            className="w-11 h-14 text-xl font-black border-2 border-gray-200 rounded-2xl bg-gray-50 text-gray-900 data-[active=true]:border-blue-500 data-[active=true]:ring-blue-100 transition-all text-center"
-                          />
-                        ))}
-                      </InputOTPGroup>
-                    </InputOTP>
+                {/* Transaction PIN — slides up when form is complete */}
+                <div
+                  ref={pinSectionRef}
+                  className={cn(
+                    "overflow-hidden transition-all duration-500 ease-out",
+                    showPin
+                      ? "max-h-[200px] opacity-100 translate-y-0"
+                      : "max-h-0 opacity-0 translate-y-4"
+                  )}
+                  style={{
+                    transform: showPin ? "translateY(0)" : "translateY(16px)",
+                    transition: "max-height 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)"
+                  }}
+                >
+                  <div className="pt-2 pb-1 space-y-3 border-t border-gray-100 mt-1">
+                    <div className="flex items-center gap-2 mt-3">
+                      <KeyRound className="w-4 h-4 text-blue-600" />
+                      <Label className="text-sm font-semibold text-gray-700">Enter 4-digit PIN to confirm</Label>
+                    </div>
+                    <p className="text-xs text-gray-400 ml-6">Entering the last digit will auto-process your purchase</p>
+                    <div className="flex justify-center py-2">
+                      {isLoading ? (
+                        <div className="flex items-center gap-3 py-4 text-blue-600">
+                          <Loader2 className="w-6 h-6 animate-spin" />
+                          <span className="font-semibold text-sm">Processing purchase...</span>
+                        </div>
+                      ) : (
+                        <InputOTP
+                          maxLength={4}
+                          value={pin}
+                          onChange={handlePinChange}
+                          autoFocus
+                        >
+                          <InputOTPGroup className="gap-3">
+                            {[0, 1, 2, 3].map((i) => (
+                              <InputOTPSlot
+                                key={i}
+                                index={i}
+                                className="w-14 h-16 text-xl font-black border-2 border-gray-200 rounded-2xl bg-gray-50 text-gray-900 data-[active=true]:border-blue-500 data-[active=true]:ring-blue-100 transition-all text-center"
+                              />
+                            ))}
+                          </InputOTPGroup>
+                        </InputOTP>
+                      )}
+                    </div>
                   </div>
                 </div>
-
-                <Button
-                  type="submit"
-                  disabled={isLoading || !formData.network || !formData.phone || !formData.amount || pin.length !== 4}
-                  className="w-full h-12 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-lg shadow-xl shadow-blue-200 transition-all duration-200 disabled:opacity-70 mt-4"
-                >
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                      Processing...
-                    </>
-                  ) : (
-                    "Buy Airtime"
-                  )}
-                </Button>
               </>
             )}
-          </form>
+          </div>
         </DialogContent>
       </Dialog>
 
