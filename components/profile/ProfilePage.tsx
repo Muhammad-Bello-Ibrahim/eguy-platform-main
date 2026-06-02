@@ -5,6 +5,9 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import { ProfileSkeleton } from './skeletons';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
+import { KeyRound, Loader2, CheckCircle2 } from "lucide-react";
 
 export default function ProfilePage() {
     const router = useRouter();
@@ -12,6 +15,12 @@ export default function ProfilePage() {
     const [mounted, setMounted] = useState(false);
     const [user, setUser] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [showPinModal, setShowPinModal] = useState(false);
+    const [newPin, setNewPin] = useState("");
+    const [confirmPin, setConfirmPin] = useState("");
+    const [isSavingPin, setIsSavingPin] = useState(false);
+    const [pinError, setPinError] = useState("");
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
 
     useEffect(() => {
         const fetchUserData = async () => {
@@ -42,6 +51,39 @@ export default function ProfilePage() {
             router.refresh();
         } catch (error) {
             console.error("Sign out failed", error);
+        }
+    };
+
+    const handleSavePin = async () => {
+        setPinError("");
+        if (newPin.length !== 4 || confirmPin.length !== 4) {
+            setPinError("Please enter your 4-digit PIN in both fields.");
+            return;
+        }
+        if (newPin !== confirmPin) {
+            setPinError("PINs do not match.");
+            return;
+        }
+        setIsSavingPin(true);
+        try {
+            const response = await fetch("/api/auth/change-pin", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ pin: newPin, confirmPin }),
+            });
+            const data = await response.json();
+            if (response.ok) {
+                setShowPinModal(false);
+                setNewPin("");
+                setConfirmPin("");
+                setShowSuccessModal(true);
+            } else {
+                setPinError(data.error || "Failed to update PIN.");
+            }
+        } catch (error) {
+            setPinError("An error occurred. Please try again.");
+        } finally {
+            setIsSavingPin(false);
         }
     };
 
@@ -143,7 +185,15 @@ export default function ProfilePage() {
                                 <div className="absolute left-6 top-1 bg-white w-4 h-4 rounded-full transition-transform shadow-sm"></div>
                             </div>
                         </div>
-                        <button className="w-full flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                        <button
+                            onClick={() => {
+                                setPinError("");
+                                setNewPin("");
+                                setConfirmPin("");
+                                setShowPinModal(true);
+                            }}
+                            className="w-full flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
+                        >
                             <div className="flex items-center gap-4">
                                 <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
                                     <span className="material-icons-round">pin</span>
@@ -263,6 +313,109 @@ export default function ProfilePage() {
                     <p className="text-slate-600 dark:text-slate-500 text-[10px] uppercase tracking-[0.2em] font-bold mt-4">eGuy Fintech v2.4.1</p>
                 </div>
             </main>
+
+            {/* Change PIN Dialog */}
+            <Dialog open={showPinModal} onOpenChange={(open) => !open && setShowPinModal(false)}>
+                <DialogContent className="w-[90%] max-w-sm rounded-[2rem] bg-white dark:bg-[#131321] border border-slate-100 dark:border-white/10 p-6 text-slate-900 dark:text-white">
+                    <DialogHeader className="flex flex-col items-center justify-center text-center pb-2">
+                        <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4">
+                            <KeyRound className="w-6 h-6 text-primary" />
+                        </div>
+                        <DialogTitle className="text-lg font-bold">Change Transaction PIN</DialogTitle>
+                    </DialogHeader>
+                    
+                    <div className="py-2 space-y-6">
+                        {pinError && (
+                            <div className="bg-red-500/10 border border-red-500/20 text-red-500 dark:text-red-400 text-xs font-semibold px-4 py-2.5 rounded-xl text-center">
+                                {pinError}
+                            </div>
+                        )}
+                        
+                        <div className="space-y-4">
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest block pl-1">
+                                    New 4-Digit PIN
+                                </label>
+                                <div className="flex justify-center">
+                                    <InputOTP
+                                        maxLength={4}
+                                        value={newPin}
+                                        onChange={(value) => setNewPin(value)}
+                                    >
+                                        <InputOTPGroup className="gap-3">
+                                            {[0, 1, 2, 3].map((i) => (
+                                                <InputOTPSlot
+                                                    key={i}
+                                                    index={i}
+                                                    className="w-11 h-14 text-xl font-black border-2 border-slate-200 dark:border-white/10 rounded-2xl bg-slate-50 dark:bg-zinc-800/40 text-slate-900 dark:text-white data-[active=true]:border-primary data-[active=true]:ring-primary/20 transition-all text-center"
+                                                />
+                                            ))}
+                                        </InputOTPGroup>
+                                    </InputOTP>
+                                </div>
+                            </div>
+                            
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest block pl-1">
+                                    Confirm New PIN
+                                </label>
+                                <div className="flex justify-center">
+                                    <InputOTP
+                                        maxLength={4}
+                                        value={confirmPin}
+                                        onChange={(value) => setConfirmPin(value)}
+                                    >
+                                        <InputOTPGroup className="gap-3">
+                                            {[0, 1, 2, 3].map((i) => (
+                                                <InputOTPSlot
+                                                    key={i}
+                                                    index={i}
+                                                    className="w-11 h-14 text-xl font-black border-2 border-slate-200 dark:border-white/10 rounded-2xl bg-slate-50 dark:bg-zinc-800/40 text-slate-900 dark:text-white data-[active=true]:border-primary data-[active=true]:ring-primary/20 transition-all text-center"
+                                                />
+                                            ))}
+                                        </InputOTPGroup>
+                                    </InputOTP>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div className="pt-4 space-y-3">
+                        <button
+                            onClick={handleSavePin}
+                            disabled={isSavingPin || newPin.length !== 4 || confirmPin.length !== 4}
+                            className="w-full bg-primary hover:bg-primary/90 text-slate-900 font-extrabold py-3.5 rounded-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
+                        >
+                            {isSavingPin ? <Loader2 className="animate-spin w-5 h-5" /> : "Save New PIN"}
+                        </button>
+                        <button
+                            onClick={() => setShowPinModal(false)}
+                            className="w-full text-slate-400 hover:text-slate-600 dark:hover:text-white text-sm font-semibold text-center pt-1"
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                </DialogContent>
+            </Dialog>
+
+            {/* PIN Success Confirmation Dialog */}
+            <Dialog open={showSuccessModal} onOpenChange={(open) => !open && setShowSuccessModal(false)}>
+                <DialogContent className="w-[90%] max-w-sm rounded-[2rem] bg-white dark:bg-[#131321] border border-slate-100 dark:border-white/10 p-8 text-center text-slate-900 dark:text-white">
+                    <div className="w-20 h-20 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <CheckCircle2 className="w-10 h-10 text-green-500 animate-bounce" />
+                    </div>
+                    <DialogTitle className="text-xl font-bold mb-2">PIN Updated Successfully!</DialogTitle>
+                    <p className="text-slate-500 dark:text-zinc-400 text-sm mb-6">
+                        Your transaction PIN has been changed. Use your new 4-digit PIN for future transactions.
+                    </p>
+                    <button
+                        onClick={() => setShowSuccessModal(false)}
+                        className="w-full bg-[#47f0d1] hover:bg-[#47f0d1]/90 text-[#131321] font-extrabold py-3.5 rounded-xl transition-all text-sm uppercase tracking-wider"
+                    >
+                        Great, Thanks!
+                    </button>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }

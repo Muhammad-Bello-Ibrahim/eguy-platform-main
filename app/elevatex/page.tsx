@@ -16,12 +16,13 @@ import { cn } from "@/lib/utils";
 import { NetworkTree } from "@/components/elevatex/NetworkTree";
 import { ElevateXPageSkeleton } from "@/components/elevatex/skeletons";
 import { Skeleton } from "@/components/ui/skeleton";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
+import { KeyRound } from "lucide-react";
 
 // Format currency
 const formatCurrency = (amount: number) => {
 	return new Intl.NumberFormat('en-US', {
 		style: 'currency',
-		currency: 'USD',
 		// The design shows $, but logic might be NGN. Sticking to logic if it was NGN, 
 		// but the design explicitly shows $. I will use NGN as per previous context 
 		// or keep it generic. The design says $42,890.50. 
@@ -45,6 +46,8 @@ export default function ElevatexPage() {
 	const [activating, setActivating] = useState(false);
 	const [showDeposit, setShowDeposit] = useState(false);
 	const [showWithdraw, setShowWithdraw] = useState(false);
+	const [showPinModal, setShowPinModal] = useState(false);
+	const [pin, setPin] = useState("");
 	const [rank, setRank] = useState<string>("Guest");
 
 	// ElevateX specific data
@@ -126,14 +129,24 @@ export default function ElevatexPage() {
 	}, [elevatexTransactions]);
 
 	const handleActivateElevatex = async () => {
+		if (pin.length !== 4) {
+			toast({ title: "Validation Error", description: "Please enter your 4-digit transaction PIN", variant: "destructive" });
+			return;
+		}
 		setActivating(true);
 		try {
-			const res = await fetch("/api/elevatex/activate", { method: "POST" });
+			const res = await fetch("/api/elevatex/activate", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ pin }),
+			});
 			const data = await res.json();
 			if (data.success) {
 				setSubscribed(true);
 				setReferralCode(data.referralCode);
 				await fetchWalletBalance();
+				setShowPinModal(false);
+				setPin("");
 				toast({ title: "Success!", description: "Welcome to ElevateX!" });
 			} else {
 				toast({ title: "Activation Failed", description: data.error || "Could not activate ElevateX", variant: "destructive" });
@@ -255,7 +268,7 @@ export default function ElevatexPage() {
 						<h3 className="text-lg font-bold text-white mb-2">Activate Membership</h3>
 						<p className="text-sm text-slate-400 mb-4">Unlock earnings and premium features for ₦1,000.</p>
 						<Button
-							onClick={handleActivateElevatex}
+							onClick={() => setShowPinModal(true)}
 							disabled={activating || balance < 1000}
 							className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-bold"
 						>
@@ -424,6 +437,47 @@ export default function ElevatexPage() {
 							</div>
 						</div>
 					)}
+				</DialogContent>
+			</Dialog>
+
+			{/* PIN Verification Dialog for Activation */}
+			<Dialog open={showPinModal} onOpenChange={(open) => !open && setShowPinModal(false)}>
+				<DialogContent className="w-[90%] max-w-sm rounded-[2rem] bg-[#1a1a2e] border-white/10 p-6 text-white">
+					<DialogHeader>
+						<DialogTitle className="text-center text-lg font-bold">Verify PIN</DialogTitle>
+					</DialogHeader>
+					<div className="flex flex-col items-center gap-6 py-4">
+						<div className="w-16 h-16 bg-[#47f0d1]/10 rounded-full flex items-center justify-center">
+							<KeyRound className="w-8 h-8 text-[#47f0d1]" />
+						</div>
+						<div className="text-center">
+							<p className="text-sm text-slate-300">Enter your 4-digit transaction PIN to activate ElevateX membership.</p>
+						</div>
+						<div className="flex justify-center">
+							<InputOTP
+								maxLength={4}
+								value={pin}
+								onChange={(value) => setPin(value)}
+							>
+								<InputOTPGroup className="gap-3">
+									{[0, 1, 2, 3].map((i) => (
+										<InputOTPSlot
+											key={i}
+											index={i}
+											className="w-12 h-12 text-xl font-bold border-2 border-white/10 rounded-xl bg-white/5 text-white data-[active=true]:border-[#47f0d1] data-[active=true]:ring-[#47f0d1]/20 transition-all text-center"
+										/>
+									))}
+								</InputOTPGroup>
+							</InputOTP>
+						</div>
+						<Button
+							onClick={handleActivateElevatex}
+							disabled={activating || pin.length !== 4}
+							className="w-full bg-[#47f0d1] hover:bg-[#47f0d1]/90 text-[#131321] font-extrabold py-3 rounded-xl transition-all"
+						>
+							{activating ? "Activating..." : "Verify & Activate"}
+						</Button>
+					</div>
 				</DialogContent>
 			</Dialog>
 		</div>

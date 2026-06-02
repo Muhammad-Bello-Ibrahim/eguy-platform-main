@@ -34,6 +34,28 @@ export async function verifyPassword(password, hashedPassword) {
   return await bcrypt.compare(password, hashedPassword)
 }
 
+export async function verifyTransactionPin(userId: string, pin: string | undefined): Promise<{ isValid: boolean; error?: string }> {
+  if (!pin) {
+    return { isValid: false, error: "Transaction PIN is required" }
+  }
+  if (pin.length !== 4) {
+    return { isValid: false, error: "Transaction PIN must be 4 digits" }
+  }
+  const { Database } = await import("./database")
+  const user = await Database.findUserById(userId)
+  if (!user) {
+    return { isValid: false, error: "User not found" }
+  }
+  if (!user.transactionPin) {
+    return { isValid: false, error: "Transaction PIN not configured" }
+  }
+  const isMatch = await verifyPassword(pin, user.transactionPin)
+  if (!isMatch) {
+    return { isValid: false, error: "Incorrect transaction PIN" }
+  }
+  return { isValid: true }
+}
+
 /**
  * Safe version of getSession — requires an active request context.
  * Avoids being executed during build analysis.

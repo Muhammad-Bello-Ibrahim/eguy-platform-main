@@ -5,8 +5,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Check, Crown, Star, Zap, Loader2 } from "lucide-react"
+import { Check, Crown, Star, Zap, Loader2, KeyRound } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp"
+import { Label } from "@/components/ui/label"
 
 interface SubscriptionPacksProps {
   onSubscriptionSuccess: () => void
@@ -34,9 +37,15 @@ const ActivationCard = {
 export function SubscriptionPacks({ onSubscriptionSuccess }: SubscriptionPacksProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
+  const [showPinModal, setShowPinModal] = useState(false)
+  const [pin, setPin] = useState("")
   const { toast } = useToast()
 
   const handleActivate = async () => {
+    if (pin.length !== 4) {
+      setError("Please enter your 4-digit transaction PIN")
+      return
+    }
     setError("")
     setIsLoading(true)
 
@@ -46,7 +55,7 @@ export function SubscriptionPacks({ onSubscriptionSuccess }: SubscriptionPacksPr
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ packId: 'activation' }), // Sending dummy packId
+        body: JSON.stringify({ packId: 'activation', pin }), // Sending dummy packId
       })
 
       const data = await response.json()
@@ -60,6 +69,8 @@ export function SubscriptionPacks({ onSubscriptionSuccess }: SubscriptionPacksPr
         description: `Welcome to ElevateX! You are now an active member.`,
       })
 
+      setShowPinModal(false)
+      setPin("")
       onSubscriptionSuccess()
     } catch (error) {
       setError(error instanceof Error ? error.message : "Something went wrong")
@@ -128,7 +139,7 @@ export function SubscriptionPacks({ onSubscriptionSuccess }: SubscriptionPacksPr
 
             <Button
               className="w-full py-6 text-lg font-bold shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all"
-              onClick={handleActivate}
+              onClick={() => setShowPinModal(true)}
               disabled={isLoading}
               size="lg"
             >
@@ -172,6 +183,47 @@ export function SubscriptionPacks({ onSubscriptionSuccess }: SubscriptionPacksPr
           </div>
         </div>
       </div>
+
+      {/* PIN Verification Dialog */}
+      <Dialog open={showPinModal} onOpenChange={(open) => !open && setShowPinModal(false)}>
+        <DialogContent className="sm:max-w-[360px] bg-white dark:bg-[#131321] border border-slate-100 dark:border-white/10 text-slate-900 dark:text-white rounded-3xl p-6 overflow-hidden">
+          <DialogHeader className="flex flex-col items-center justify-center text-center pb-2">
+            <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4">
+              <KeyRound className="w-6 h-6 text-primary" />
+            </div>
+            <DialogTitle className="text-lg font-bold">Verify PIN</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col items-center gap-6 py-4">
+            <p className="text-xs text-slate-500 dark:text-zinc-400 text-center">
+              Enter your 4-digit transaction PIN to authorize the payment of {formatCurrency(ActivationCard.price)} for ElevateX activation.
+            </p>
+            <div className="flex justify-center">
+              <InputOTP
+                maxLength={4}
+                value={pin}
+                onChange={(value) => setPin(value)}
+              >
+                <InputOTPGroup className="gap-3">
+                  {[0, 1, 2, 3].map((i) => (
+                    <InputOTPSlot
+                      key={i}
+                      index={i}
+                      className="w-12 h-12 text-xl font-bold border-2 border-slate-200 dark:border-white/20 rounded-xl bg-slate-50 dark:bg-zinc-800/40 text-slate-900 dark:text-white data-[active=true]:border-primary data-[active=true]:ring-primary/20 transition-all text-center"
+                    />
+                  ))}
+                </InputOTPGroup>
+              </InputOTP>
+            </div>
+            <Button
+              onClick={handleActivate}
+              disabled={isLoading || pin.length !== 4}
+              className="w-full bg-primary hover:bg-primary/90 text-background-dark font-extrabold py-3 rounded-xl transition-all"
+            >
+              {isLoading ? "Processing..." : "Verify & Activate"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

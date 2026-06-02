@@ -14,6 +14,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { SuccessModal } from "@/components/ui/success-modal"
 import { ErrorModal } from "@/components/ui/error-modal"
 import { cn } from "@/lib/utils"
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp"
+import { KeyRound } from "lucide-react"
 
 interface DataModalProps {
   isOpen: boolean
@@ -54,6 +56,7 @@ export function DataModal({ isOpen, onClose, onSuccess }: DataModalProps) {
   })
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
+  const [pin, setPin] = useState("")
   const [successModalOpen, setSuccessModalOpen] = useState(false)
   const [errorModalOpen, setErrorModalOpen] = useState(false)
   const [transactionData, setTransactionData] = useState<any>(null)
@@ -169,6 +172,7 @@ export function DataModal({ isOpen, onClose, onSuccess }: DataModalProps) {
           phone: formData.phone,
           plan: selectedPlan.dataPlan,
           amount: selectedPlan.price,
+          pin,
         }),
       })
 
@@ -191,6 +195,7 @@ export function DataModal({ isOpen, onClose, onSuccess }: DataModalProps) {
       onSuccess()
       onClose()
       setFormData({ network: "", phone: "", type: "", plan: "" })
+      setPin("")
     } catch (error) {
       setTransactionData({
         title: "Data Purchase Failed",
@@ -361,10 +366,37 @@ export function DataModal({ isOpen, onClose, onSuccess }: DataModalProps) {
                   </div>
                 )}
 
+                {/* Transaction PIN */}
+                {selectedPlan && (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <KeyRound className="w-4 h-4 text-[#47f0d1]" />
+                      <Label htmlFor="pin" className="text-sm font-semibold text-slate-700 dark:text-zinc-300">Transaction PIN</Label>
+                    </div>
+                    <div className="flex justify-center py-1">
+                      <InputOTP
+                        maxLength={4}
+                        value={pin}
+                        onChange={(value) => setPin(value)}
+                      >
+                        <InputOTPGroup className="gap-3">
+                          {[0, 1, 2, 3].map((i) => (
+                            <InputOTPSlot
+                              key={i}
+                              index={i}
+                              className="w-11 h-14 text-xl font-black border-2 border-slate-100 dark:border-white/10 rounded-2xl bg-slate-50 dark:bg-zinc-800/40 text-slate-900 dark:text-white data-[active=true]:border-[#47f0d1] data-[active=true]:ring-[#47f0d1]/20 data-[active=true]:bg-white dark:data-[active=true]:bg-[#18182d] transition-all text-center"
+                            />
+                          ))}
+                        </InputOTPGroup>
+                      </InputOTP>
+                    </div>
+                  </div>
+                )}
+
                 {/* Submit Action */}
                 <Button
                   type="submit"
-                  disabled={isLoading || !formData.network || !formData.phone || !formData.plan}
+                  disabled={isLoading || !formData.network || !formData.phone || !formData.plan || pin.length !== 4}
                   className="w-full h-14 rounded-2xl bg-[#47f0d1] hover:bg-[#47f0d1]/90 text-[#131321] font-black text-lg shadow-xl shadow-[#47f0d1]/10 hover:shadow-[#47f0d1]/20 active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed mt-4"
                 >
                   {isLoading ? (

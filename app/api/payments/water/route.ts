@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { getSession } from "@/lib/auth"
+import { getSession, verifyTransactionPin } from "@/lib/auth"
 import { Database } from "@/lib/database"
 
 export async function POST(request: NextRequest) {
@@ -9,7 +9,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const { provider, meterNumber, amount, customerInfo } = await request.json()
+    const { provider, meterNumber, amount, customerInfo, pin, transactionPin } = await request.json()
+
+    // Verify transaction PIN
+    const pinVerification = await verifyTransactionPin((session.user as any).id, pin || transactionPin)
+    if (!pinVerification.isValid) {
+      return NextResponse.json({ error: pinVerification.error }, { status: 400 })
+    }
 
     if (!provider || !meterNumber || !amount) {
       return NextResponse.json({ error: "All fields are required" }, { status: 400 })

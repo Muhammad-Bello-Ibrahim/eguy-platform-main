@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { getSession } from "@/lib/auth"
+import { getSession, verifyTransactionPin } from "@/lib/auth"
 import { Database } from "@/lib/database"
 
 function generateReferralCode(userId: string) {
@@ -9,6 +9,14 @@ function generateReferralCode(userId: string) {
 export async function POST(request: NextRequest) {
   const session = await getSession()
   if (!session || !session.user?.email) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+
+  const { pin, transactionPin } = await request.json().catch(() => ({}))
+
+  // Verify transaction PIN
+  const pinVerification = await verifyTransactionPin((session.user as any).id, pin || transactionPin)
+  if (!pinVerification.isValid) {
+    return NextResponse.json({ error: pinVerification.error }, { status: 400 })
+  }
 
   const user = await Database.findUserByEmail(session.user.email)
   if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 })

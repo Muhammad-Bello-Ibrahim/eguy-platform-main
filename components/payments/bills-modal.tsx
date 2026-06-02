@@ -9,9 +9,10 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Loader2, Receipt, Lightbulb, Droplets, Tv, GraduationCap } from "lucide-react"
+import { Loader2, Receipt, Lightbulb, Droplets, Tv, GraduationCap, KeyRound } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp"
 
 interface BillsModalProps {
   isOpen: boolean
@@ -61,6 +62,7 @@ export function BillsModal({ isOpen, onClose, onSuccess }: BillsModalProps) {
   })
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
+  const [pin, setPin] = useState("")
   const { toast } = useToast()
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -84,6 +86,7 @@ export function BillsModal({ isOpen, onClose, onSuccess }: BillsModalProps) {
         amount: amount,
         recipient: formData.recipient,
         customerInfo: formData.customerInfo,
+        pin,
       }
 
       // Use specific APIs for better integration
@@ -94,6 +97,7 @@ export function BillsModal({ isOpen, onClose, onSuccess }: BillsModalProps) {
           meterNumber: formData.recipient,
           amount: amount,
           customerInfo: formData.customerInfo,
+          pin,
         }
       } else if (formData.serviceType === "electricity") {
         endpoint = "/api/payments/electricity"
@@ -102,6 +106,7 @@ export function BillsModal({ isOpen, onClose, onSuccess }: BillsModalProps) {
           meterType: "prepaid", // Default to prepaid
           meterNumber: formData.recipient,
           amount: amount,
+          pin,
         }
       } else if (formData.serviceType === "education") {
         endpoint = "/api/payments/education"
@@ -110,6 +115,7 @@ export function BillsModal({ isOpen, onClose, onSuccess }: BillsModalProps) {
           bills_code: formData.serviceType,
           regNumber: formData.recipient,
           amount: amount,
+          pin,
         }
       }
       // TV subscriptions use the general bills API
@@ -136,6 +142,7 @@ export function BillsModal({ isOpen, onClose, onSuccess }: BillsModalProps) {
       onSuccess()
       onClose()
       setFormData({ serviceType: "", provider: "", recipient: "", amount: "", customerInfo: "" })
+      setPin("")
     } catch (error) {
       setError(error instanceof Error ? error.message : "Something went wrong")
     } finally {
@@ -271,10 +278,36 @@ export function BillsModal({ isOpen, onClose, onSuccess }: BillsModalProps) {
             />
           </div>
 
+          {formData.amount && (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <KeyRound className="w-4 h-4 text-purple-600" />
+                <Label htmlFor="pin" className="text-sm font-semibold text-gray-700">Transaction PIN</Label>
+              </div>
+              <div className="flex justify-center py-1">
+                <InputOTP
+                  maxLength={4}
+                  value={pin}
+                  onChange={(value) => setPin(value)}
+                >
+                  <InputOTPGroup className="gap-3">
+                    {[0, 1, 2, 3].map((i) => (
+                      <InputOTPSlot
+                        key={i}
+                        index={i}
+                        className="w-11 h-14 text-xl font-black border-2 border-gray-200 rounded-2xl bg-gray-50 text-gray-900 data-[active=true]:border-purple-500 data-[active=true]:ring-purple-100 transition-all text-center"
+                      />
+                    ))}
+                  </InputOTPGroup>
+                </InputOTP>
+              </div>
+            </div>
+          )}
+
           <Button
             type="submit"
             disabled={
-              isLoading || !formData.serviceType || !formData.provider || !formData.recipient || !formData.amount
+              isLoading || !formData.serviceType || !formData.provider || !formData.recipient || !formData.amount || pin.length !== 4
             }
             className="w-full h-12 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold text-lg shadow-xl shadow-purple-200 transition-all duration-200 disabled:opacity-70 mt-4"
           >

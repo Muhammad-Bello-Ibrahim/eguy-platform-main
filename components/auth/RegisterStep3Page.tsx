@@ -55,8 +55,8 @@ export default function RegisterStep3Page() {
             setError('Please choose a stronger password');
             return;
         }
-        if (pin.length !== 6) {
-            setError('Please enter a 6-digit Transaction PIN');
+        if (pin.length !== 4) {
+            setError('Please enter a 4-digit Transaction PIN');
             return;
         }
 
@@ -184,16 +184,16 @@ export default function RegisterStep3Page() {
                                     </label>
                                 </div>
                                 <p className="text-xs text-slate-400 dark:text-zinc-500">
-                                    Create a 6-digit PIN to authorize transactions.
+                                    Create a 4-digit PIN to authorize transactions.
                                 </p>
                                 <div className="flex justify-center py-2">
                                     <InputOTP
-                                        maxLength={6}
+                                        maxLength={4}
                                         value={pin}
                                         onChange={(value) => setPin(value)}
                                     >
                                         <InputOTPGroup className="gap-3">
-                                            {[0, 1, 2, 3, 4, 5].map((i) => (
+                                            {[0, 1, 2, 3].map((i) => (
                                                 <InputOTPSlot
                                                     key={i}
                                                     index={i}

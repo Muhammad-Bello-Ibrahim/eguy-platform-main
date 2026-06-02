@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { getSession } from "@/lib/auth";
+import { getSession, verifyTransactionPin } from "@/lib/auth";
 import { Database } from "@/lib/database";
 
 export async function POST(request: NextRequest) {
@@ -8,12 +8,18 @@ export async function POST(request: NextRequest) {
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    const { amount } = await request.json();
+    const { amount, pin, transactionPin } = await request.json();
+
+    // Verify transaction PIN
+    const pinVerification = await verifyTransactionPin((session.user as any).id, pin || transactionPin)
+    if (!pinVerification.isValid) {
+      return NextResponse.json({ error: pinVerification.error }, { status: 400 })
+    }
     if (!amount || amount < 100) {
       return NextResponse.json({ error: "Minimum withdrawal amount is ₦100" }, { status: 400 });
     }
     // Find user
-    const user = await Database.findUserByEmail(session.user.email);
+    const user = await Database.findUserByEmail((session.user as any).email);
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }

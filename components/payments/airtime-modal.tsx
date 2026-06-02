@@ -12,6 +12,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { SuccessModal } from "@/components/ui/success-modal"
 import { ErrorModal } from "@/components/ui/error-modal"
 import { cn } from "@/lib/utils"
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp"
+import { KeyRound } from "lucide-react"
 
 interface AirtimeModalProps {
   isOpen: boolean
@@ -29,6 +31,7 @@ export function AirtimeModal({ isOpen, onClose, onSuccess }: AirtimeModalProps) 
   })
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
+  const [pin, setPin] = useState("")
   const [successModalOpen, setSuccessModalOpen] = useState(false)
   const [errorModalOpen, setErrorModalOpen] = useState(false)
   const [transactionData, setTransactionData] = useState<any>(null)
@@ -96,7 +99,7 @@ export function AirtimeModal({ isOpen, onClose, onSuccess }: AirtimeModalProps) 
     try {
       const response = await fetch("/api/payments/airtime", {
         method: "POST",
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, pin }),
         headers: { "Content-Type": "application/json" },
       })
 
@@ -118,6 +121,7 @@ export function AirtimeModal({ isOpen, onClose, onSuccess }: AirtimeModalProps) 
       onSuccess()
       onClose()
       setFormData({ network: "", phone: "", amount: "" })
+      setPin("")
     } catch (error) {
       setTransactionData({
         title: "Airtime Purchase Failed",
@@ -231,9 +235,34 @@ export function AirtimeModal({ isOpen, onClose, onSuccess }: AirtimeModalProps) 
                   </div>
                 )}
 
+                {/* Transaction PIN */}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <KeyRound className="w-4 h-4 text-blue-600" />
+                    <Label htmlFor="pin" className="text-sm font-semibold text-gray-700">Transaction PIN</Label>
+                  </div>
+                  <div className="flex justify-center py-1">
+                    <InputOTP
+                      maxLength={4}
+                      value={pin}
+                      onChange={(value) => setPin(value)}
+                    >
+                      <InputOTPGroup className="gap-3">
+                        {[0, 1, 2, 3].map((i) => (
+                          <InputOTPSlot
+                            key={i}
+                            index={i}
+                            className="w-11 h-14 text-xl font-black border-2 border-gray-200 rounded-2xl bg-gray-50 text-gray-900 data-[active=true]:border-blue-500 data-[active=true]:ring-blue-100 transition-all text-center"
+                          />
+                        ))}
+                      </InputOTPGroup>
+                    </InputOTP>
+                  </div>
+                </div>
+
                 <Button
                   type="submit"
-                  disabled={isLoading || !formData.network || !formData.phone || !formData.amount}
+                  disabled={isLoading || !formData.network || !formData.phone || !formData.amount || pin.length !== 4}
                   className="w-full h-12 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-lg shadow-xl shadow-blue-200 transition-all duration-200 disabled:opacity-70 mt-4"
                 >
                   {isLoading ? (

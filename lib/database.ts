@@ -30,6 +30,7 @@ export interface DatabaseUser {
   createdAt?: Date
   updatedAt?: Date
   linkedAccounts?: LinkedAccount[]
+  transactionPin?: string
 }
 
 

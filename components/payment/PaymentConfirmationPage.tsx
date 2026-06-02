@@ -3,6 +3,7 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Loader2, CheckCircle, AlertCircle } from 'lucide-react';
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 
 const PaymentConfirmationContent = () => {
     const searchParams = useSearchParams();
@@ -17,6 +18,7 @@ const PaymentConfirmationContent = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
     const [message, setMessage] = useState('');
+    const [pin, setPin] = useState('');
 
     // Validate params
     const isValid = type && amount && recipient && provider;
@@ -30,13 +32,13 @@ const PaymentConfirmationContent = () => {
             let endpoint = '';
             let body = {};
 
-            if (type === 'airtime') {
+             if (type === 'airtime') {
                 endpoint = '/api/payments/airtime';
-                body = { network: provider, phone: recipient, amount: amount };
+                body = { network: provider, phone: recipient, amount: amount, pin };
             } else if (type === 'data') {
                 endpoint = '/api/payments/data';
                 const planCode = searchParams.get('plan');
-                body = { network: provider, phone: recipient, plan: planCode, amount: amount };
+                body = { network: provider, phone: recipient, plan: planCode, amount: amount, pin };
             } else if (type === 'cable') {
                 endpoint = '/api/payments/bills';
                 // Pass dynamic data from frontend 
@@ -48,7 +50,8 @@ const PaymentConfirmationContent = () => {
                     provider: provider,     // The service name (e.g., 'gotv')
                     recipient: recipient,   // Smartcard number
                     amount: Number(amount),
-                    customerInfo: customerName || 'Customer'
+                    customerInfo: customerName || 'Customer',
+                    pin
                 };
             } else if (type === 'electricity') {
                 endpoint = '/api/payments/electricity';
@@ -58,7 +61,8 @@ const PaymentConfirmationContent = () => {
                     disco: provider,        // The service ID (e.g., 'AEDC')
                     meterType: meterType,   // 'PRE' or 'POST'
                     meterNumber: recipient, // Meter number
-                    amount: Number(amount)
+                    amount: Number(amount),
+                    pin
                 };
             }
 
@@ -172,13 +176,24 @@ const PaymentConfirmationContent = () => {
                     {!isLoading && status !== 'error' && (
                         <div className="mb-10">
                             <p className="text-center text-white/60 text-xs uppercase tracking-widest font-bold mb-4">
-                                Secure Payment
+                                Enter 4-Digit Transaction PIN
                             </p>
-                            <div className="flex justify-center gap-4 opacity-50">
-                                {/* Mock PIN dots */}
-                                {[1, 2, 3, 4].map(i => (
-                                    <div key={i} className="w-4 h-4 bg-white/20 rounded-full"></div>
-                                ))}
+                            <div className="flex justify-center py-2">
+                                <InputOTP
+                                    maxLength={4}
+                                    value={pin}
+                                    onChange={(value) => setPin(value)}
+                                >
+                                    <InputOTPGroup className="gap-3">
+                                        {[0, 1, 2, 3].map((i) => (
+                                            <InputOTPSlot
+                                                key={i}
+                                                index={i}
+                                                className="w-12 h-12 text-xl font-bold border-2 border-white/10 rounded-xl bg-white/5 text-white data-[active=true]:border-primary data-[active=true]:ring-primary/20 transition-all text-center"
+                                            />
+                                        ))}
+                                    </InputOTPGroup>
+                                </InputOTP>
                             </div>
                         </div>
                     )}
@@ -187,7 +202,7 @@ const PaymentConfirmationContent = () => {
                     <div className="space-y-4">
                         <button
                             onClick={handleConfirm}
-                            disabled={!isValid || isLoading}
+                            disabled={!isValid || isLoading || pin.length !== 4}
                             className="w-full bg-primary hover:bg-primary/90 text-background-dark font-extrabold py-4 rounded-xl transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {isLoading ? <Loader2 className="animate-spin" /> : (

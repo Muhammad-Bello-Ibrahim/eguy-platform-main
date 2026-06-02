@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Loader2, ShieldCheck, ChevronDown, ExternalLink } from "lucide-react"
+import { Loader2, ShieldCheck, ChevronDown, ExternalLink, KeyRound } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
@@ -20,6 +20,7 @@ interface WithdrawModalProps {
 
 export function WithdrawModal({ isOpen, onClose, onSuccess }: WithdrawModalProps) {
   const [amount, setAmount] = useState("")
+  const [pin, setPin] = useState("")
   const [payoutAccount, setPayoutAccount] = useState<any>(null)
   const [userBalance, setUserBalance] = useState(0)
   const [isLoading, setIsLoading] = useState(false)
@@ -84,7 +85,7 @@ export function WithdrawModal({ isOpen, onClose, onSuccess }: WithdrawModalProps
     try {
       const response = await fetch("/api/wallet/withdraw", {
         method: "POST",
-        body: JSON.stringify({ amount: withdrawAmount }),
+        body: JSON.stringify({ amount: withdrawAmount, pin }),
         headers: { "Content-Type": "application/json" },
       })
       const result = await response.json()
@@ -142,6 +143,7 @@ export function WithdrawModal({ isOpen, onClose, onSuccess }: WithdrawModalProps
       setStep('amount')
       setAmount("")
       setOtp("")
+      setPin("")
     }, 500)
   }
 
@@ -256,10 +258,37 @@ export function WithdrawModal({ isOpen, onClose, onSuccess }: WithdrawModalProps
               </div>
             )}
 
+            {/* Transaction PIN */}
+            {amount && Number.parseFloat(amount) >= 100 && (
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <KeyRound className="w-4 h-4 text-[#47f0d1]" />
+                  <Label htmlFor="pin" className="text-sm font-semibold text-slate-500 dark:text-zinc-400">Transaction PIN</Label>
+                </div>
+                <div className="flex justify-center py-1">
+                  <InputOTP
+                    maxLength={4}
+                    value={pin}
+                    onChange={(value) => setPin(value)}
+                  >
+                    <InputOTPGroup className="gap-3">
+                      {[0, 1, 2, 3].map((i) => (
+                        <InputOTPSlot
+                          key={i}
+                          index={i}
+                          className="w-11 h-14 text-xl font-bold border-2 border-slate-200 dark:border-white/20 rounded-xl bg-slate-100 dark:bg-zinc-800/40 text-slate-900 dark:text-white data-[active=true]:border-[#47f0d1] data-[active=true]:ring-[#47f0d1]/20 transition-all text-center"
+                        />
+                      ))}
+                    </InputOTPGroup>
+                  </InputOTP>
+                </div>
+              </div>
+            )}
+
             {/* Primary CTA */}
             <Button
               type="submit"
-              disabled={isLoading || !payoutAccount || !amount || Number.parseFloat(amount) > userBalance}
+              disabled={isLoading || !payoutAccount || !amount || Number.parseFloat(amount) > userBalance || pin.length !== 4}
               className="w-full bg-[#47f0d1] hover:bg-[#47f0d1]/90 text-[#131321] font-extrabold py-6 rounded-xl transition-all shadow-[0_4px_20px_rgba(71,240,209,0.3)] active:scale-[0.98] text-lg h-auto disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? (
