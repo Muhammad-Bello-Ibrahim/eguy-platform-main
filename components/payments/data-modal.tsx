@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useEffect } from "react"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
@@ -9,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Loader2, Wifi, Check } from "lucide-react"
+import { Loader2, Wifi, Check, Sparkles } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { Skeleton } from "@/components/ui/skeleton"
 import { SuccessModal } from "@/components/ui/success-modal"
@@ -21,7 +20,6 @@ interface DataModalProps {
   onClose: () => void
   onSuccess: () => void
 }
-
 
 const networkImages: Record<string, string> = {
   MTN: "/mtn.jpeg",
@@ -51,6 +49,7 @@ export function DataModal({ isOpen, onClose, onSuccess }: DataModalProps) {
   const [formData, setFormData] = useState({
     network: "",
     phone: "",
+    type: "",
     plan: "",
   })
   const [isLoading, setIsLoading] = useState(false)
@@ -83,15 +82,19 @@ export function DataModal({ isOpen, onClose, onSuccess }: DataModalProps) {
           // Fallback data
           const fallbackData = [
             // MTN Plans
-            { _id: '1', network: 'MTN', dataBundle: '100MB', dataPlan: 'MTN_100MB', duration: '1 Day', type: 'Daily', status: 'Active', price: 100, apiPrice: 90 },
-            { _id: '2', network: 'MTN', dataBundle: '500MB', dataPlan: 'MTN_500MB', duration: '1 Day', type: 'Daily', status: 'Active', price: 150, apiPrice: 135 },
-            { _id: '3', network: 'MTN', dataBundle: '1GB', dataPlan: 'MTN_1GB', duration: '1 Day', type: 'Daily', status: 'Active', price: 250, apiPrice: 225 },
-            { _id: '4', network: 'MTN', dataBundle: '2GB', dataPlan: 'MTN_2GB', duration: '3 Days', type: 'Weekly', status: 'Active', price: 500, apiPrice: 450 },
-            { _id: '5', network: 'MTN', dataBundle: '5GB', dataPlan: 'MTN_5GB', duration: '7 Days', type: 'Weekly', status: 'Active', price: 1000, apiPrice: 900 },
-            // ... minimal fallback
-            { _id: '6', network: 'AIRTEL', dataBundle: '100MB', dataPlan: 'AIRTEL_100MB', duration: '1 Day', type: 'Daily', status: 'Active', price: 100, apiPrice: 90 },
-            { _id: '11', network: 'GLO', dataBundle: '100MB', dataPlan: 'GLO_100MB', duration: '1 Day', type: 'Daily', status: 'Active', price: 100, apiPrice: 90 },
-            { _id: '16', network: '9MOBILE', dataBundle: '100MB', dataPlan: '9MOBILE_100MB', duration: '1 Day', type: 'Daily', status: 'Active', price: 100, apiPrice: 90 },
+            { _id: '1', network: 'MTN', dataBundle: '500MB', dataPlan: 'MTN_500MB_SME', duration: '30 Days', type: 'SME', status: 'Active', price: 125, apiPrice: 119 },
+            { _id: '2', network: 'MTN', dataBundle: '1GB', dataPlan: 'MTN_1GB_SME', duration: '30 Days', type: 'SME', status: 'Active', price: 245, apiPrice: 239 },
+            { _id: '3', network: 'MTN', dataBundle: '2GB', dataPlan: 'MTN_2GB_SME', duration: '30 Days', type: 'SME', status: 'Active', price: 490, apiPrice: 480 },
+            { _id: '4', network: 'MTN', dataBundle: '5GB', dataPlan: 'MTN_5GB_SME', duration: '30 Days', type: 'SME', status: 'Active', price: 1225, apiPrice: 1200 },
+            { _id: '5', network: 'MTN', dataBundle: '1GB', dataPlan: 'MTN_1GB_GIFTING', duration: '30 Days', type: 'GIFTING', status: 'Active', price: 290, apiPrice: 280 },
+            // Airtel Plans
+            { _id: '6', network: 'AIRTEL', dataBundle: '1GB', dataPlan: 'AIRTEL_1GB_SME', duration: '30 Days', type: 'SME', status: 'Active', price: 235, apiPrice: 230 },
+            { _id: '7', network: 'AIRTEL', dataBundle: '2GB', dataPlan: 'AIRTEL_2GB_SME', duration: '30 Days', type: 'SME', status: 'Active', price: 470, apiPrice: 460 },
+            // Glo Plans
+            { _id: '11', network: 'GLO', dataBundle: '1GB', dataPlan: 'GLO_1GB_CG', duration: '30 Days', type: 'CORPORATE GIFTING', status: 'Active', price: 250, apiPrice: 240 },
+            { _id: '12', network: 'GLO', dataBundle: '2GB', dataPlan: 'GLO_2GB_CG', duration: '30 Days', type: 'CORPORATE GIFTING', status: 'Active', price: 500, apiPrice: 480 },
+            // 9Mobile Plans
+            { _id: '16', network: '9MOBILE', dataBundle: '1GB', dataPlan: '9MOBILE_1GB_GIFTING', duration: '30 Days', type: 'GIFTING', status: 'Active', price: 400, apiPrice: 380 },
           ];
 
           const grouped = fallbackData.reduce((acc: any, plan: any) => {
@@ -107,12 +110,29 @@ export function DataModal({ isOpen, onClose, onSuccess }: DataModalProps) {
           );
         }
       } catch (e) {
-        // Error handling
+        console.error("Bundles load error", e)
       }
       setFetching(false);
     }
     fetchBundles();
   }, []);
+
+  // Get available plan types for selected network
+  const availableTypes = formData.network
+    ? Array.from(new Set(
+        bundles
+          .find((b) => b.NETWORK === formData.network)
+          ?.BUNDLE.filter((plan) => plan.status === "Active")
+          .map((plan) => plan.type) || []
+      ))
+    : [];
+
+  // Filter plans based on selected network AND selected type
+  const filteredPlans = formData.network && formData.type
+    ? bundles
+        .find((b) => b.NETWORK === formData.network)
+        ?.BUNDLE.filter((plan) => plan.status === "Active" && plan.type === formData.type) || []
+    : [];
 
   const selectedPlan =
     formData.network && formData.plan
@@ -170,9 +190,8 @@ export function DataModal({ isOpen, onClose, onSuccess }: DataModalProps) {
 
       onSuccess()
       onClose()
-      setFormData({ network: "", phone: "", plan: "" })
+      setFormData({ network: "", phone: "", type: "", plan: "" })
     } catch (error) {
-      // Error
       setTransactionData({
         title: "Data Purchase Failed",
         description: error instanceof Error ? error.message : "Something went wrong",
@@ -184,128 +203,177 @@ export function DataModal({ isOpen, onClose, onSuccess }: DataModalProps) {
     }
   }
 
+  // Format type nicely for UI (e.g. CORPORATE GIFTING -> Corporate Gifting)
+  const formatPlanType = (type: string) => {
+    if (!type) return "";
+    return type
+      .toLowerCase()
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+  };
+
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="sm:max-w-[425px] overflow-hidden">
+        <DialogContent className="sm:max-w-[440px] overflow-hidden bg-white/95 dark:bg-[#131321]/95 backdrop-blur-xl border border-slate-100 dark:border-white/10 text-slate-900 dark:text-white rounded-[2.5rem] p-6 shadow-2xl transition-all duration-300">
+          
+          {/* Top aesthetic pill grabber */}
+          <div className="w-12 h-1.5 bg-slate-200 dark:bg-zinc-700/50 rounded-full mx-auto -mt-1 mb-4"></div>
+
           <DialogHeader className="flex flex-col items-center justify-center text-center pb-2">
-            <div className="w-16 h-16 bg-teal-50 rounded-full flex items-center justify-center mb-4 ring-8 ring-teal-50/50">
-              <Wifi className="w-8 h-8 text-teal-600" />
+            <div className="w-16 h-16 bg-[#47f0d1]/10 rounded-full flex items-center justify-center mb-4 ring-8 ring-[#47f0d1]/5 text-[#47f0d1] hover:scale-105 transition-transform duration-300">
+              <Wifi className="w-8 h-8" />
             </div>
-            <DialogTitle className="text-2xl font-bold bg-gradient-to-br from-gray-900 to-gray-600 bg-clip-text text-transparent">
-              Buy Data Bundle
+            <DialogTitle className="text-2xl font-black tracking-tight bg-gradient-to-br from-slate-950 to-slate-600 dark:from-white dark:to-slate-400 bg-clip-text text-transparent flex items-center gap-2">
+              Buy Data Bundle <Sparkles className="w-5 h-5 text-[#47f0d1] animate-pulse" />
             </DialogTitle>
-            <DialogDescription className="text-gray-500 text-base max-w-[280px] mx-auto">
-              Get connected with affordable data plans
+            <DialogDescription className="text-slate-500 dark:text-zinc-400 text-sm max-w-[280px] mx-auto leading-relaxed">
+              Get connected with affordable internet packages
             </DialogDescription>
           </DialogHeader>
 
-          <form onSubmit={handleSubmit} className="space-y-6 pt-2">
+          <form onSubmit={handleSubmit} className="space-y-5 pt-2">
             {error && (
-              <Alert variant="destructive" className="rounded-2xl border-red-100 bg-red-50/50">
-                <AlertDescription className="font-medium text-red-700 text-center">{error}</AlertDescription>
+              <Alert variant="destructive" className="rounded-2xl border-red-500/20 bg-red-500/10 text-red-500 dark:text-red-400">
+                <AlertDescription className="font-semibold text-center">{error}</AlertDescription>
               </Alert>
             )}
 
             {fetching ? (
               <div className="space-y-4">
-                <Skeleton className="h-14 w-full rounded-2xl" />
-                <Skeleton className="h-14 w-full rounded-2xl" />
-                <Skeleton className="h-14 w-full rounded-2xl" />
+                <Skeleton className="h-16 w-full rounded-2xl bg-slate-100 dark:bg-zinc-800/50" />
+                <Skeleton className="h-16 w-full rounded-2xl bg-slate-100 dark:bg-zinc-800/50" />
+                <Skeleton className="h-16 w-full rounded-2xl bg-slate-100 dark:bg-zinc-800/50" />
               </div>
             ) : (
               <>
                 {/* Network Select */}
-                <div className="space-y-3">
-                  <Label className="text-sm font-semibold text-gray-700 ml-1">Network Provider</Label>
-                  <div className="grid grid-cols-4 gap-2">
-                    {bundles.map((bundle) => (
-                      <div
-                        key={bundle.NETWORK}
-                        onClick={() => setFormData(prev => ({ ...prev, network: bundle.NETWORK, plan: "" }))}
-                        className={cn(
-                          "flex flex-col items-center justify-center p-2 rounded-xl border cursor-pointer transition-all",
-                          formData.network === bundle.NETWORK
-                            ? "bg-teal-50 border-teal-500 ring-2 ring-teal-200"
-                            : "bg-gray-50 border-gray-100 hover:border-teal-200 hover:bg-white"
-                        )}
-                      >
-                        <div className="relative w-8 h-8 mb-1">
-                          <img src={networkImages[bundle.NETWORK] || "/placeholder-logo.png"} alt={bundle.NETWORK} className="w-full h-full rounded-full object-cover" />
-                          {formData.network === bundle.NETWORK && (
-                            <div className="absolute -bottom-1 -right-1 bg-teal-500 text-white rounded-full p-0.5">
-                              <Check className="w-2.5 h-2.5" />
-                            </div>
+                <div className="space-y-2.5">
+                  <Label className="text-xs font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest ml-1">Network Provider</Label>
+                  <div className="grid grid-cols-4 gap-2.5">
+                    {bundles.map((bundle) => {
+                      const isSelected = formData.network === bundle.NETWORK;
+                      return (
+                        <div
+                          key={bundle.NETWORK}
+                          onClick={() => setFormData(prev => ({ ...prev, network: bundle.NETWORK, type: "", plan: "" }))}
+                          className={cn(
+                            "flex flex-col items-center justify-center p-2.5 rounded-2xl border cursor-pointer transition-all duration-300 relative overflow-hidden group select-none",
+                            isSelected
+                              ? "bg-[#47f0d1]/10 border-[#47f0d1] ring-2 ring-[#47f0d1]/10"
+                              : "bg-slate-50 dark:bg-zinc-800/30 border-slate-100 dark:border-white/5 hover:border-[#47f0d1]/30 hover:bg-slate-100/50 dark:hover:bg-zinc-800/50"
                           )}
+                        >
+                          <div className="relative w-9 h-9 mb-1.5 transition-transform duration-300 group-hover:scale-105">
+                            <img 
+                              src={networkImages[bundle.NETWORK] || "/placeholder-logo.png"} 
+                              alt={bundle.NETWORK} 
+                              className="w-full h-full rounded-full object-cover shadow-sm border border-slate-200/20" 
+                            />
+                            {isSelected && (
+                              <div className="absolute -bottom-1 -right-1 bg-[#47f0d1] text-[#131321] rounded-full p-0.5 shadow-md">
+                                <Check className="w-2.5 h-2.5 stroke-[4]" />
+                              </div>
+                            )}
+                          </div>
+                          <span className={cn(
+                            "text-[10px] font-extrabold uppercase tracking-tight",
+                            isSelected ? "text-[#47f0d1]" : "text-slate-600 dark:text-zinc-400"
+                          )}>{bundle.NETWORK}</span>
                         </div>
-                        <span className="text-[10px] font-bold text-gray-700">{bundle.NETWORK}</span>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
 
                 {/* Phone Input */}
-                <div className="space-y-3">
-                  <Label htmlFor="phone" className="text-sm font-semibold text-gray-700 ml-1">Phone Number</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="phone" className="text-xs font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest ml-1">Phone Number</Label>
                   <Input
                     id="phone"
                     type="tel"
                     placeholder="080 1234 5678"
                     value={formData.phone}
                     onChange={(e) => setFormData((prev) => ({ ...prev, phone: e.target.value }))}
-                    className="h-14 rounded-2xl text-lg bg-gray-50/50 border-gray-200 focus:bg-white transition-all"
+                    className="h-14 rounded-2xl text-lg bg-slate-50 dark:bg-zinc-800/40 border border-slate-100 dark:border-white/5 focus:bg-white dark:focus:bg-[#18182d] focus:border-[#47f0d1] focus:ring-4 focus:ring-[#47f0d1]/10 text-slate-900 dark:text-white font-bold transition-all placeholder:text-slate-400 dark:placeholder:text-zinc-600"
                     required
                   />
                 </div>
 
+                {/* Type Selection (Dropdown) */}
                 {formData.network && (
-                  <div className="space-y-3">
-                    <Label htmlFor="plan" className="text-sm font-semibold text-gray-700 ml-1">Data Plan</Label>
+                  <div className="space-y-2">
+                    <Label htmlFor="type" className="text-xs font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest ml-1">Data Type</Label>
                     <Select
-                      value={formData.plan}
-                      onValueChange={(value) => setFormData((prev) => ({ ...prev, plan: value }))}
+                      value={formData.type}
+                      onValueChange={(value) => setFormData((prev) => ({ ...prev, type: value, plan: "" }))}
                     >
-                      <SelectTrigger className="w-full h-14 rounded-xl border border-gray-200 bg-gray-50/50 px-4 text-base font-medium text-gray-900 focus:ring-2 focus:ring-teal-100">
-                        <SelectValue placeholder="Select data plan" />
+                      <SelectTrigger className="w-full h-14 rounded-2xl border border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-zinc-800/40 px-4 text-base font-semibold text-slate-955 dark:text-white focus:ring-4 focus:ring-[#47f0d1]/10">
+                        <SelectValue placeholder="Choose type (e.g. SME, Gifting)" />
                       </SelectTrigger>
-                      <SelectContent>
-                        {bundles
-                          .find((b) => b.NETWORK === formData.network)?.BUNDLE
-                          .filter((plan) => plan.status === "Active")
-                          .map((plan) => (
-                            <SelectItem key={plan.dataPlan} value={plan.dataPlan}>
-                              <div className="flex items-center justify-between w-full min-w-[240px]">
-                                <span>{plan.dataBundle} {plan.duration} ({plan.type})</span>
-                                <span className="font-semibold text-teal-600">₦{plan.price}</span>
-                              </div>
-                            </SelectItem>
-                          ))}
+                      <SelectContent className="bg-white dark:bg-[#131321] border border-slate-100 dark:border-white/10 rounded-2xl shadow-xl">
+                        {availableTypes.map((type) => (
+                          <SelectItem key={type} value={type} className="text-sm font-semibold text-slate-700 dark:text-zinc-300 focus:bg-[#47f0d1]/10 focus:text-slate-950 dark:focus:text-white">
+                            {formatPlanType(type)}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
                 )}
 
+                {/* Plan Selection */}
+                {formData.network && formData.type && (
+                  <div className="space-y-2">
+                    <Label htmlFor="plan" className="text-xs font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest ml-1">Available Bundles</Label>
+                    <Select
+                      value={formData.plan}
+                      onValueChange={(value) => setFormData((prev) => ({ ...prev, plan: value }))}
+                    >
+                      <SelectTrigger className="w-full h-14 rounded-2xl border border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-zinc-800/40 px-4 text-base font-semibold text-slate-955 dark:text-white focus:ring-4 focus:ring-[#47f0d1]/10">
+                        <SelectValue placeholder="Select bundle package" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-white dark:bg-[#131321] border border-slate-100 dark:border-white/10 rounded-2xl shadow-xl max-h-[220px]">
+                        {filteredPlans.map((plan) => (
+                          <SelectItem key={plan.dataPlan} value={plan.dataPlan} className="text-sm font-semibold text-slate-700 dark:text-zinc-300 focus:bg-[#47f0d1]/10 focus:text-slate-950 dark:focus:text-white">
+                            <div className="flex items-center justify-between w-full min-w-[260px]">
+                              <span>{plan.dataBundle} - {plan.duration}</span>
+                              <span className="font-bold text-[#47f0d1] ml-2">₦{plan.price}</span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+
+                {/* Summary Box */}
                 {selectedPlan && (
-                  <div className="bg-teal-50/50 p-4 rounded-xl border border-teal-100">
+                  <div className="bg-[#47f0d1]/5 border border-[#47f0d1]/10 p-4.5 rounded-2xl transition-all duration-300">
                     <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium text-gray-900">Total Amount</span>
-                      <span className="text-xl font-bold text-teal-700">₦{selectedPlan.price}</span>
+                      <div className="space-y-0.5">
+                        <span className="text-xs text-slate-500 dark:text-zinc-500 font-bold uppercase tracking-widest">Total Amount</span>
+                        <p className="text-xs text-slate-400 dark:text-zinc-400">{selectedPlan.dataBundle} ({formatPlanType(formData.type)})</p>
+                      </div>
+                      <span className="text-2xl font-black text-[#47f0d1]">₦{selectedPlan.price}</span>
                     </div>
                   </div>
                 )}
 
+                {/* Submit Action */}
                 <Button
                   type="submit"
                   disabled={isLoading || !formData.network || !formData.phone || !formData.plan}
-                  className="w-full h-12 rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white font-bold text-lg shadow-xl shadow-teal-200 transition-all duration-200 disabled:opacity-70 mt-4"
+                  className="w-full h-14 rounded-2xl bg-[#47f0d1] hover:bg-[#47f0d1]/90 text-[#131321] font-black text-lg shadow-xl shadow-[#47f0d1]/10 hover:shadow-[#47f0d1]/20 active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed mt-4"
                 >
                   {isLoading ? (
                     <>
                       <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                      Processing...
+                      Processing Purchase...
                     </>
                   ) : (
-                    "Buy Data Bundle"
+                    "Confirm & Buy Data"
                   )}
                 </Button>
               </>
