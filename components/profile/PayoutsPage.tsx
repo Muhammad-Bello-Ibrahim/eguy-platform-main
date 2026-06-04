@@ -77,144 +77,20 @@ export default function PayoutsPage() {
                 <h1 className="text-xl font-bold text-slate-900 dark:text-white">Payout Schedule</h1>
             </header>
 
-            <main className="px-5 space-y-6 pb-32">
-                {/* Next Payout Card */}
-                <section className="mt-4">
-                    <div className="bg-gradient-to-br from-primary/20 via-primary/5 to-transparent border border-primary/20 rounded-2xl p-6 relative overflow-hidden">
-                        <div className="absolute -right-4 -top-4 w-32 h-32 bg-primary/10 rounded-full blur-3xl"></div>
-                        <div className="flex justify-between items-start mb-6">
-                            <div>
-                                <p className="text-xs font-bold uppercase tracking-widest text-primary/80 mb-1">Next Payout</p>
-                                <h2 className="text-3xl font-extrabold text-white">Oct 27, 2023</h2>
-                            </div>
-                            <div className="bg-primary/10 p-3 rounded-xl">
-                                <span className="material-icons-round text-primary">schedule_send</span>
-                            </div>
-                        </div>
-                        <div className="space-y-4">
-                            <div className="flex justify-between items-center text-sm">
-                                <span className="text-slate-400">Estimated Amount</span>
-                                <span className="font-bold text-primary">$1,240.50</span>
-                            </div>
-                            <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
-                                <div className="bg-primary h-full w-[82%]"></div>
-                            </div>
-                            <p className="text-[10px] text-slate-500 uppercase tracking-wider text-center">82% of minimum threshold reached</p>
-                        </div>
-                    </div>
-                </section>
-
-                {/* Payout Frequency */}
-                <section>
-                    <h2 className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3 px-1">Payout Frequency</h2>
-                    <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/5 rounded-2xl p-2 space-y-1">
-                        <label
-                            className={`flex items-center justify-between p-4 rounded-xl transition-colors cursor-pointer group ${frequency === 'daily' ? 'bg-primary/5 border border-primary/20' : 'hover:bg-slate-50 dark:hover:bg-white/5 border border-transparent'}`}
-                            onClick={() => setFrequency('daily')}
-                        >
-                            <div className="flex items-center gap-4">
-                                <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-primary ${frequency === 'daily' ? 'bg-primary/20' : 'bg-primary/10'}`}>
-                                    <span className="material-icons-round">calendar_today</span>
-                                </div>
-                                <div>
-                                    <p className="text-sm font-semibold">Daily</p>
-                                    <p className="text-xs text-slate-500">Processed every 24 hours</p>
-                                </div>
-                            </div>
-                            <div className={`w-5 h-5 border-2 rounded-full flex items-center justify-center ${frequency === 'daily' ? 'border-primary' : 'border-slate-700'}`}>
-                                {frequency === 'daily' && <div className="w-2.5 h-2.5 bg-primary rounded-full"></div>}
-                            </div>
-                        </label>
-
-                        <label
-                            className={`flex items-center justify-between p-4 rounded-xl transition-colors cursor-pointer group ${frequency === 'weekly' ? 'bg-primary/5 border border-primary/20' : 'hover:bg-slate-50 dark:hover:bg-white/5 border border-transparent'}`}
-                            onClick={() => setFrequency('weekly')}
-                        >
-                            <div className="flex items-center gap-4">
-                                <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-primary ${frequency === 'weekly' ? 'bg-primary/20' : 'bg-primary/10'}`}>
-                                    <span className="material-icons-round">date_range</span>
-                                </div>
-                                <div>
-                                    <p className="text-sm font-semibold">Weekly</p>
-                                    <p className={`text-xs ${frequency === 'weekly' ? 'text-primary/70' : 'text-slate-500'}`}>Every Friday</p>
-                                </div>
-                            </div>
-                            <div className={`w-5 h-5 border-2 rounded-full flex items-center justify-center ${frequency === 'weekly' ? 'border-primary' : 'border-slate-700'}`}>
-                                {frequency === 'weekly' && <div className="w-2.5 h-2.5 bg-primary rounded-full"></div>}
-                            </div>
-                        </label>
-
-                        <label
-                            className={`flex items-center justify-between p-4 rounded-xl transition-colors cursor-pointer group ${frequency === 'monthly' ? 'bg-primary/5 border border-primary/20' : 'hover:bg-slate-50 dark:hover:bg-white/5 border border-transparent'}`}
-                            onClick={() => setFrequency('monthly')}
-                        >
-                            <div className="flex items-center gap-4">
-                                <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-primary ${frequency === 'monthly' ? 'bg-primary/20' : 'bg-primary/10'}`}>
-                                    <span className="material-icons-round">event_note</span>
-                                </div>
-                                <div>
-                                    <p className="text-sm font-semibold">Monthly</p>
-                                    <p className="text-xs text-slate-500">1st of every month</p>
-                                </div>
-                            </div>
-                            <div className={`w-5 h-5 border-2 rounded-full flex items-center justify-center ${frequency === 'monthly' ? 'border-primary' : 'border-slate-700'}`}>
-                                {frequency === 'monthly' && <div className="w-2.5 h-2.5 bg-primary rounded-full"></div>}
-                            </div>
-                        </label>
-                    </div>
-                </section>
-
-                {/* Preferred Day (Only show for Weekly) */}
-                {frequency === 'weekly' && (
-                    <section className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/5 rounded-2xl p-5">
-                        <h2 className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-4">Preferred Payout Day</h2>
-                        <div className="flex justify-between items-center gap-2">
-                            {['M', 'T', 'W', 'Th', 'F', 'Sa', 'Su'].map((day, i) => (
-                                <button
-                                    key={i}
-                                    onClick={() => setPreferredDay(day)}
-                                    className={`w-10 h-10 rounded-lg text-xs font-bold transition-colors ${preferredDay === day ? 'bg-primary text-slate-900 dark:text-background-dark font-black' : 'border border-slate-200 dark:border-white/5 hover:bg-primary/10 text-slate-600 dark:text-slate-400'}`}
-                                >{day}</button>
-                            ))}
-                        </div>
-                    </section>
-                )}
-
-                {/* Minimum Payout Slider */}
-                <section>
-                    <div className="flex justify-between items-end mb-3 px-1">
-                        <h2 className="text-xs font-bold uppercase tracking-widest text-slate-500">Minimum Payout</h2>
-                        <span className="text-xl font-extrabold text-primary">${minPayout.toLocaleString()}</span>
-                    </div>
-                    <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/5 rounded-2xl p-6">
-                        <input
-                            className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-primary"
-                            max="5000"
-                            min="100"
-                            step="100"
-                            type="range"
-                            value={minPayout}
-                            onChange={(e) => setMinPayout(Number(e.target.value))}
-                        />
-                        <div className="flex justify-between mt-4 text-[10px] font-bold text-slate-600 uppercase tracking-widest">
-                            <span>$100 Min</span>
-                            <span>$5,000 Max</span>
-                        </div>
-                    </div>
-                    <p className="mt-3 px-2 text-xs text-slate-500 leading-relaxed italic">
-                        * Payouts are only triggered once your available balance exceeds this threshold on your scheduled day.
-                    </p>
-                </section>
-
-                <div className="pt-6 pb-12">
-                    <button
-                        onClick={handleSave}
-                        disabled={saving || loading}
-                        className="w-full bg-primary text-slate-900 dark:text-background-dark font-bold py-4 rounded-2xl shadow-lg shadow-primary/20 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                        {saving ? "SAVING..." : "SAVE SETTINGS"}
-                    </button>
+            <main className="px-5 pb-32 flex flex-col items-center justify-center min-h-[60vh] text-center">
+                <div className="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center mb-6">
+                    <span className="material-icons-round text-primary text-5xl">auto_awesome</span>
                 </div>
+                <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Coming Soon</h2>
+                <p className="text-slate-500 dark:text-slate-400 max-w-[280px] mb-8">
+                    We are working hard to bring you advanced payout scheduling. Stay tuned!
+                </p>
+                <button
+                    onClick={() => router.push('/dashboard')}
+                    className="bg-primary text-slate-900 dark:text-background-dark font-bold py-3 px-8 rounded-xl shadow-lg shadow-primary/20 active:scale-[0.98] transition-all"
+                >
+                    Go to Dashboard
+                </button>
             </main>
         </div>
     );
