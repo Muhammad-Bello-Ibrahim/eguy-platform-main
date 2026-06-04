@@ -43,7 +43,7 @@ export default function RegisterStep2Page() {
                         <ArrowLeft className="w-5 h-5" />
                     </button>
                     <span className="text-sm font-bold text-[#47f0d1] flex items-center gap-1">
-                        Step 2 of 3 <Sparkles className="w-4 h-4 animate-pulse" />
+                        Step 2 of 3
                     </span>
                     <div className="w-10" />
                 </header>
@@ -99,6 +99,8 @@ export default function RegisterStep2Page() {
                                         type="tel"
                                         value={phone}
                                         onChange={(e) => setPhone(e.target.value)}
+                                        minLength={11}
+                                        maxLength={11}
                                         required
                                     />
                                     <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-zinc-600 w-5 h-5 group-focus-within:text-[#47f0d1] transition-colors pointer-events-none" />
@@ -117,6 +119,7 @@ export default function RegisterStep2Page() {
                                         rows={3}
                                         value={address}
                                         onChange={(e) => setAddress(e.target.value)}
+                                        maxLength={45}
                                         required
                                     />
                                     <MapPin className="absolute left-4 top-5 text-slate-400 dark:text-zinc-600 w-5 h-5 group-focus-within:text-[#47f0d1] transition-colors pointer-events-none" />

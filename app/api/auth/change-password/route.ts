@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
-import { getSession, verifyPassword, hashPassword } from "@/lib/auth"
+import { getSession } from "@/lib/auth"
+import { verifyPassword, hashPassword } from "@/lib/server-auth"
 import { Database } from "@/lib/database"
 
 export async function POST(request) {

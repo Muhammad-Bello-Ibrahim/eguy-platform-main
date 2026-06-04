@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { Database } from "@/lib/database";
+import { profileUpdateSchema } from "@/lib/validation";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -11,7 +12,14 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   const body = await request.json();
-  const { fullName, phone, avatar, payoutAccount, bio, twitter, linkedin } = body;
+  
+  const validation = profileUpdateSchema.safeParse(body);
+  if (!validation.success) {
+    const errorMsg = validation.error.errors[0]?.message || "Invalid input data";
+    return NextResponse.json({ error: errorMsg }, { status: 400 });
+  }
+
+  const { fullName, phone, avatar, payoutAccount, bio, twitter, linkedin, location } = validation.data;
 
   const user = await Database.findUserByEmail(session.user.email);
   if (!user) {
@@ -25,7 +33,8 @@ export async function PUT(request: NextRequest) {
     payoutAccount,
     bio,
     twitter,
-    linkedin
+    linkedin,
+    location
   });
 
   if (!updated) {

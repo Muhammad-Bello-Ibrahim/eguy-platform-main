@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { Database } from "@/lib/database"
-import { hashPassword } from "@/lib/auth"
+import { hashPassword } from "@/lib/server-auth"
+
 import { ObjectId } from "mongodb"
 
 export async function POST(request: NextRequest) {

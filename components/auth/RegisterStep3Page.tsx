@@ -6,7 +6,6 @@ import {
     ArrowLeft,
     Eye,
     EyeOff,
-    Fingerprint,
     Check,
     ShieldCheck,
     Sparkles,
@@ -25,7 +24,6 @@ export default function RegisterStep3Page() {
     const [passwordStrength, setPasswordStrength] = useState<'weak' | 'strong' | 'very-strong'>('weak');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
-    const [biometricEnabled, setBiometricEnabled] = useState(true);
 
     const checkPasswordStrength = (pass: string) => {
         if (pass.length < 8) return 'weak';
@@ -92,9 +90,6 @@ export default function RegisterStep3Page() {
                 sessionStorage.removeItem('register_dob');
                 sessionStorage.removeItem('register_phone');
                 sessionStorage.removeItem('register_address');
-                if (biometricEnabled) {
-                    sessionStorage.setItem('register_biometric', 'true');
-                }
                 router.push(`/verify-prompt?email=${encodeURIComponent(email || '')}`);
             } else {
                 const data = await res.json();
@@ -140,7 +135,7 @@ export default function RegisterStep3Page() {
                         <ArrowLeft className="w-5 h-5" />
                     </button>
                     <span className="text-sm font-bold text-[#47f0d1] flex items-center gap-1">
-                        Step 3 of 3 <Sparkles className="w-4 h-4 animate-pulse" />
+                        Step 3 of 3
                     </span>
                     <div className="w-10" />
                 </header>
@@ -197,7 +192,7 @@ export default function RegisterStep3Page() {
                                                 <InputOTPSlot
                                                     key={i}
                                                     index={i}
-                                                    className="w-11 h-14 text-xl font-black border-2 border-slate-100 dark:border-white/10 rounded-2xl bg-slate-50 dark:bg-zinc-800/40 text-slate-900 dark:text-white data-[active=true]:border-[#47f0d1] data-[active=true]:ring-[#47f0d1]/20 data-[active=true]:bg-white dark:data-[active=true]:bg-[#18182d] transition-all"
+                                                    className="w-11 h-14 text-xl font-black border-2 border-slate-100 dark:border-white/10 rounded-2xl first:rounded-2xl last:rounded-2xl first:border-2 bg-slate-50 dark:bg-zinc-800/40 text-slate-900 dark:text-white data-[active=true]:border-[#47f0d1] data-[active=true]:ring-[#47f0d1]/20 data-[active=true]:bg-white dark:data-[active=true]:bg-[#18182d] transition-all"
                                                 />
                                             ))}
                                         </InputOTPGroup>
@@ -277,34 +272,6 @@ export default function RegisterStep3Page() {
                                         {password === confirmPassword ? '✓ Passwords match' : '✗ Passwords do not match'}
                                     </p>
                                 )}
-                            </div>
-
-                            {/* Divider */}
-                            <div className="h-px bg-slate-100 dark:bg-white/5" />
-
-                            {/* Biometric Toggle */}
-                            <div className="flex items-center justify-between p-4 rounded-2xl bg-[#47f0d1]/5 border border-[#47f0d1]/15">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-xl bg-[#47f0d1]/10 flex items-center justify-center shrink-0">
-                                        <Fingerprint className="w-5 h-5 text-[#47f0d1]" />
-                                    </div>
-                                    <div>
-                                        <p className="text-sm font-bold text-slate-800 dark:text-white">Biometric Login</p>
-                                        <p className="text-[11px] text-slate-400 dark:text-zinc-500">Use Face ID or Fingerprint</p>
-                                    </div>
-                                </div>
-                                {/* Custom Toggle */}
-                                <button
-                                    type="button"
-                                    role="switch"
-                                    aria-checked={biometricEnabled}
-                                    onClick={() => setBiometricEnabled(!biometricEnabled)}
-                                    className={`relative w-12 h-6 rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[#47f0d1]/40 ${biometricEnabled ? 'bg-[#47f0d1] shadow-[0_0_12px_rgba(71,240,209,0.35)]' : 'bg-slate-200 dark:bg-zinc-700'}`}
-                                >
-                                    <span
-                                        className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-300 ${biometricEnabled ? 'translate-x-6' : 'translate-x-0'}`}
-                                    />
-                                </button>
                             </div>
 
                             {/* Privacy Info */}

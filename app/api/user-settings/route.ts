@@ -3,6 +3,13 @@ export const revalidate = 0;
 import { NextRequest, NextResponse } from "next/server"
 import { getSession } from "@/lib/auth"
 import { Database } from "@/lib/database"
+import {
+  profileSettingsSchema,
+  notificationSettingsSchema,
+  privacySettingsSchema,
+  securitySettingsSchema,
+  preferencesSettingsSchema
+} from "@/lib/validation"
 
 export async function GET(request: NextRequest) {
   try {
@@ -83,49 +90,74 @@ export async function PUT(request: NextRequest) {
     // Update user settings based on category
     let updateData: any = {}
     switch (category) {
-      case "profile":
+      case "profile": {
+        const val = profileSettingsSchema.safeParse(settings)
+        if (!val.success) {
+          return NextResponse.json({ error: val.error.errors[0]?.message || "Invalid profile data" }, { status: 400 })
+        }
         updateData = {
-          fullName: settings.displayName,
-          phone: settings.phone,
-          avatar: settings.avatar,
-          bio: settings.bio,
-          location: settings.location,
-          dateOfBirth: settings.dateOfBirth
+          fullName: val.data.displayName,
+          phone: val.data.phone,
+          avatar: val.data.avatar,
+          bio: val.data.bio,
+          location: val.data.location,
+          dateOfBirth: val.data.dateOfBirth
         }
         break
-      case "notifications":
+      }
+      case "notifications": {
+        const val = notificationSettingsSchema.safeParse(settings)
+        if (!val.success) {
+          return NextResponse.json({ error: "Invalid notification configuration" }, { status: 400 })
+        }
         updateData = {
-          emailNotifications: settings.emailNotifications,
-          smsNotifications: settings.smsNotifications,
-          pushNotifications: settings.pushNotifications,
-          transactionAlerts: settings.transactionAlerts,
-          securityAlerts: settings.securityAlerts,
-          marketingEmails: settings.marketingEmails
+          emailNotifications: val.data.emailNotifications,
+          smsNotifications: val.data.smsNotifications,
+          pushNotifications: val.data.pushNotifications,
+          transactionAlerts: val.data.transactionAlerts,
+          securityAlerts: val.data.securityAlerts,
+          marketingEmails: val.data.marketingEmails
         }
         break
-      case "privacy":
+      }
+      case "privacy": {
+        const val = privacySettingsSchema.safeParse(settings)
+        if (!val.success) {
+          return NextResponse.json({ error: "Invalid privacy settings" }, { status: 400 })
+        }
         updateData = {
-          profileVisibility: settings.profileVisibility,
-          showOnlineStatus: settings.showOnlineStatus,
-          allowReferrals: settings.allowReferrals,
-          dataSharing: settings.dataSharing
+          profileVisibility: val.data.profileVisibility,
+          showOnlineStatus: val.data.showOnlineStatus,
+          allowReferrals: val.data.allowReferrals,
+          dataSharing: val.data.dataSharing
         }
         break
-      case "security":
+      }
+      case "security": {
+        const val = securitySettingsSchema.safeParse(settings)
+        if (!val.success) {
+          return NextResponse.json({ error: "Invalid security configuration" }, { status: 400 })
+        }
         updateData = {
-          twoFactorEnabled: settings.twoFactorEnabled,
-          sessionTimeout: settings.sessionTimeout,
-          loginAlerts: settings.loginAlerts
+          twoFactorEnabled: val.data.twoFactorEnabled,
+          sessionTimeout: val.data.sessionTimeout,
+          loginAlerts: val.data.loginAlerts
         }
         break
-      case "preferences":
+      }
+      case "preferences": {
+        const val = preferencesSettingsSchema.safeParse(settings)
+        if (!val.success) {
+          return NextResponse.json({ error: "Invalid preferences data" }, { status: 400 })
+        }
         updateData = {
-          currency: settings.currency,
-          language: settings.language,
-          timezone: settings.timezone,
-          theme: settings.theme
+          currency: val.data.currency,
+          language: val.data.language,
+          timezone: val.data.timezone,
+          theme: val.data.theme
         }
         break
+      }
       default:
         return NextResponse.json({ error: "Invalid category" }, { status: 400 })
     }

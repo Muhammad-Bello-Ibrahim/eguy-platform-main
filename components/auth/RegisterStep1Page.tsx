@@ -41,7 +41,7 @@ export default function RegisterStep1() {
                         <ArrowLeft className="w-5 h-5" />
                     </button>
                     <span className="text-sm font-bold text-[#47f0d1] flex items-center gap-1">
-                        Step 1 of 3 <Sparkles className="w-4 h-4 animate-pulse" />
+                        Step 1 of 3
                     </span>
                     <div className="w-10"></div>
                 </header>
@@ -78,6 +78,8 @@ export default function RegisterStep1() {
                                         type="text"
                                         value={fullName}
                                         onChange={(e) => setFullName(e.target.value)}
+                                        minLength={7}
+                                        maxLength={45}
                                         required
                                     />
                                     <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-zinc-600 w-5 h-5 group-focus-within:text-[#47f0d1] transition-colors" />
@@ -94,6 +96,7 @@ export default function RegisterStep1() {
                                         type="email"
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
+                                        maxLength={45}
                                         required
                                     />
                                     <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-zinc-600 w-5 h-5 group-focus-within:text-[#47f0d1] transition-colors" />
@@ -112,6 +115,7 @@ export default function RegisterStep1() {
                                         type="text"
                                         value={referralCode}
                                         onChange={(e) => setReferralCode(e.target.value)}
+                                        maxLength={12}
                                     />
                                     <Tag className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-zinc-600 w-5 h-5 group-focus-within:text-[#47f0d1] transition-colors" />
                                 </div>

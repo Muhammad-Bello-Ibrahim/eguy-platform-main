@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
-import { getSession, verifyTransactionPin } from "@/lib/auth"
+import { verifyTransactionPin } from "@/lib/server-auth"
+import { getSession } from "@/lib/auth"
 import { Database } from "@/lib/database"
 
 function generateReferralCode(userId: string) {

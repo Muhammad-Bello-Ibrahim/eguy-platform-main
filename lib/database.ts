@@ -31,6 +31,9 @@ export interface DatabaseUser {
   updatedAt?: Date
   linkedAccounts?: LinkedAccount[]
   transactionPin?: string
+  twoFactorEnabled?: boolean
+  biometricEnabled?: boolean
+  biometricCredentials?: any[]
 }
 
 
@@ -67,6 +70,7 @@ export class Database {
   }
   
   static async findUserByEmail(email: string): Promise<DatabaseUser | null> {
+    if (typeof email !== "string") return null
     const db = await this.getDb()
     const user = await db.collection("users").findOne({ email })
     if (!user) return null
@@ -74,6 +78,7 @@ export class Database {
   }
 
   static async findUserByPhone(phone: string): Promise<DatabaseUser | null> {
+    if (typeof phone !== "string") return null
     const db = await this.getDb()
     const user = await db.collection("users").findOne({ phone })
     if (!user) return null
@@ -81,6 +86,7 @@ export class Database {
   }
 
   static async findUserByReferralCode(referralCode: string): Promise<DatabaseUser | null> {
+    if (typeof referralCode !== "string") return null
     const db = await this.getDb()
     const user = await db.collection("users").findOne({ referralCode })
     if (!user) return null
@@ -88,6 +94,7 @@ export class Database {
   }
 
   static async findUserById(id: string): Promise<DatabaseUser | null> {
+    if (typeof id !== "string" || id.length !== 24) return null
     const db = await this.getDb()
     const user = await db.collection("users").findOne({ _id: new ObjectId(id) })
     if (!user) return null
@@ -416,6 +423,25 @@ export class Database {
     await db.collection("password_reset_tokens").updateOne(
       { token },
       { $set: { used: true, usedAt: new Date() } }
+    )
+  }
+
+  // =========================
+  // SETTINGS & BIOMETRICS
+  // =========================
+  static async toggleBiometric(userId: string, enabled: boolean) {
+    const db = await this.getDb()
+    await db.collection("users").updateOne(
+      { _id: new ObjectId(userId) },
+      { $set: { biometricEnabled: enabled, updatedAt: new Date() } }
+    )
+  }
+
+  static async toggleTwoFactor(userId: string, enabled: boolean) {
+    const db = await this.getDb()
+    await db.collection("users").updateOne(
+      { _id: new ObjectId(userId) },
+      { $set: { twoFactorEnabled: enabled, updatedAt: new Date() } }
     )
   }
 }

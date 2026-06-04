@@ -1,15 +1,21 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { Database } from "@/lib/database"
-import { hashPassword, createSession, generateReferralCode } from "@/lib/auth"
+import { hashPassword } from "@/lib/server-auth"
+import { createSession, generateReferralCode } from "@/lib/auth"
+import { signUpSchema } from "@/lib/validation"
 
 export async function POST(request: NextRequest) {
   try {
-    const { fullName, email, phone, password, transactionPin, referralCode, dob, address } = await request.json()
+    const rawBody = await request.json()
+    const validation = signUpSchema.safeParse(rawBody)
 
-    // Validate input
-    if (!fullName || !email || !phone || !password || !transactionPin) {
-      return NextResponse.json({ error: "All fields are required" }, { status: 400 })
+    if (!validation.success) {
+      const errorMsg = validation.error.errors[0]?.message || "Invalid input data"
+      return NextResponse.json({ error: errorMsg }, { status: 400 })
     }
+
+    const { fullName, email, phone, password, transactionPin, referralCode, dob, address } = validation.data
+
 
     // Check if user already exists
     const existingUserByEmail = await Database.findUserByEmail(email)

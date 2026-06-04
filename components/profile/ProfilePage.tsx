@@ -5,8 +5,6 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import { ProfileSkeleton } from './skeletons';
-import { isBiometricAvailable, registerBiometric } from '@/lib/biometric';
-import { useToast } from '@/hooks/use-toast';
 
 export default function ProfilePage() {
     const router = useRouter();
@@ -14,9 +12,9 @@ export default function ProfilePage() {
     const [mounted, setMounted] = useState(false);
     const [user, setUser] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(true);
-    const { toast } = useToast();
-    const [biometricEnabled, setBiometricEnabled] = useState(false);
-    const [isBiometricLoading, setIsBiometricLoading] = useState(false);
+    const [is2FAEnabled, setIs2FAEnabled] = useState(false);
+    const [isBiometricEnabled, setIsBiometricEnabled] = useState(false);
+    const [isToggling, setIsToggling] = useState(false);
 
     useEffect(() => {
         const fetchUserData = async () => {
@@ -25,12 +23,8 @@ export default function ProfilePage() {
                 if (response.ok) {
                     const data = await response.json();
                     setUser(data.user);
-                    
-                    const bioRes = await fetch('/api/auth/biometric/toggle');
-                    if (bioRes.ok) {
-                        const bioData = await bioRes.json();
-                        setBiometricEnabled(bioData.biometricEnabled);
-                    }
+                    setIs2FAEnabled(data.user.twoFactorEnabled || false);
+                    setIsBiometricEnabled(data.user.biometricEnabled || false);
                 } else {
                     // Redirect to login if unauthorized
                     router.push('/login');
@@ -56,57 +50,55 @@ export default function ProfilePage() {
         }
     };
 
-    const handleToggleBiometric = async () => {
-        if (isBiometricLoading) return;
-        setIsBiometricLoading(true);
-        try {
-            if (!biometricEnabled) {
-                // Turn ON
-                if (!isBiometricAvailable()) {
-                    toast({ variant: 'destructive', title: 'Not Supported', description: 'Biometric authentication is not supported on this device.' });
-                    setIsBiometricLoading(false);
-                    return;
-                }
-                const credential = await registerBiometric(user._id || user.id, user.email || 'user');
-                const regRes = await fetch('/api/auth/biometric/register', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ credential })
-                });
-                if (!regRes.ok) throw new Error('Failed to register credential');
-                
-                const togRes = await fetch('/api/auth/biometric/toggle', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ enabled: true })
-                });
-                if (!togRes.ok) throw new Error('Failed to enable biometric');
-                
-                setBiometricEnabled(true);
-                toast({ title: 'Success', description: 'Fingerprint Login and Payment enabled.' });
-            } else {
-                // Turn OFF
-                const togRes = await fetch('/api/auth/biometric/toggle', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ enabled: false })
-                });
-                if (!togRes.ok) throw new Error('Failed to disable biometric');
-                
-                setBiometricEnabled(false);
-                toast({ title: 'Success', description: 'Fingerprint Login and Payment disabled.' });
-            }
-        } catch (error: any) {
-            toast({ variant: 'destructive', title: 'Error', description: error.message || 'Something went wrong.' });
-        } finally {
-            setIsBiometricLoading(false);
-        }
-    };
-
-
     if (isLoading) {
         return <ProfileSkeleton />;
     }
+
+    const handleToggle2FA = async () => {
+        if (isToggling) return;
+        setIsToggling(true);
+        const newValue = !is2FAEnabled;
+        setIs2FAEnabled(newValue); // Optimistic update
+        try {
+            const res = await fetch("/api/auth/2fa/toggle", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ enabled: newValue })
+            });
+            if (!res.ok) {
+                throw new Error("Failed to toggle 2FA");
+            }
+        } catch (error) {
+            console.error(error);
+            setIs2FAEnabled(!newValue); // Revert
+            alert("Failed to update 2FA status.");
+        } finally {
+            setIsToggling(false);
+        }
+    };
+
+    const handleToggleBiometric = async () => {
+        if (isToggling) return;
+        setIsToggling(true);
+        const newValue = !isBiometricEnabled;
+        setIsBiometricEnabled(newValue); // Optimistic update
+        try {
+            const res = await fetch("/api/auth/biometric/toggle", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ enabled: newValue })
+            });
+            if (!res.ok) {
+                throw new Error("Failed to toggle Biometric");
+            }
+        } catch (error) {
+            console.error(error);
+            setIsBiometricEnabled(!newValue); // Revert
+            alert("Failed to update Biometric status.");
+        } finally {
+            setIsToggling(false);
+        }
+    };
 
     const displayName = user?.fullName || user?.firstName || user?.username || "User";
     const displayEmail = user?.email || "user@example.com";
@@ -189,22 +181,41 @@ export default function ProfilePage() {
                         <div className="w-full flex items-center justify-between p-4 border-b border-slate-100 dark:border-slate-700">
                             <div className="flex items-center gap-4">
                                 <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                                    <span className="material-icons-round">phonelink_lock</span>
+                                </div>
+                                <div className="text-left">
+                                    <p className="text-sm font-semibold">Two-Factor Auth</p>
+                                    <p className="text-xs text-primary font-medium">{is2FAEnabled ? 'Enabled' : 'Disabled'}</p>
+                                </div>
+                            </div>
+                            {/* Toggle Switch */}
+                            <div 
+                                onClick={handleToggle2FA}
+                                className={`relative inline-flex items-center cursor-pointer w-11 h-6 rounded-full transition-colors ${is2FAEnabled ? 'bg-primary' : 'bg-slate-300 dark:bg-slate-600'}`}
+                            >
+                                <div className={`absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform shadow-sm ${is2FAEnabled ? 'translate-x-5' : 'translate-x-0'}`}></div>
+                            </div>
+                        </div>
+
+                        <div className="w-full flex items-center justify-between p-4 border-b border-slate-100 dark:border-slate-700">
+                            <div className="flex items-center gap-4">
+                                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
                                     <span className="material-icons-round">fingerprint</span>
                                 </div>
                                 <div className="text-left">
-                                    <p className="text-sm font-semibold">Fingerprint Login & Payment</p>
-                                    <p className="text-xs text-slate-500 font-medium">Use biometrics for fast access</p>
+                                    <p className="text-sm font-semibold">Biometric Login</p>
+                                    <p className="text-xs text-primary font-medium">{isBiometricEnabled ? 'Enabled' : 'Disabled'}</p>
                                 </div>
                             </div>
                             {/* Toggle Switch */}
                             <div 
                                 onClick={handleToggleBiometric}
-                                className={`relative inline-flex items-center cursor-pointer transition-opacity ${isBiometricLoading ? 'opacity-50 pointer-events-none' : ''}`}
+                                className={`relative inline-flex items-center cursor-pointer w-11 h-6 rounded-full transition-colors ${isBiometricEnabled ? 'bg-primary' : 'bg-slate-300 dark:bg-slate-600'}`}
                             >
-                                <div className={`w-11 h-6 rounded-full transition-colors ${biometricEnabled ? 'bg-primary' : 'bg-slate-300 dark:bg-slate-600'}`}></div>
-                                <div className={`absolute top-1 bg-white w-4 h-4 rounded-full transition-all shadow-sm ${biometricEnabled ? 'left-6' : 'left-1'}`}></div>
+                                <div className={`absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform shadow-sm ${isBiometricEnabled ? 'translate-x-5' : 'translate-x-0'}`}></div>
                             </div>
                         </div>
+
                         <button className="w-full flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
                             <div className="flex items-center gap-4">
                                 <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
