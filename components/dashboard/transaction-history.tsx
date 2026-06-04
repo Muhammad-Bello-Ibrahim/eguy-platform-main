@@ -40,6 +40,7 @@ interface Transaction {
   category?: string
   recipient?: string
   provider?: string
+  metadata?: any
 }
 
 interface TransactionHistoryProps {
@@ -362,18 +363,49 @@ export function TransactionHistory({ refreshKey }: TransactionHistoryProps) {
                           </p>
                         </div>
                       )}
-                      {transaction.provider && (
+                      
+                      {/* Withdrawal Specific Details */}
+                      {transaction.type === 'withdrawal' && transaction.metadata?.payoutAccount && (
+                        <>
+                          <div>
+                            <p className="text-gray-500 mb-1">Bank Name</p>
+                            <p className="font-medium text-gray-900">{transaction.metadata.payoutAccount.bank || transaction.metadata.payoutAccount.bankCode}</p>
+                          </div>
+                          <div>
+                            <p className="text-gray-500 mb-1">Account Number</p>
+                            <p className="font-medium text-gray-900">{transaction.metadata.payoutAccount.accountNumber}</p>
+                          </div>
+                          <div className="sm:col-span-2">
+                            <p className="text-gray-500 mb-1">Account Holder</p>
+                            <p className="font-medium text-gray-900">{transaction.metadata.payoutAccount.accountName}</p>
+                          </div>
+                        </>
+                      )}
+
+                      {/* Generic Provider/Recipient if not withdrawal */}
+                      {transaction.type !== 'withdrawal' && transaction.provider && (
                         <div>
                           <p className="text-gray-500 mb-1">Provider</p>
                           <p className="font-medium text-gray-900">{transaction.provider}</p>
                         </div>
                       )}
-                      {transaction.recipient && (
+                      {transaction.type !== 'withdrawal' && transaction.recipient && (
                         <div className="sm:col-span-2">
                           <p className="text-gray-500 mb-1">Recipient</p>
                           <p className="font-medium text-gray-900">{transaction.recipient}</p>
                         </div>
                       )}
+                      
+                      {/* Any other flat metadata */}
+                      {transaction.metadata && Object.entries(transaction.metadata)
+                        .filter(([key, value]) => key !== 'payoutAccount' && key !== 'paystackTransfer' && typeof value === 'string')
+                        .map(([key, value]) => (
+                          <div key={key} className="sm:col-span-2">
+                            <p className="text-gray-500 mb-1 capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</p>
+                            <p className="font-medium text-gray-900">{value as string}</p>
+                          </div>
+                        ))
+                      }
                     </div>
 
                     {/* Receipt Button */}

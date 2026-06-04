@@ -35,6 +35,7 @@ interface Transaction {
   category?: string;
   recipient?: string;
   provider?: string;
+  metadata?: any;
 }
 
 interface ReceiptModalProps {
@@ -257,6 +258,49 @@ export function ReceiptModal({ transaction, isOpen, onClose }: ReceiptModalProps
                 <span className="text-white font-medium text-right max-w-[60%] truncate">{transaction.description}</span>
               </div>
             )}
+            
+            {/* Withdrawal Specific Details */}
+            {transaction.type === 'withdrawal' && transaction.metadata?.payoutAccount && (
+              <>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-slate-400">Bank Name</span>
+                  <span className="text-white font-medium text-right">{transaction.metadata.payoutAccount.bank || transaction.metadata.payoutAccount.bankCode}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-slate-400">Account Number</span>
+                  <span className="text-white font-medium text-right">{transaction.metadata.payoutAccount.accountNumber}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-slate-400">Account Holder</span>
+                  <span className="text-white font-medium text-right truncate max-w-[60%]">{transaction.metadata.payoutAccount.accountName}</span>
+                </div>
+              </>
+            )}
+
+            {/* Generic Provider/Recipient if not withdrawal */}
+            {transaction.type !== 'withdrawal' && transaction.provider && (
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-slate-400">Provider</span>
+                <span className="text-white font-medium text-right">{transaction.provider}</span>
+              </div>
+            )}
+            {transaction.type !== 'withdrawal' && transaction.recipient && (
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-slate-400">Recipient</span>
+                <span className="text-white font-medium text-right max-w-[60%] truncate">{transaction.recipient}</span>
+              </div>
+            )}
+            
+            {/* Any other flat metadata */}
+            {transaction.metadata && Object.entries(transaction.metadata)
+              .filter(([key, value]) => key !== 'payoutAccount' && key !== 'paystackTransfer' && typeof value === 'string')
+              .map(([key, value]) => (
+                <div key={key} className="flex items-center justify-between text-sm">
+                  <span className="text-slate-400 capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</span>
+                  <span className="text-white font-medium text-right max-w-[60%] truncate">{value as string}</span>
+                </div>
+              ))
+            }
           </div>
 
           {/* Actions */}

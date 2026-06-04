@@ -444,4 +444,37 @@ export class Database {
       { $set: { twoFactorEnabled: enabled, updatedAt: new Date() } }
     )
   }
+
+  // =========================
+  // RATE LIMITING
+  // =========================
+  static async checkRateLimit(ip: string, action: string, maxHits: number, windowMs: number): Promise<{ allowed: boolean; remaining: number }> {
+    const db = await this.getDb();
+    const collection = db.collection("rate_limits");
+    
+    // Ensure TTL index exists (this runs once and is safe to call repeatedly but ideally should be done on DB init)
+    // MongoDB will automatically expire documents based on 'expiresAt'
+    await collection.createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 }).catch(() => {});
+
+    const now = new Date();
+    const expiresAt = new Date(now.getTime() + windowMs);
+
+    const result = await collection.findOneAndUpdate(
+      { ip, action },
+      {
+        $setOnInsert: { ip, action, createdAt: now, expiresAt },
+        $inc: { hits: 1 }
+      },
+      { upsert: true, returnDocument: "after" }
+    );
+
+    const doc = result || result?.value;
+    if (!doc) return { allowed: true, remaining: maxHits - 1 };
+
+    const hits = doc.hits as number;
+    const allowed = hits <= maxHits;
+    const remaining = Math.max(0, maxHits - hits);
+
+    return { allowed, remaining };
+  }
 }

@@ -2,8 +2,10 @@ import { type NextRequest, NextResponse } from "next/server"
 import { Database } from "@/lib/database"
 import { createSession } from "@/lib/auth"
 import { verifyPassword } from "@/lib/server-auth"
+import { withRateLimit } from "@/lib/rate-limit"
 
 export async function POST(request: NextRequest) {
+  return withRateLimit(request, { action: "auth:signin", maxHits: 5, windowMs: 15 * 60 * 1000 }, async () => {
   try {
     const { emailOrPhone, password } = await request.json()
 
@@ -75,4 +77,6 @@ export async function POST(request: NextRequest) {
     }
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
+  });
 }
+

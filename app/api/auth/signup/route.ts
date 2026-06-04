@@ -3,8 +3,10 @@ import { Database } from "@/lib/database"
 import { hashPassword } from "@/lib/server-auth"
 import { createSession, generateReferralCode } from "@/lib/auth"
 import { signUpSchema } from "@/lib/validation"
+import { withRateLimit } from "@/lib/rate-limit"
 
 export async function POST(request: NextRequest) {
+  return withRateLimit(request, { action: "auth:signup", maxHits: 5, windowMs: 15 * 60 * 1000 }, async () => {
   try {
     const rawBody = await request.json()
     const validation = signUpSchema.safeParse(rawBody)
@@ -96,6 +98,8 @@ export async function POST(request: NextRequest) {
     })
   } catch (error) {
     console.error("Signup error:", error)
+    }
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
+  });
 }
