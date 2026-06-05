@@ -30,8 +30,13 @@ export default function LoginPage() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ emailOrPhone: email, password }),
             });
-            if (res.ok) { router.push('/dashboard'); }
-            else { const data = await res.json(); setError(data.error || 'Login failed'); }
+            const data = await res.json();
+            if (res.ok) {
+                sessionStorage.setItem('user', JSON.stringify(data.user));
+                router.push('/dashboard');
+            } else {
+                setError(data.error || 'Login failed');
+            }
         } catch { setError('An error occurred. Please try again.'); }
         finally { setIsLoading(false); }
     };
@@ -46,11 +51,12 @@ export default function LoginPage() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ credentialId: authData.credentialId, email }),
             });
+            const data = await res.json();
             if (res.ok) {
+                sessionStorage.setItem('user', JSON.stringify(data.user));
                 toast({ title: 'Success!', description: `Authenticated with ${getBiometricName()}` });
                 router.push('/dashboard');
             } else {
-                const data = await res.json();
                 setError(data.error || 'Biometric authentication failed');
             }
         } catch (err: any) { setError(err.message || 'Biometric authentication failed'); }

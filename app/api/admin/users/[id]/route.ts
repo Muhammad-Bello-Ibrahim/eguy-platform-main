@@ -1,11 +1,13 @@
-import { NextResponse } from "next/server"
+import { type NextRequest, NextResponse } from "next/server"
 import { getSession } from "@/lib/auth"
 import { Database } from "@/lib/database"
+import { withRateLimit } from "@/lib/rate-limit"
 
 export async function PUT(
-  request: Request,
+  request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  return withRateLimit(request, { action: "admin:users:update", maxHits: 50, windowMs: 60 * 1000 }, async () => {
   try {
     const session = await getSession()
     if (!session) {
@@ -72,4 +74,5 @@ export async function PUT(
     console.error("Admin user update error:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
+  });
 }

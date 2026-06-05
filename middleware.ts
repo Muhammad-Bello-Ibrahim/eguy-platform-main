@@ -18,7 +18,7 @@ export async function middleware(request: NextRequest) {
   const user = session?.user as any
 
   // Redirect admin user from dashboard → admin panel
-  if (isDashboard && user && user.email === "oraotechnologiesltd@gmail.com" && user.role === "admin") {
+  if (isDashboard && user  && user.role === "admin") {
     return NextResponse.redirect(new URL("/admin", request.url))
   }
 
@@ -31,14 +31,14 @@ export async function middleware(request: NextRequest) {
 
   // Protect admin route
   if (isAdmin) {
-    if (!user || user.email !== "oraotechnologiesltd@gmail.com" || user.role !== "admin") {
+    if (!user || user.role !== "admin") {
       return NextResponse.redirect(new URL("/login", request.url))
     }
   }
 
   // Prevent signed-in VERIFIED users from accessing auth pages
   if (isAuthPage && session && user) {
-    if (user.email === "oraotechnologiesltd@gmail.com" && user.role === "admin") {
+    if (user.role === "admin") {
       return NextResponse.redirect(new URL("/admin", request.url))
     }
     // Only redirect away from auth if already verified

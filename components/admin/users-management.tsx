@@ -16,6 +16,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Search, MoreHorizontal, UserCheck, UserX, Eye, Edit, CheckCircle, XCircle, User, Filter, Download, RefreshCw, EyeOff, Eye as EyeIcon, History, Users, DollarSign, TrendingUp, Star, Shield, Key, UserCog, Ban, AlertTriangle, ChevronDown, Calendar, Wallet, Phone, Mail, ArrowUpRight } from "lucide-react"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useToast } from "@/components/ui/use-toast"
+import { useDebounce } from "@/hooks/use-debounce"
 
 interface User {
   id: string
@@ -82,6 +83,7 @@ export function UsersManagement({ searchTerm }: { searchTerm?: string }) {
   const [filterStatus, setFilterStatus] = useState<string>("all")
   const [filterKyc, setFilterKyc] = useState<string>("all")
   const [localSearchTerm, setLocalSearchTerm] = useState("")
+  const debouncedSearch = useDebounce(localSearchTerm, 500)
   const [activeTab, setActiveTab] = useState("overview")
   const { toast } = useToast()
   const [formData, setFormData] = useState({
@@ -294,11 +296,12 @@ export function UsersManagement({ searchTerm }: { searchTerm?: string }) {
 
   // Enhanced filtering
   const filteredUsers = users.filter((user) => {
+    const searchTarget = debouncedSearch || searchTerm || ""
     const matchesSearch =
-      (user.fullName || "").toLowerCase().includes((localSearchTerm || searchTerm || "").toLowerCase()) ||
-      (user.email || "").toLowerCase().includes((localSearchTerm || searchTerm || "").toLowerCase()) ||
-      (user.phone || "").includes(localSearchTerm || searchTerm || "") ||
-      (user.referralCode || "").toLowerCase().includes((localSearchTerm || searchTerm || "").toLowerCase())
+      (user.fullName || "").toLowerCase().includes(searchTarget.toLowerCase()) ||
+      (user.email || "").toLowerCase().includes(searchTarget.toLowerCase()) ||
+      (user.phone || "").includes(searchTarget) ||
+      (user.referralCode || "").toLowerCase().includes(searchTarget.toLowerCase())
 
     const matchesStatus = filterStatus === "all" || user.status === filterStatus
     const matchesKyc = filterKyc === "all" || user.kycStatus === filterKyc
@@ -418,34 +421,34 @@ export function UsersManagement({ searchTerm }: { searchTerm?: string }) {
   }
 
   return (
-    <div className="space-y-6 animate-fade-in-up">
+    <div className="space-y-6 animate-fade-in-up text-slate-900 dark:text-slate-100">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">User Management</h1>
-          <p className="text-slate-500 text-sm">View, edit, and manage all platform users.</p>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">User Management</h1>
+          <p className="text-slate-500 dark:text-slate-400 text-sm">View, edit, and manage all platform users.</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" className="bg-white border-slate-200 text-slate-700">
+          <Button variant="outline" size="sm" className="bg-white dark:bg-card-dark border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300">
             <Download className="w-4 h-4 mr-2" />
             Export CSV
           </Button>
-          <Button variant="ghost" size="icon" onClick={fetchUsers} className="text-slate-500 hover:text-blue-600">
+          <Button variant="ghost" size="icon" onClick={fetchUsers} className="text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400">
             <RefreshCw className="w-4 h-4" />
           </Button>
         </div>
       </div>
 
       {/* Modern Filter Toolbar */}
-      <Card className="border-0 shadow-sm bg-white overflow-visible">
+      <Card className="border-0 shadow-sm bg-white dark:bg-card-dark overflow-visible">
         <CardContent className="p-4">
           <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
             <div className="relative w-full md:w-96">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-4 w-4" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 dark:text-slate-500 h-4 w-4" />
               <Input
                 placeholder="Search users..."
                 value={localSearchTerm}
                 onChange={(e) => setLocalSearchTerm(e.target.value)}
-                className="pl-10 bg-slate-50 border-slate-200 focus:bg-white transition-all"
+                className="pl-10 bg-slate-50 dark:bg-background-dark border-slate-200 dark:border-white/10 focus:bg-white dark:focus:bg-slate-800 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500"
               />
             </div>
 
@@ -484,11 +487,11 @@ export function UsersManagement({ searchTerm }: { searchTerm?: string }) {
         </CardContent>
       </Card>
 
-      <Card className="border-0 shadow-md shadow-slate-200/50">
-        <CardHeader className="px-6 py-4 border-b border-slate-100 flex flex-row items-center justify-between">
+      <Card className="border-0 shadow-md shadow-slate-200/50 dark:shadow-none bg-white dark:bg-card-dark">
+        <CardHeader className="px-6 py-4 border-b border-slate-100 dark:border-white/5 flex flex-row items-center justify-between">
           <div>
-            <CardTitle className="text-base font-semibold text-slate-800">All Users</CardTitle>
-            <CardDescription>Total {filteredUsers.length} users found</CardDescription>
+            <CardTitle className="text-base font-semibold text-slate-800 dark:text-white">All Users</CardTitle>
+            <CardDescription className="dark:text-slate-400">Total {filteredUsers.length} users found</CardDescription>
           </div>
         </CardHeader>
         <CardContent className="p-0">
@@ -496,16 +499,16 @@ export function UsersManagement({ searchTerm }: { searchTerm?: string }) {
             {/* Desktop / Tablet Table */}
             <div className="hidden md:block overflow-x-auto">
               <Table>
-                <TableHeader className="bg-slate-50/50">
-                  <TableRow className="border-b border-slate-100 hover:bg-transparent">
-                    <TableHead className="font-semibold text-slate-600 pl-6">User Details</TableHead>
-                    <TableHead className="font-semibold text-slate-600">Contact</TableHead>
-                    <TableHead className="font-semibold text-slate-600">Balance</TableHead>
-                    <TableHead className="font-semibold text-slate-600">Status</TableHead>
-                    <TableHead className="font-semibold text-slate-600">KYC</TableHead>
-                    <TableHead className="font-semibold text-slate-600">Performance</TableHead>
-                    <TableHead className="font-semibold text-slate-600">Joined</TableHead>
-                    <TableHead className="text-right pr-6 align-middle font-semibold text-slate-600">Actions</TableHead>
+                <TableHeader className="bg-slate-50/50 dark:bg-white/5">
+                  <TableRow className="border-b border-slate-100 dark:border-white/5 hover:bg-transparent">
+                    <TableHead className="font-semibold text-slate-600 dark:text-slate-300 pl-6">User Details</TableHead>
+                    <TableHead className="font-semibold text-slate-600 dark:text-slate-300">Contact</TableHead>
+                    <TableHead className="font-semibold text-slate-600 dark:text-slate-300">Balance</TableHead>
+                    <TableHead className="font-semibold text-slate-600 dark:text-slate-300">Status</TableHead>
+                    <TableHead className="font-semibold text-slate-600 dark:text-slate-300">KYC</TableHead>
+                    <TableHead className="font-semibold text-slate-600 dark:text-slate-300">Performance</TableHead>
+                    <TableHead className="font-semibold text-slate-600 dark:text-slate-300">Joined</TableHead>
+                    <TableHead className="text-right pr-6 align-middle font-semibold text-slate-600 dark:text-slate-300">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -521,7 +524,7 @@ export function UsersManagement({ searchTerm }: { searchTerm?: string }) {
                       </TableCell>
                     </TableRow>
                   ) : filteredUsers.map((user) => (
-                    <TableRow key={user.id} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors group">
+                    <TableRow key={user.id} className="border-b border-slate-50 dark:border-white/5 hover:bg-slate-50/50 dark:hover:bg-white/5 transition-colors group">
                       <TableCell className="pl-6 py-4">
                         <div className="flex items-center space-x-3">
                           <Avatar className="h-9 w-9 border border-slate-100 shadow-sm">

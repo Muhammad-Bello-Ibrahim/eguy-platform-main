@@ -15,10 +15,12 @@ import { Button } from "@/components/ui/button"
 import { LogOut, Bell, Search, Menu } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { Input } from "@/components/ui/input"
+import { useDebounce } from "@/hooks/use-debounce"
 
 export default function AdminPage() {
     const [activeTab, setActiveTab] = useState("dashboard")
     const [searchTerm, setSearchTerm] = useState("")
+    const debouncedSearch = useDebounce(searchTerm, 500)
     const router = useRouter()
 
     // Handle URL tab parameter
@@ -53,46 +55,46 @@ export default function AdminPage() {
     const renderContent = () => {
         switch (activeTab) {
             case "dashboard":
-                return <DashboardOverview searchTerm={searchTerm} />
+                return <DashboardOverview searchTerm={debouncedSearch} />
             case "users":
-                return <UsersManagement searchTerm={searchTerm} />
+                return <UsersManagement searchTerm={debouncedSearch} />
             case "transactions":
-                return <TransactionsManagement searchTerm={searchTerm} />
+                return <TransactionsManagement searchTerm={debouncedSearch} />
             case "plans":
-                return <PlansManagement searchTerm={searchTerm} />
+                return <PlansManagement searchTerm={debouncedSearch} />
             case "referrals":
-                return <ReferralsManagement searchTerm={searchTerm} />
+                return <ReferralsManagement searchTerm={debouncedSearch} />
             case "subscriptions":
-                return <SubscriptionsManagement searchTerm={searchTerm} />
+                return <SubscriptionsManagement searchTerm={debouncedSearch} />
             case "services":
-                return <ServicesManagement searchTerm={searchTerm} />
+                return <ServicesManagement searchTerm={debouncedSearch} />
             case "reports":
-                return <ReportsManagement searchTerm={searchTerm} />
+                return <ReportsManagement searchTerm={debouncedSearch} />
             case "settings":
-                return <SettingsManagement searchTerm={searchTerm} />
+                return <SettingsManagement searchTerm={debouncedSearch} />
             default:
-                return <DashboardOverview searchTerm={searchTerm} />
+                return <DashboardOverview searchTerm={debouncedSearch} />
         }
     }
 
     return (
-        <div className="min-h-screen bg-slate-50/50 flex">
+        <div className="min-h-screen bg-slate-50/50 dark:bg-background-dark flex text-slate-900 dark:text-slate-100">
             {/* Sidebar */}
             <AdminSidebar activeTab={activeTab} onTabChange={setActiveTab} />
 
             {/* Main Content Area */}
             <div className="flex-1 flex flex-col min-h-screen transition-all duration-300">
                 {/* Header */}
-                <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-200 shadow-sm">
+                <header className="sticky top-0 z-30 bg-white/80 dark:bg-card-dark/80 backdrop-blur-md border-b border-slate-200 dark:border-white/5 shadow-sm">
                     <div className="px-4 sm:px-6 lg:px-8">
                         <div className="flex items-center justify-between h-16">
                             {/* Left side spacer for mobile menu button or breadcrumbs */}
                             <div className="flex items-center lg:hidden pl-12">
-                                <span className="text-lg font-bold text-slate-800">Admin</span>
+                                <span className="text-lg font-bold text-slate-800 dark:text-white">Admin</span>
                             </div>
 
-                            <div className="hidden lg:flex items-center text-slate-500 text-sm">
-                                <span className="font-medium text-slate-900">Platform</span>
+                            <div className="hidden lg:flex items-center text-slate-500 dark:text-slate-400 text-sm">
+                                <span className="font-medium text-slate-900 dark:text-white">Platform</span>
                                 <span className="mx-2">/</span>
                                 <span className="capitalize">{activeTab}</span>
                             </div>
@@ -100,29 +102,29 @@ export default function AdminPage() {
                             <div className="flex items-center space-x-2 sm:space-x-4 ml-auto">
                                 {/* Global Search */}
                                 <div className="relative hidden md:block">
-                                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+                                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 dark:text-slate-500 w-4 h-4" />
                                     <Input
                                         placeholder="Search..."
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
-                                        className="pl-10 w-64 h-9 bg-slate-50 border-slate-200 focus:bg-white focus:border-blue-500 transition-all rounded-full text-sm"
+                                        className="pl-10 w-64 h-9 bg-slate-50 dark:bg-background-dark border-slate-200 dark:border-white/10 focus:bg-white dark:focus:bg-slate-800 focus:border-primary transition-all rounded-full text-sm placeholder:text-slate-400 dark:placeholder:text-slate-500"
                                     />
                                 </div>
 
                                 {/* Notifications */}
-                                <Button variant="ghost" size="icon" className="relative text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-full">
+                                <Button variant="ghost" size="icon" className="relative text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5 rounded-full">
                                     <Bell className="w-5 h-5" />
-                                    <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+                                    <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white dark:border-card-dark"></span>
                                 </Button>
 
-                                <div className="h-8 w-px bg-slate-200 mx-2 hidden sm:block"></div>
+                                <div className="h-8 w-px bg-slate-200 dark:bg-white/10 mx-2 hidden sm:block"></div>
 
                                 {/* Sign Out */}
                                 <Button
                                     variant="ghost"
                                     size="sm"
                                     onClick={handleSignOut}
-                                    className="text-slate-600 hover:text-red-600 hover:bg-red-50 rounded-full px-4"
+                                    className="text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-full px-4"
                                 >
                                     <LogOut className="w-4 h-4 sm:mr-2" />
                                     <span className="hidden sm:inline">Sign Out</span>

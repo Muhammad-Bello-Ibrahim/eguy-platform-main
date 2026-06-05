@@ -74,21 +74,21 @@ export function AdminSidebar({ activeTab, onTabChange }: AdminSidebarProps) {
             {/* Sidebar Container */}
             <div
                 className={cn(
-                    "fixed inset-y-0 left-0 z-40 bg-white border-r border-slate-200 transition-all duration-300 ease-in-out lg:relative",
+                    "fixed inset-y-0 left-0 z-40 bg-white dark:bg-card-dark border-r border-slate-200 dark:border-white/5 transition-all duration-300 ease-in-out lg:relative",
                     isMobile && !showMobileMenu ? "-translate-x-full" : "translate-x-0",
                     isCollapsed && !isMobile ? "w-20" : "w-64",
                     isMobile ? "w-64 shadow-2xl" : ""
                 )}
             >
-                <div className="flex h-16 items-center justify-between px-4 border-b border-slate-100">
+                <div className="flex h-16 items-center justify-between px-4 border-b border-slate-100 dark:border-white/5">
                     <div className={cn("flex items-center space-x-3", isCollapsed && !isMobile ? "justify-center w-full" : "")}>
                         <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-200">
                             <span className="text-white font-bold text-lg">A</span>
                         </div>
                         {(!isCollapsed || isMobile) && (
                             <div className="flex flex-col">
-                                <span className="text-lg font-bold text-slate-800 tracking-tight">Admin</span>
-                                <span className="text-xs text-slate-500 font-medium">Panel</span>
+                                <span className="text-lg font-bold text-slate-800 dark:text-white tracking-tight">Admin</span>
+                                <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Panel</span>
                             </div>
                         )}
                     </div>
@@ -98,7 +98,7 @@ export function AdminSidebar({ activeTab, onTabChange }: AdminSidebarProps) {
                             variant="ghost"
                             size="icon"
                             onClick={() => setIsCollapsed(!isCollapsed)}
-                            className="text-slate-400 hover:text-slate-600 hover:bg-slate-50 hidden lg:flex"
+                            className="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/5 hidden lg:flex"
                         >
                             {isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
                         </Button>
@@ -114,8 +114,8 @@ export function AdminSidebar({ activeTab, onTabChange }: AdminSidebarProps) {
                                 className={cn(
                                     "w-full justify-start mb-1 transition-all duration-200",
                                     activeTab === item.id
-                                        ? "bg-blue-50 text-blue-600 shadow-sm ring-1 ring-blue-100"
-                                        : "text-slate-600 hover:text-slate-900 hover:bg-slate-50",
+                                        ? "bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 shadow-sm ring-1 ring-blue-100 dark:ring-blue-500/20"
+                                        : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/5",
                                     isCollapsed && !isMobile ? "px-2 justify-center" : "px-3"
                                 )}
                                 onClick={() => {
@@ -126,7 +126,7 @@ export function AdminSidebar({ activeTab, onTabChange }: AdminSidebarProps) {
                                 <item.icon
                                     className={cn(
                                         "h-5 w-5",
-                                        activeTab === item.id ? "text-blue-600" : "text-slate-400 group-hover:text-slate-600",
+                                        activeTab === item.id ? "text-blue-600 dark:text-blue-400" : "text-slate-400 group-hover:text-slate-600 dark:group-hover:text-white",
                                         isCollapsed && !isMobile ? "mr-0" : "mr-3"
                                     )}
                                 />
@@ -142,18 +142,18 @@ export function AdminSidebar({ activeTab, onTabChange }: AdminSidebarProps) {
                     </nav>
                 </ScrollArea>
 
-                <div className="p-4 border-t border-slate-100">
+                <div className="p-4 border-t border-slate-100 dark:border-white/5">
                     <div className={cn(
-                        "rounded-xl bg-slate-50 p-4 border border-slate-100",
+                        "rounded-xl bg-slate-50 dark:bg-background-dark p-4 border border-slate-100 dark:border-white/5",
                         isCollapsed && !isMobile ? "hidden" : "block"
                     )}>
                         <div className="flex items-center gap-3">
-                            <div className="h-8 w-8 rounded-full bg-slate-200 flex items-center justify-center">
-                                <Settings className="h-4 w-4 text-slate-500" />
+                            <div className="h-8 w-8 rounded-full bg-slate-200 dark:bg-white/10 flex items-center justify-center">
+                                <Settings className="h-4 w-4 text-slate-500 dark:text-slate-400" />
                             </div>
                             <div className="flex flex-col overflow-hidden">
-                                <span className="text-sm font-medium text-slate-700 truncate">Admin User</span>
-                                <span className="text-xs text-slate-500 truncate">super@admin.com</span>
+                                <span className="text-sm font-medium text-slate-700 dark:text-white truncate">Admin User</span>
+                                <span className="text-xs text-slate-500 dark:text-slate-400 truncate">super@admin.com</span>
                             </div>
                         </div>
                     </div>

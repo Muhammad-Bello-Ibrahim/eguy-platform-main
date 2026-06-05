@@ -1,11 +1,13 @@
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-import { NextResponse } from "next/server"
+import { type NextRequest, NextResponse } from "next/server"
 import { getSession } from "@/lib/auth"
 import { Database } from "@/lib/database"
+import { withRateLimit } from "@/lib/rate-limit"
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  return withRateLimit(request, { action: "admin:users:get", maxHits: 100, windowMs: 60 * 1000 }, async () => {
   try {
     const session = await getSession()
     if (!session) {
@@ -70,4 +72,5 @@ export async function GET() {
     console.error("Admin users error:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
+  });
 }
