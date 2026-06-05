@@ -252,7 +252,7 @@ export function ReceiptModal({ transaction, isOpen, onClose }: ReceiptModalProps
               </span>
             </div>
 
-            {transaction.description && (
+            {transaction.description && !(transaction.type === 'withdrawal' && transaction.metadata?.payoutAccount) && (
               <div className="flex items-center justify-between text-sm">
                 <span className="text-slate-400">Description</span>
                 <span className="text-white font-medium text-right max-w-[60%] truncate">{transaction.description}</span>

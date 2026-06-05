@@ -21,6 +21,10 @@ export async function GET() {
         status: t.status,
         reference: t.reference,
         createdAt: t.createdAt,
+        category: t.category,
+        provider: t.provider,
+        recipient: t.recipient,
+        metadata: t.metadata,
       })),
     })
   } catch (error) {
