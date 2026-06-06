@@ -64,12 +64,12 @@ export function ReportsManagement({ searchTerm }: { searchTerm?: string }) {
       <div className="space-y-6">
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {[...Array(4)].map((_, i) => (
-            <Card key={i} className="border-0 shadow-sm">
+            <Card key={i} className="border border-slate-200 dark:border-slate-800/30 bg-white dark:bg-card-dark shadow-sm dark:shadow-none">
               <CardContent className="p-6">
                 <div className="animate-pulse space-y-3">
-                  <div className="h-4 bg-slate-100 rounded w-3/4" />
-                  <div className="h-8 bg-slate-100 rounded w-1/2" />
-                  <div className="h-3 bg-slate-100 rounded w-full" />
+                  <div className="h-4 bg-slate-100 dark:bg-slate-800 rounded w-3/4" />
+                  <div className="h-8 bg-slate-100 dark:bg-slate-800 rounded w-1/2" />
+                  <div className="h-3 bg-slate-100 dark:bg-slate-800 rounded w-full" />
                 </div>
               </CardContent>
             </Card>
@@ -143,18 +143,18 @@ export function ReportsManagement({ searchTerm }: { searchTerm?: string }) {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold">Reports</h1>
-            <p className="text-slate-500">Loading analytics...</p>
+            <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Reports</h1>
+            <p className="text-slate-500 dark:text-slate-400">Loading analytics...</p>
           </div>
         </div>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {[...Array(4)].map((_, i) => (
-            <Card key={i} className="border-0 shadow-sm">
+            <Card key={i} className="border border-slate-200 dark:border-slate-800/30 bg-white dark:bg-card-dark shadow-sm dark:shadow-none">
               <CardContent className="p-6">
                 <div className="animate-pulse space-y-3">
-                  <div className="h-4 bg-slate-100 rounded w-3/4" />
-                  <div className="h-8 bg-slate-100 rounded w-1/2" />
-                  <div className="h-3 bg-slate-100 rounded w-full" />
+                  <div className="h-4 bg-slate-100 dark:bg-slate-800 rounded w-3/4" />
+                  <div className="h-8 bg-slate-100 dark:bg-slate-800 rounded w-1/2" />
+                  <div className="h-3 bg-slate-100 dark:bg-slate-800 rounded w-full" />
                 </div>
               </CardContent>
             </Card>
@@ -168,26 +168,26 @@ export function ReportsManagement({ searchTerm }: { searchTerm?: string }) {
     <div className="space-y-6 animate-fade-in-up">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Reports & Analytics</h1>
-          <p className="text-slate-500 text-sm">Comprehensive insights into platform performance.</p>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Reports & Analytics</h1>
+          <p className="text-slate-500 dark:text-slate-400 text-sm">Comprehensive insights into platform performance.</p>
         </div>
         <div className="flex flex-col sm:flex-row gap-2">
           <Select value={dateRange} onValueChange={setDateRange}>
-            <SelectTrigger className="w-[150px] bg-white border-slate-200">
+            <SelectTrigger className="w-[150px] bg-white dark:bg-card-dark border-slate-200 dark:border-slate-800/50 text-slate-900 dark:text-white">
               <SelectValue placeholder="Period" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-white dark:bg-card-dark border-slate-200 dark:border-slate-800/50">
               <SelectItem value="7d">Last 7 Days</SelectItem>
               <SelectItem value="30d">Last 30 Days</SelectItem>
               <SelectItem value="90d">Last 3 Months</SelectItem>
               <SelectItem value="1y">Values Year</SelectItem>
             </SelectContent>
           </Select>
-          <Button variant="outline" className="bg-white border-slate-200 text-slate-600 hover:text-blue-600">
+          <Button variant="outline" className="bg-white dark:bg-card-dark border-slate-200 dark:border-slate-800/50 text-slate-600 dark:text-slate-300 hover:text-primary">
             <Filter className="h-4 w-4 mr-2" />
             Filter
           </Button>
-          <Button className="bg-blue-600 hover:bg-blue-700 text-white border-none shadow-md shadow-blue-200">
+          <Button className="bg-primary hover:bg-primary/90 text-background-dark border-none shadow-md shadow-primary/20">
             <Download className="h-4 w-4 mr-2" />
             Export
           </Button>
@@ -196,103 +196,103 @@ export function ReportsManagement({ searchTerm }: { searchTerm?: string }) {
 
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
+        <Card className="border border-slate-200 dark:border-slate-800/30 bg-white dark:bg-card-dark shadow-sm dark:shadow-none hover:shadow-md transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-slate-600">Total Revenue</CardTitle>
-            <div className="bg-green-50 p-2 rounded-full">
-              <DollarSign className="h-4 w-4 text-green-600" />
+            <CardTitle className="text-sm font-medium text-slate-600 dark:text-slate-400">Total Revenue</CardTitle>
+            <div className="bg-emerald-500/10 p-2 rounded-full border border-emerald-500/20">
+              <DollarSign className="h-4 w-4 text-emerald-450" />
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-slate-900">{formatCurrency(data.summary.totalRevenue)}</div>
-            <div className="flex items-center space-x-2 text-xs text-green-600 mt-1">
+            <div className="text-2xl font-bold text-slate-900 dark:text-white">{formatCurrency(data.summary.totalRevenue)}</div>
+            <div className="flex items-center space-x-2 text-xs text-emerald-450 mt-1">
               <TrendingUp className="h-3 w-3" />
               <span>+{data.summary.growthRate}% growth</span>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
+        <Card className="border border-slate-200 dark:border-slate-800/30 bg-white dark:bg-card-dark shadow-sm dark:shadow-none hover:shadow-md transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-slate-600">Total Users</CardTitle>
-            <div className="bg-blue-50 p-2 rounded-full">
-              <Users className="h-4 w-4 text-blue-600" />
+            <CardTitle className="text-sm font-medium text-slate-600 dark:text-slate-400">Total Users</CardTitle>
+            <div className="bg-primary/10 p-2 rounded-full border border-primary/20">
+              <Users className="h-4 w-4 text-primary" />
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-slate-900">{data.summary.totalUsers.toLocaleString()}</div>
-            <div className="text-xs text-slate-500 mt-1">
+            <div className="text-2xl font-bold text-slate-900 dark:text-white">{data.summary.totalUsers.toLocaleString()}</div>
+            <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
               Registered platform users
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
+        <Card className="border border-slate-200 dark:border-slate-800/30 bg-white dark:bg-card-dark shadow-sm dark:shadow-none hover:shadow-md transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-slate-600">Total Transactions</CardTitle>
-            <div className="bg-purple-50 p-2 rounded-full">
-              <CreditCard className="h-4 w-4 text-purple-600" />
+            <CardTitle className="text-sm font-medium text-slate-600 dark:text-slate-400">Total Transactions</CardTitle>
+            <div className="bg-purple-500/10 p-2 rounded-full border border-purple-500/20">
+              <CreditCard className="h-4 w-4 text-purple-400" />
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-slate-900">{data.summary.totalTransactions.toLocaleString()}</div>
-            <div className="text-xs text-slate-500 mt-1">
+            <div className="text-2xl font-bold text-slate-900 dark:text-white">{data.summary.totalTransactions.toLocaleString()}</div>
+            <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
               All platform transactions
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
+        <Card className="border border-slate-200 dark:border-slate-800/30 bg-white dark:bg-card-dark shadow-sm dark:shadow-none hover:shadow-md transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-slate-600">Success Rate</CardTitle>
-            <div className="bg-teal-50 p-2 rounded-full">
-              <Activity className="h-4 w-4 text-teal-600" />
+            <CardTitle className="text-sm font-medium text-slate-600 dark:text-slate-400">Success Rate</CardTitle>
+            <div className="bg-teal-500/10 p-2 rounded-full border border-teal-500/20">
+              <Activity className="h-4 w-4 text-teal-400" />
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-slate-900">{data.transactions.successRate}%</div>
-            <Progress value={data.transactions.successRate} className="mt-2 h-1.5" indicatorClassName={data.transactions.successRate > 95 ? 'bg-teal-500' : 'bg-amber-500'} />
+            <div className="text-2xl font-bold text-slate-900 dark:text-white">{data.transactions.successRate}%</div>
+            <Progress value={data.transactions.successRate} className="mt-2 h-1.5 bg-slate-100 dark:bg-slate-800" indicatorClassName={data.transactions.successRate > 95 ? 'bg-teal-500' : 'bg-amber-500'} />
           </CardContent>
         </Card>
       </div>
 
       <Tabs defaultValue="revenue" className="w-full">
-        <TabsList className="bg-slate-100 p-1 mb-6 rounded-lg w-full sm:w-auto grid sm:inline-grid grid-cols-3 sm:grid-cols-none">
-          <TabsTrigger value="revenue" className="rounded-md">Revenue</TabsTrigger>
-          <TabsTrigger value="users" className="rounded-md">Users</TabsTrigger>
-          <TabsTrigger value="transactions" className="rounded-md">Transactions</TabsTrigger>
+        <TabsList className="bg-slate-100 dark:bg-neutral-dark/50 p-1 mb-6 rounded-lg w-full sm:w-auto grid sm:inline-grid grid-cols-3 sm:grid-cols-none border border-slate-200 dark:border-slate-800/50">
+          <TabsTrigger value="revenue" className="rounded-md data-[state=active]:bg-white dark:data-[state=active]:bg-primary/10 data-[state=active]:text-slate-900 dark:data-[state=active]:text-primary dark:text-slate-400">Revenue</TabsTrigger>
+          <TabsTrigger value="users" className="rounded-md data-[state=active]:bg-white dark:data-[state=active]:bg-primary/10 data-[state=active]:text-slate-900 dark:data-[state=active]:text-primary dark:text-slate-400">Users</TabsTrigger>
+          <TabsTrigger value="transactions" className="rounded-md data-[state=active]:bg-white dark:data-[state=active]:bg-primary/10 data-[state=active]:text-slate-900 dark:data-[state=active]:text-primary dark:text-slate-400">Transactions</TabsTrigger>
         </TabsList>
 
         <TabsContent value="revenue" className="space-y-6 mt-0">
           <div className="grid gap-6 md:grid-cols-3">
-            <Card className="md:col-span-2 border-0 shadow-md shadow-slate-200/50">
+            <Card className="md:col-span-2 border border-slate-200 dark:border-slate-800/30 bg-white dark:bg-card-dark shadow-sm dark:shadow-none">
               <CardHeader>
-                <CardTitle className="text-lg text-slate-800">Revenue Trends</CardTitle>
-                <CardDescription>Income over time</CardDescription>
+                <CardTitle className="text-lg text-slate-800 dark:text-white">Revenue Trends</CardTitle>
+                <CardDescription className="text-slate-500 dark:text-slate-400">Income over time</CardDescription>
               </CardHeader>
               <CardContent className="h-[300px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={data.revenue.monthly} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                     <defs>
                       <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
-                        <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                        <stop offset="5%" stopColor="#46F0D2" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="#46F0D2" stopOpacity={0} />
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#334155" opacity={0.2} />
                     <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: '#64748b' }} />
                     <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b' }} tickFormatter={(value) => `₦${(value / 1000000).toFixed(1)}M`} />
                     <Tooltip content={<CustomTooltip />} />
-                    <Area type="monotone" dataKey="amount" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorRevenue)" name="Revenue" />
+                    <Area type="monotone" dataKey="amount" stroke="#46F0D2" strokeWidth={3} fillOpacity={1} fill="url(#colorRevenue)" name="Revenue" />
                   </AreaChart>
                 </ResponsiveContainer>
               </CardContent>
             </Card>
 
-            <Card className="border-0 shadow-md shadow-slate-200/50">
+            <Card className="border border-slate-200 dark:border-slate-800/30 bg-white dark:bg-card-dark shadow-sm dark:shadow-none">
               <CardHeader>
-                <CardTitle className="text-lg text-slate-800">Revenue by Service</CardTitle>
-                <CardDescription>Breakdown by category</CardDescription>
+                <CardTitle className="text-lg text-slate-800 dark:text-white">Revenue by Service</CardTitle>
+                <CardDescription className="text-slate-500 dark:text-slate-400">Breakdown by category</CardDescription>
               </CardHeader>
               <CardContent className="h-[300px] flex items-center justify-center">
                 <ResponsiveContainer width="100%" height="100%">
@@ -312,25 +312,25 @@ export function ReportsManagement({ searchTerm }: { searchTerm?: string }) {
                       ))}
                     </Pie>
                     <Tooltip formatter={(value: number) => formatCurrency(value)} />
-                    <Legend verticalAlign="bottom" height={36} />
+                    <Legend verticalAlign="bottom" height={36} wrapperStyle={{ color: '#94a3b8' }} />
                   </PieChart>
                 </ResponsiveContainer>
               </CardContent>
             </Card>
           </div>
 
-          <Card className="border-0 shadow-md shadow-slate-200/50">
+          <Card className="border border-slate-200 dark:border-slate-800/30 bg-white dark:bg-card-dark shadow-sm dark:shadow-none">
             <CardHeader>
-              <CardTitle className="text-lg text-slate-800">Daily Revenue Performance</CardTitle>
-              <CardDescription>Daily transaction volume for the selected period</CardDescription>
+              <CardTitle className="text-lg text-slate-800 dark:text-white">Daily Revenue Performance</CardTitle>
+              <CardDescription className="text-slate-500 dark:text-slate-400">Daily transaction volume for the selected period</CardDescription>
             </CardHeader>
             <CardContent className="h-[250px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={data.revenue.daily}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#334155" opacity={0.2} />
                   <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#94a3b8' }} minTickGap={30} />
-                  <Tooltip cursor={{ fill: '#f1f5f9' }} content={<CustomTooltip />} />
-                  <Bar dataKey="amount" fill="#3b82f6" radius={[4, 4, 0, 0]} name="Daily Revenue" />
+                  <Tooltip cursor={{ fill: '#334155', opacity: 0.1 }} content={<CustomTooltip />} />
+                  <Bar dataKey="amount" fill="#46F0D2" radius={[4, 4, 0, 0]} name="Daily Revenue" />
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>
@@ -339,55 +339,55 @@ export function ReportsManagement({ searchTerm }: { searchTerm?: string }) {
 
         <TabsContent value="users" className="space-y-6 mt-0">
           <div className="grid gap-6 md:grid-cols-2">
-            <Card className="border-0 shadow-md shadow-slate-200/50">
+            <Card className="border border-slate-200 dark:border-slate-800/30 bg-white dark:bg-card-dark shadow-sm dark:shadow-none">
               <CardHeader>
-                <CardTitle className="text-lg text-slate-800">User Growth</CardTitle>
-                <CardDescription>New user registrations over time</CardDescription>
+                <CardTitle className="text-lg text-slate-800 dark:text-white">User Growth</CardTitle>
+                <CardDescription className="text-slate-500 dark:text-slate-400">New user registrations over time</CardDescription>
               </CardHeader>
               <CardContent className="h-[300px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={data.users.growth}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#334155" opacity={0.2} />
                     <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: '#64748b' }} />
                     <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b' }} />
-                    <Tooltip content={<CustomTooltip />} />
+                    <Tooltip cursor={{ fill: '#334155', opacity: 0.1 }} content={<CustomTooltip />} />
                     <Bar dataKey="newUsers" fill="#8b5cf6" radius={[4, 4, 0, 0]} name="New Users" />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
             </Card>
 
-            <Card className="border-0 shadow-md shadow-slate-200/50">
+            <Card className="border border-slate-200 dark:border-slate-800/30 bg-white dark:bg-card-dark shadow-sm dark:shadow-none">
               <CardHeader>
-                <CardTitle className="text-lg text-slate-800">User Distribution</CardTitle>
-                <CardDescription>By Location and KYC Status</CardDescription>
+                <CardTitle className="text-lg text-slate-800 dark:text-white">User Distribution</CardTitle>
+                <CardDescription className="text-slate-500 dark:text-slate-400">By Location and KYC Status</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-6">
                   <div>
-                    <h4 className="text-sm font-medium text-slate-700 mb-3">By Location</h4>
+                    <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">By Location</h4>
                     <div className="space-y-3">
                       {data.users.byLocation.map((loc, i) => (
                         <div key={loc.location} className="flex items-center justify-between text-sm">
                           <div className="flex items-center gap-2">
                             <div className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS[i % COLORS.length] }}></div>
-                            <span>{loc.location}</span>
+                            <span className="text-slate-700 dark:text-slate-300">{loc.location}</span>
                           </div>
                           <div className="flex items-center gap-4">
-                            <Progress value={loc.percentage} className="w-24 h-2" indicatorClassName={`bg-[${COLORS[i % COLORS.length]}]`} />
-                            <span className="w-8 text-right text-slate-500">{loc.percentage}%</span>
+                            <Progress value={loc.percentage} className="w-24 h-2 bg-slate-100 dark:bg-slate-800" indicatorClassName="bg-primary" style={{ '--progress-background': COLORS[i % COLORS.length] } as any} />
+                            <span className="w-8 text-right text-slate-500 dark:text-slate-400">{loc.percentage}%</span>
                           </div>
                         </div>
                       ))}
                     </div>
                   </div>
-                  <div className="pt-4 border-t border-slate-100">
-                    <h4 className="text-sm font-medium text-slate-700 mb-3">By KYC Status</h4>
+                  <div className="pt-4 border-t border-slate-100 dark:border-slate-800/50">
+                    <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">By KYC Status</h4>
                     <div className="flex gap-2">
                       {data.users.byKycStatus.map((status, i) => (
-                        <div key={status.status} className="flex-1 p-3 bg-slate-50 rounded-lg text-center">
-                          <div className="text-xs text-slate-500 mb-1">{status.status}</div>
-                          <div className="font-bold text-slate-900">{status.percentage}%</div>
+                        <div key={status.status} className="flex-1 p-3 bg-slate-50 dark:bg-neutral-dark/30 rounded-lg text-center border border-slate-100 dark:border-slate-800/50">
+                          <div className="text-xs text-slate-500 dark:text-slate-400 mb-1">{status.status}</div>
+                          <div className="font-bold text-slate-900 dark:text-white">{status.percentage}%</div>
                         </div>
                       ))}
                     </div>
@@ -400,10 +400,10 @@ export function ReportsManagement({ searchTerm }: { searchTerm?: string }) {
 
         <TabsContent value="transactions" className="space-y-6 mt-0">
           <div className="grid gap-6 md:grid-cols-2">
-            <Card className="border-0 shadow-md shadow-slate-200/50">
+            <Card className="border border-slate-200 dark:border-slate-800/30 bg-white dark:bg-card-dark shadow-sm dark:shadow-none">
               <CardHeader>
-                <CardTitle className="text-lg text-slate-800">Transaction Volume by Type</CardTitle>
-                <CardDescription>Which services are most used?</CardDescription>
+                <CardTitle className="text-lg text-slate-800 dark:text-white">Transaction Volume by Type</CardTitle>
+                <CardDescription className="text-slate-500 dark:text-slate-400">Which services are most used?</CardDescription>
               </CardHeader>
               <CardContent className="h-[300px] flex items-center justify-center">
                 <ResponsiveContainer width="100%" height="100%">
@@ -423,26 +423,26 @@ export function ReportsManagement({ searchTerm }: { searchTerm?: string }) {
                       ))}
                     </Pie>
                     <Tooltip />
-                    <Legend layout="vertical" verticalAlign="middle" align="right" />
+                    <Legend layout="vertical" verticalAlign="middle" align="right" wrapperStyle={{ color: '#94a3b8' }} />
                   </PieChart>
                 </ResponsiveContainer>
               </CardContent>
             </Card>
 
-            <Card className="border-0 shadow-md shadow-slate-200/50">
+            <Card className="border border-slate-200 dark:border-slate-800/30 bg-white dark:bg-card-dark shadow-sm dark:shadow-none">
               <CardHeader>
-                <CardTitle className="text-lg text-slate-800">Failed Transactions Analysis</CardTitle>
-                <CardDescription>Top reasons for failure</CardDescription>
+                <CardTitle className="text-lg text-slate-800 dark:text-white">Failed Transactions Analysis</CardTitle>
+                <CardDescription className="text-slate-500 dark:text-slate-400">Top reasons for failure</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   {data.transactions.failures.map((fail, i) => (
                     <div key={fail.reason} className="space-y-1">
                       <div className="flex justify-between text-sm">
-                        <span className="font-medium text-slate-700">{fail.reason}</span>
-                        <span className="text-slate-500">{fail.count} failures</span>
+                        <span className="font-medium text-slate-700 dark:text-slate-300">{fail.reason}</span>
+                        <span className="text-slate-500 dark:text-slate-400">{fail.count} failures</span>
                       </div>
-                      <Progress value={(fail.count / 500) * 100} className="h-2" indicatorClassName="bg-red-500" />
+                      <Progress value={(fail.count / 500) * 100} className="h-2 bg-slate-100 dark:bg-slate-800" indicatorClassName="bg-red-500" />
                     </div>
                   ))}
                 </div>

@@ -234,19 +234,19 @@ export function PlansManagement({ searchTerm: initialSearchTerm }: { searchTerm?
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold">Plans</h1>
-            <p className="text-slate-500">Manage data and airtime plans</p>
+            <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Plans</h1>
+            <p className="text-slate-500 dark:text-slate-400">Manage data and airtime plans</p>
           </div>
         </div>
-        <Card className="border-0 shadow-sm">
+        <Card className="border border-slate-200 dark:border-slate-800/30 bg-white dark:bg-card-dark shadow-sm dark:shadow-none">
           <CardContent className="p-6">
             <div className="space-y-4">
               {[...Array(5)].map((_, i) => (
                 <div key={i} className="flex items-center space-x-4 animate-pulse">
-                  <div className="w-10 h-10 bg-slate-100 rounded-full" />
+                  <div className="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-full" />
                   <div className="flex-1 space-y-2">
-                    <div className="h-4 bg-slate-100 rounded w-3/4" />
-                    <div className="h-3 bg-slate-100 rounded w-1/2" />
+                    <div className="h-4 bg-slate-100 dark:bg-slate-800 rounded w-3/4" />
+                    <div className="h-3 bg-slate-100 dark:bg-slate-800 rounded w-1/2" />
                   </div>
                 </div>
               ))}
@@ -261,30 +261,30 @@ export function PlansManagement({ searchTerm: initialSearchTerm }: { searchTerm?
     <div className="space-y-6 animate-fade-in-up">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold" style={{ color: 'var(--color-foreground)' }}>Plans Management</h2>
-          <p className="text-sm" style={{ color: 'var(--color-muted-foreground)' }}>Configure and manage data bundles and airtime pricing.</p>
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Plans Management</h2>
+          <p className="text-sm text-slate-500 dark:text-slate-400">Configure and manage data bundles and airtime pricing.</p>
         </div>
 
         <Dialog open={addModalOpen} onOpenChange={setAddModalOpen}>
           <DialogTrigger asChild>
-            <Button onClick={() => { resetForm(); setEditingPlan(null); }}>
+            <Button onClick={() => { resetForm(); setEditingPlan(null); }} className="bg-primary hover:bg-primary/90 text-background-dark font-extrabold shadow-lg shadow-primary/20 transition-all duration-200 active:scale-95 rounded-xl">
               <Plus className="w-4 h-4 mr-2" />
               Add Plan
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-md">
+          <DialogContent className="max-w-md bg-white dark:bg-card-dark border border-slate-200 dark:border-slate-800/50 shadow-2xl">
             <DialogHeader>
-              <DialogTitle>{editingPlan ? "Edit Plan" : "Add New Plan"}</DialogTitle>
-              <DialogDescription>
+              <DialogTitle className="text-slate-900 dark:text-white">{editingPlan ? "Edit Plan" : "Add New Plan"}</DialogTitle>
+              <DialogDescription className="text-slate-500 dark:text-slate-400">
                 {editingPlan ? "Update the plan details below." : "Create a new data or airtime plan configuration."}
               </DialogDescription>
             </DialogHeader>
 
             <form onSubmit={handleSubmit} className="space-y-4 py-4">
               <Tabs value={planType} onValueChange={(value) => setPlanType(value as "data" | "airtime")} className="w-full">
-                <TabsList className="grid w-full grid-cols-2 mb-4">
-                  <TabsTrigger value="data">Data Plan</TabsTrigger>
-                  <TabsTrigger value="airtime">Airtime Plan</TabsTrigger>
+                <TabsList className="grid w-full grid-cols-2 mb-4 bg-slate-100/50 dark:bg-neutral-dark/30 rounded-xl p-1">
+                  <TabsTrigger value="data" className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:border-primary/20 rounded-lg">Data Plan</TabsTrigger>
+                  <TabsTrigger value="airtime" className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:border-primary/20 rounded-lg">Airtime Plan</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="data" className="space-y-4 mt-0">
@@ -435,19 +435,19 @@ export function PlansManagement({ searchTerm: initialSearchTerm }: { searchTerm?
         </Dialog>
       </div>
 
-      <Card className="border-0 shadow-sm bg-white overflow-visible">
+      <Card className="border border-slate-200 dark:border-slate-800/30 bg-white dark:bg-card-dark shadow-sm dark:shadow-none overflow-visible">
         <CardContent className="p-4">
           <div className="flex items-center gap-4">
             <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-4 w-4" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 dark:text-slate-500 h-4 w-4" />
               <Input
                 placeholder="Search plans..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 bg-slate-50 border-slate-200 focus:bg-white transition-all"
+                className="pl-10 bg-slate-50 dark:bg-background-dark border-slate-200 dark:border-slate-800/50 focus:bg-white dark:focus:bg-slate-800 focus:border-primary transition-all text-slate-900 dark:text-white"
               />
             </div>
-            <Button variant="outline" size="icon" onClick={fetchPlans} className="text-slate-500 hover:text-blue-600">
+            <Button variant="outline" size="icon" onClick={fetchPlans} className="text-slate-500 dark:text-slate-400 hover:text-primary border-slate-200 dark:border-slate-800/50 bg-white dark:bg-card-dark">
               <RefreshCw className="w-4 h-4" />
             </Button>
           </div>
@@ -455,78 +455,78 @@ export function PlansManagement({ searchTerm: initialSearchTerm }: { searchTerm?
       </Card>
 
       <Tabs defaultValue="data" className="w-full">
-        <TabsList className="bg-slate-100/50 p-1 mb-6">
-          <TabsTrigger value="data" className="flex items-center gap-2">
+        <TabsList className="bg-slate-100/50 dark:bg-neutral-dark/30 p-1 mb-6 rounded-xl">
+          <TabsTrigger value="data" className="flex items-center gap-2 data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:border-primary/20 rounded-lg">
             <Wifi className="h-4 w-4" /> Data Plans
           </TabsTrigger>
-          <TabsTrigger value="airtime" className="flex items-center gap-2">
+          <TabsTrigger value="airtime" className="flex items-center gap-2 data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:border-primary/20 rounded-lg">
             <Smartphone className="h-4 w-4" /> Airtime Plans
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="data" className="mt-0">
-          <Card className="border-0 shadow-md shadow-slate-200/50">
-            <CardHeader className="px-6 py-4 border-b border-slate-100">
+          <Card className="border border-slate-200 dark:border-slate-800/30 bg-white dark:bg-card-dark shadow-sm dark:shadow-none">
+            <CardHeader className="px-6 py-4 border-b border-slate-200 dark:border-slate-800/50 bg-slate-50/20 dark:bg-neutral-dark/10">
               <div>
-                <CardTitle className="text-base font-semibold text-slate-800">Data Plans</CardTitle>
-                <CardDescription>Total {filteredDataPlans.length} plans available</CardDescription>
+                <CardTitle className="text-base font-bold text-slate-900 dark:text-white">Data Plans</CardTitle>
+                <CardDescription className="text-slate-500 dark:text-slate-400">Total {filteredDataPlans.length} plans available</CardDescription>
               </div>
             </CardHeader>
             <CardContent className="p-0">
               <div className="hidden sm:block overflow-x-auto">
                 <Table>
-                  <TableHeader className="bg-slate-50/50">
-                    <TableRow className="border-b border-slate-100 hover:bg-transparent">
-                      <TableHead className="font-semibold text-slate-600 pl-6">Network</TableHead>
-                      <TableHead className="font-semibold text-slate-600">Bundle</TableHead>
-                      <TableHead className="font-semibold text-slate-600">Type</TableHead>
-                      <TableHead className="font-semibold text-slate-600">Price Info</TableHead>
-                      <TableHead className="font-semibold text-slate-600">Status</TableHead>
-                      <TableHead className="text-right pr-6 font-semibold text-slate-600">Actions</TableHead>
+                  <TableHeader className="bg-slate-50/50 dark:bg-neutral-dark/30 border-b border-slate-200 dark:border-slate-800/50">
+                    <TableRow className="border-b border-slate-200 dark:border-slate-800/50 hover:bg-transparent">
+                      <TableHead className="font-semibold text-slate-600 dark:text-slate-300 pl-6">Network</TableHead>
+                      <TableHead className="font-semibold text-slate-600 dark:text-slate-300">Bundle</TableHead>
+                      <TableHead className="font-semibold text-slate-600 dark:text-slate-300">Type</TableHead>
+                      <TableHead className="font-semibold text-slate-600 dark:text-slate-300">Price Info</TableHead>
+                      <TableHead className="font-semibold text-slate-600 dark:text-slate-300">Status</TableHead>
+                      <TableHead className="text-right pr-6 font-semibold text-slate-600 dark:text-slate-300">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {filteredDataPlans.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={6} className="h-48 text-center text-slate-500">
+                        <TableCell colSpan={6} className="h-48 text-center text-slate-500 dark:text-slate-400">
                           No data plans found.
                         </TableCell>
                       </TableRow>
                     ) : filteredDataPlans.map((plan) => (
-                      <TableRow key={plan._id} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
+                      <TableRow key={plan._id} className="border-b border-slate-200 dark:border-slate-800/30 hover:bg-slate-50 dark:hover:bg-neutral-dark/40 transition-colors text-slate-700 dark:text-slate-300">
                         <TableCell className="pl-6 font-medium">
                           <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-600">
+                            <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-xs font-bold text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
                               {plan.network[0]}
                             </div>
-                            {plan.network}
+                            <span className="text-slate-900 dark:text-white">{plan.network}</span>
                           </div>
                         </TableCell>
                         <TableCell>
-                          <div className="font-medium">{plan.dataBundle}</div>
-                          <div className="text-xs text-slate-500">{plan.duration}</div>
+                          <div className="font-medium text-slate-900 dark:text-white">{plan.dataBundle}</div>
+                          <div className="text-xs text-slate-500 dark:text-slate-400">{plan.duration}</div>
                         </TableCell>
                         <TableCell>
-                          <Badge variant="outline" className="font-normal">{plan.type}</Badge>
+                          <Badge variant="outline" className="font-normal text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700">{plan.type}</Badge>
                         </TableCell>
                         <TableCell>
                           <div className="flex flex-col gap-0.5">
-                            <span className="font-medium text-slate-900">{formatCurrency(plan.price)}</span>
-                            <span className="text-xs text-slate-500">API: {formatCurrency(plan.apiPrice)}</span>
+                            <span className="font-medium text-slate-900 dark:text-white">{formatCurrency(plan.price)}</span>
+                            <span className="text-xs text-slate-500 dark:text-slate-400">API: {formatCurrency(plan.apiPrice)}</span>
                           </div>
                         </TableCell>
                         <TableCell>
-                          <Badge variant={plan.status === 'Active' ? 'default' : 'secondary'}
-                            className={plan.status === 'Active' ? 'bg-green-100 text-green-700 hover:bg-green-100 border-0' : 'bg-slate-100 text-slate-500 border-0 hover:bg-slate-100'}>
+                          <Badge variant="outline"
+                            className={plan.status === 'Active' ? 'bg-emerald-500/10 text-emerald-450 border-emerald-500/20 font-semibold' : 'bg-slate-500/10 text-slate-400 border-slate-500/20 font-semibold'}>
                             {plan.status}
                           </Badge>
                         </TableCell>
                         <TableCell className="text-right pr-6">
                           <div className="flex items-center justify-end gap-2">
-                            <Button size="icon" variant="ghost" className="h-8 w-8 text-slate-400 hover:text-blue-600" onClick={() => handleEdit(plan, "data")}>
+                            <Button size="icon" variant="ghost" className="h-8 w-8 text-slate-400 hover:text-primary transition-colors hover:bg-slate-100 dark:hover:bg-white/5" onClick={() => handleEdit(plan, "data")}>
                               <Edit className="h-3.5 w-3.5" />
                             </Button>
-                            <Button size="icon" variant="ghost" className="h-8 w-8 text-slate-400 hover:text-red-600" onClick={() => handleDelete(plan._id!, "data")}>
+                            <Button size="icon" variant="ghost" className="h-8 w-8 text-slate-400 hover:text-red-400 transition-colors hover:bg-red-50 dark:hover:bg-red-500/10" onClick={() => handleDelete(plan._id!, "data")}>
                               <Trash2 className="h-3.5 w-3.5" />
                             </Button>
                           </div>
@@ -538,31 +538,31 @@ export function PlansManagement({ searchTerm: initialSearchTerm }: { searchTerm?
               </div>
 
               {/* Mobile */}
-              <div className="block sm:hidden p-4 space-y-3 bg-slate-50/50">
+              <div className="block sm:hidden p-4 space-y-3 bg-slate-50/50 dark:bg-neutral-dark/10">
                 {filteredDataPlans.map((plan) => (
-                  <div key={plan._id} className="bg-white border border-slate-100 rounded-xl p-4 shadow-sm">
+                  <div key={plan._id} className="bg-white dark:bg-card-dark border border-slate-200 dark:border-slate-800/30 rounded-xl p-4 shadow-sm dark:shadow-none">
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="bg-slate-50">{plan.network}</Badge>
-                        <span className="font-bold text-slate-900">{plan.dataBundle}</span>
+                        <Badge variant="outline" className="bg-slate-50 dark:bg-neutral-dark/40 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700">{plan.network}</Badge>
+                        <span className="font-bold text-slate-900 dark:text-white">{plan.dataBundle}</span>
                       </div>
-                      <Badge variant={plan.status === 'Active' ? 'default' : 'secondary'} className={plan.status === 'Active' ? 'bg-green-100 text-green-700 hover:bg-green-100 border-0' : ''}>
+                      <Badge variant="outline" className={plan.status === 'Active' ? 'bg-emerald-500/10 text-emerald-450 border-emerald-500/20 font-semibold' : 'bg-slate-500/10 text-slate-400 border-slate-500/20 font-semibold'}>
                         {plan.status}
                       </Badge>
                     </div>
                     <div className="grid grid-cols-2 gap-4 text-sm mb-4">
                       <div>
-                        <span className="text-xs text-slate-400 block">Plan Type</span>
-                        <span className="font-medium text-slate-700">{plan.type}</span>
+                        <span className="text-xs text-slate-400 dark:text-slate-500 block">Plan Type</span>
+                        <span className="font-medium text-slate-700 dark:text-slate-300">{plan.type}</span>
                       </div>
                       <div className="text-right">
-                        <span className="text-xs text-slate-400 block">Price</span>
-                        <span className="font-bold text-slate-900">{formatCurrency(plan.price)}</span>
+                        <span className="text-xs text-slate-400 dark:text-slate-500 block">Price</span>
+                        <span className="font-bold text-slate-900 dark:text-white">{formatCurrency(plan.price)}</span>
                       </div>
                     </div>
                     <div className="flex gap-2">
-                      <Button size="sm" variant="outline" className="flex-1" onClick={() => handleEdit(plan, "data")}>Edit</Button>
-                      <Button size="sm" variant="outline" className="flex-1 text-red-600 hover:bg-red-50 hover:text-red-700 border-red-100" onClick={() => handleDelete(plan._id!, "data")}>Delete</Button>
+                      <Button size="sm" variant="outline" className="flex-1 border-slate-200 dark:border-slate-800/50 text-slate-700 dark:text-slate-300 bg-transparent hover:bg-slate-50 dark:hover:bg-neutral-dark/40" onClick={() => handleEdit(plan, "data")}>Edit</Button>
+                      <Button size="sm" variant="outline" className="flex-1 text-red-600 dark:text-red-450 hover:bg-red-50 dark:hover:bg-red-500/10 border-red-100 dark:border-red-500/20" onClick={() => handleDelete(plan._id!, "data")}>Delete</Button>
                     </div>
                   </div>
                 ))}
@@ -572,44 +572,44 @@ export function PlansManagement({ searchTerm: initialSearchTerm }: { searchTerm?
         </TabsContent>
 
         <TabsContent value="airtime" className="mt-0">
-          <Card className="border-0 shadow-md shadow-slate-200/50">
-            <CardHeader className="px-6 py-4 border-b border-slate-100">
+          <Card className="border border-slate-200 dark:border-slate-800/30 bg-white dark:bg-card-dark shadow-sm dark:shadow-none">
+            <CardHeader className="px-6 py-4 border-b border-slate-200 dark:border-slate-800/50 bg-slate-50/20 dark:bg-neutral-dark/10">
               <div>
-                <CardTitle className="text-base font-semibold text-slate-800">Airtime Plans</CardTitle>
-                <CardDescription>Total {filteredAirtimePlans.length} plans available</CardDescription>
+                <CardTitle className="text-base font-bold text-slate-900 dark:text-white">Airtime Plans</CardTitle>
+                <CardDescription className="text-slate-500 dark:text-slate-400">Total {filteredAirtimePlans.length} plans available</CardDescription>
               </div>
             </CardHeader>
             <CardContent className="p-0">
               <div className="hidden sm:block overflow-x-auto">
                 <Table>
-                  <TableHeader className="bg-slate-50/50">
-                    <TableRow className="border-b border-slate-100 hover:bg-transparent">
-                      <TableHead className="font-semibold text-slate-600 pl-6">Network</TableHead>
-                      <TableHead className="font-semibold text-slate-600">Amount</TableHead>
-                      <TableHead className="font-semibold text-slate-600">Your Price</TableHead>
-                      <TableHead className="font-semibold text-slate-600">API Price</TableHead>
-                      <TableHead className="text-right pr-6 font-semibold text-slate-600">Actions</TableHead>
+                  <TableHeader className="bg-slate-50/50 dark:bg-neutral-dark/30 border-b border-slate-200 dark:border-slate-800/50">
+                    <TableRow className="border-b border-slate-200 dark:border-slate-800/50 hover:bg-transparent">
+                      <TableHead className="font-semibold text-slate-600 dark:text-slate-300 pl-6">Network</TableHead>
+                      <TableHead className="font-semibold text-slate-600 dark:text-slate-300">Amount</TableHead>
+                      <TableHead className="font-semibold text-slate-600 dark:text-slate-300">Your Price</TableHead>
+                      <TableHead className="font-semibold text-slate-600 dark:text-slate-300">API Price</TableHead>
+                      <TableHead className="text-right pr-6 font-semibold text-slate-600 dark:text-slate-300">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {filteredAirtimePlans.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={5} className="h-48 text-center text-slate-500">
+                        <TableCell colSpan={5} className="h-48 text-center text-slate-500 dark:text-slate-400">
                           No airtime plans found.
                         </TableCell>
                       </TableRow>
                     ) : filteredAirtimePlans.map((plan) => (
-                      <TableRow key={plan._id} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
-                        <TableCell className="pl-6 font-medium">{plan.network}</TableCell>
+                      <TableRow key={plan._id} className="border-b border-slate-200 dark:border-slate-800/30 hover:bg-slate-50 dark:hover:bg-neutral-dark/40 transition-colors text-slate-700 dark:text-slate-300">
+                        <TableCell className="pl-6 font-medium text-slate-900 dark:text-white">{plan.network}</TableCell>
                         <TableCell>{formatCurrency(plan.amount)}</TableCell>
-                        <TableCell className="font-medium text-green-600">{formatCurrency(plan.price)}</TableCell>
-                        <TableCell className="text-slate-500">{formatCurrency(plan.apiPrice)}</TableCell>
+                        <TableCell className="font-medium text-emerald-600 dark:text-emerald-450">{formatCurrency(plan.price)}</TableCell>
+                        <TableCell className="text-slate-500 dark:text-slate-400">{formatCurrency(plan.apiPrice)}</TableCell>
                         <TableCell className="text-right pr-6">
                           <div className="flex items-center justify-end gap-2">
-                            <Button size="icon" variant="ghost" className="h-8 w-8 text-slate-400 hover:text-blue-600" onClick={() => handleEdit(plan, "airtime")}>
+                            <Button size="icon" variant="ghost" className="h-8 w-8 text-slate-400 hover:text-primary transition-colors hover:bg-slate-100 dark:hover:bg-white/5" onClick={() => handleEdit(plan, "airtime")}>
                               <Edit className="h-3.5 w-3.5" />
                             </Button>
-                            <Button size="icon" variant="ghost" className="h-8 w-8 text-slate-400 hover:text-red-600" onClick={() => handleDelete(plan._id!, "airtime")}>
+                            <Button size="icon" variant="ghost" className="h-8 w-8 text-slate-400 hover:text-red-400 transition-colors hover:bg-red-50 dark:hover:bg-red-500/10" onClick={() => handleDelete(plan._id!, "airtime")}>
                               <Trash2 className="h-3.5 w-3.5" />
                             </Button>
                           </div>
@@ -620,20 +620,20 @@ export function PlansManagement({ searchTerm: initialSearchTerm }: { searchTerm?
                 </Table>
               </div>
               {/* Mobile */}
-              <div className="block sm:hidden p-4 space-y-3 bg-slate-50/50">
+              <div className="block sm:hidden p-4 space-y-3 bg-slate-50/50 dark:bg-neutral-dark/10">
                 {filteredAirtimePlans.map((plan) => (
-                  <div key={plan._id} className="bg-white border border-slate-100 rounded-xl p-4 shadow-sm">
+                  <div key={plan._id} className="bg-white dark:bg-card-dark border border-slate-200 dark:border-slate-800/30 rounded-xl p-4 shadow-sm dark:shadow-none">
                     <div className="flex items-center justify-between mb-3">
-                      <div className="font-bold text-slate-900">{plan.network}</div>
-                      <div className="font-medium">{formatCurrency(plan.amount)}</div>
+                      <div className="font-bold text-slate-900 dark:text-white">{plan.network}</div>
+                      <div className="font-medium text-slate-700 dark:text-slate-300">{formatCurrency(plan.amount)}</div>
                     </div>
-                    <div className="flex justify-between items-center text-sm mb-4 bg-slate-50 p-2 rounded">
-                      <span className="text-slate-500">Price: <span className="text-slate-900 font-semibold">{formatCurrency(plan.price)}</span></span>
-                      <span className="text-slate-500 text-xs">API: {formatCurrency(plan.apiPrice)}</span>
+                    <div className="flex justify-between items-center text-sm mb-4 bg-slate-50 dark:bg-background-dark p-2 rounded">
+                      <span className="text-slate-500 dark:text-slate-400">Price: <span className="text-slate-900 dark:text-white font-semibold">{formatCurrency(plan.price)}</span></span>
+                      <span className="text-slate-500 dark:text-slate-400 text-xs">API: {formatCurrency(plan.apiPrice)}</span>
                     </div>
                     <div className="flex gap-2">
-                      <Button size="sm" variant="outline" className="flex-1" onClick={() => handleEdit(plan, "airtime")}>Edit</Button>
-                      <Button size="sm" variant="outline" className="flex-1 text-red-600 hover:bg-red-50 hover:text-red-700 border-red-100" onClick={() => handleDelete(plan._id!, "airtime")}>Delete</Button>
+                      <Button size="sm" variant="outline" className="flex-1 border-slate-200 dark:border-slate-800/50 text-slate-700 dark:text-slate-300 bg-transparent hover:bg-slate-50 dark:hover:bg-neutral-dark/40" onClick={() => handleEdit(plan, "airtime")}>Edit</Button>
+                      <Button size="sm" variant="outline" className="flex-1 text-red-600 dark:text-red-450 hover:bg-red-50 dark:hover:bg-red-500/10 border-red-100 dark:border-red-500/20" onClick={() => handleDelete(plan._id!, "airtime")}>Delete</Button>
                     </div>
                   </div>
                 ))}

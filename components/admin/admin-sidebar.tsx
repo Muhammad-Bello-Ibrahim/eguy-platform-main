@@ -82,8 +82,8 @@ export function AdminSidebar({ activeTab, onTabChange }: AdminSidebarProps) {
             >
                 <div className="flex h-16 items-center justify-between px-4 border-b border-slate-100 dark:border-white/5">
                     <div className={cn("flex items-center space-x-3", isCollapsed && !isMobile ? "justify-center w-full" : "")}>
-                        <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-200">
-                            <span className="text-white font-bold text-lg">A</span>
+                        <div className="w-10 h-10 bg-gradient-to-br from-primary to-teal-500 rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
+                            <span className="text-background-dark font-extrabold text-lg">A</span>
                         </div>
                         {(!isCollapsed || isMobile) && (
                             <div className="flex flex-col">
@@ -114,8 +114,8 @@ export function AdminSidebar({ activeTab, onTabChange }: AdminSidebarProps) {
                                 className={cn(
                                     "w-full justify-start mb-1 transition-all duration-200",
                                     activeTab === item.id
-                                        ? "bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 shadow-sm ring-1 ring-blue-100 dark:ring-blue-500/20"
-                                        : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/5",
+                                        ? "bg-primary/10 text-primary border border-primary/20 shadow-sm shadow-primary/5"
+                                        : "border border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/5",
                                     isCollapsed && !isMobile ? "px-2 justify-center" : "px-3"
                                 )}
                                 onClick={() => {
@@ -126,7 +126,7 @@ export function AdminSidebar({ activeTab, onTabChange }: AdminSidebarProps) {
                                 <item.icon
                                     className={cn(
                                         "h-5 w-5",
-                                        activeTab === item.id ? "text-blue-600 dark:text-blue-400" : "text-slate-400 group-hover:text-slate-600 dark:group-hover:text-white",
+                                        activeTab === item.id ? "text-primary" : "text-slate-400 group-hover:text-slate-600 dark:group-hover:text-white",
                                         isCollapsed && !isMobile ? "mr-0" : "mr-3"
                                     )}
                                 />
@@ -135,7 +135,7 @@ export function AdminSidebar({ activeTab, onTabChange }: AdminSidebarProps) {
                                 )}
 
                                 {(!isCollapsed || isMobile) && activeTab === item.id && (
-                                    <div className="ml-auto w-1.5 h-1.5 rounded-full bg-blue-600" />
+                                    <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary shadow-sm shadow-primary/50" />
                                 )}
                             </Button>
                         ))}

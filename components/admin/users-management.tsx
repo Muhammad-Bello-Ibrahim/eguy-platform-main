@@ -328,20 +328,20 @@ export function UsersManagement({ searchTerm }: { searchTerm?: string }) {
     switch (status) {
       case "active":
         return (
-          <Badge variant="default" className="bg-green-100 text-green-700 hover:bg-green-100 border-0">
+          <Badge variant="outline" className="text-emerald-400 bg-emerald-500/10 border-emerald-500/20 flex items-center gap-1 font-semibold">
             <CheckCircle className="w-3 h-3 mr-1" />
             Active
           </Badge>
         )
       case "suspended":
         return (
-          <Badge variant="destructive" className="bg-red-100 text-red-700 hover:bg-red-100 border-0">
+          <Badge variant="outline" className="text-red-400 bg-red-500/10 border-red-500/20 flex items-center gap-1 font-semibold">
             <XCircle className="w-3 h-3 mr-1" />
             Suspended
           </Badge>
         )
       case "inactive":
-        return <Badge variant="secondary" className="bg-slate-100 text-slate-600 hover:bg-slate-100 border-0">Inactive</Badge>
+        return <Badge variant="outline" className="text-slate-400 bg-slate-500/10 border-slate-500/20 font-semibold">Inactive</Badge>
       default:
         return <Badge variant="outline">{status}</Badge>
     }
@@ -351,21 +351,21 @@ export function UsersManagement({ searchTerm }: { searchTerm?: string }) {
     switch (status) {
       case "verified":
         return (
-          <Badge variant="default" className="bg-blue-100 text-blue-700 hover:bg-blue-100 border-0">
+          <Badge variant="outline" className="text-emerald-400 bg-emerald-500/10 border-emerald-500/20 flex items-center gap-1 font-semibold">
             <Shield className="w-3 h-3 mr-1" />
             Verified
           </Badge>
         )
       case "pending":
         return (
-          <Badge variant="secondary" className="bg-amber-100 text-amber-700 hover:bg-amber-100 border-0">
+          <Badge variant="outline" className="text-amber-400 bg-amber-500/10 border-amber-500/20 flex items-center gap-1 font-semibold">
             <AlertTriangle className="w-3 h-3 mr-1" />
             Pending
           </Badge>
         )
       case "rejected":
         return (
-          <Badge variant="destructive" className="bg-red-50 text-red-600 hover:bg-red-50 border-red-100">
+          <Badge variant="outline" className="text-red-400 bg-red-500/10 border-red-500/20 flex items-center gap-1 font-semibold">
             <XCircle className="w-3 h-3 mr-1" />
             Rejected
           </Badge>
@@ -389,19 +389,19 @@ export function UsersManagement({ searchTerm }: { searchTerm?: string }) {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold">Users</h1>
-            <p className="text-slate-500">Manage your user base</p>
+            <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Users</h1>
+            <p className="text-slate-500 dark:text-slate-400">Manage your user base</p>
           </div>
         </div>
-        <Card className="border-0 shadow-sm">
+        <Card className="border border-slate-200 dark:border-slate-800/30 bg-white dark:bg-card-dark shadow-sm dark:shadow-none">
           <CardContent className="p-6">
             <div className="space-y-4">
               {[...Array(5)].map((_, i) => (
                 <div key={i} className="flex items-center space-x-4 animate-pulse">
-                  <div className="w-10 h-10 bg-slate-100 rounded-full" />
+                  <div className="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-full" />
                   <div className="flex-1 space-y-2">
-                    <div className="h-4 bg-slate-100 rounded w-3/4" />
-                    <div className="h-3 bg-slate-100 rounded w-1/2" />
+                    <div className="h-4 bg-slate-100 dark:bg-slate-800 rounded w-3/4" />
+                    <div className="h-3 bg-slate-100 dark:bg-slate-800 rounded w-1/2" />
                   </div>
                 </div>
               ))}
@@ -417,7 +417,7 @@ export function UsersManagement({ searchTerm }: { searchTerm?: string }) {
   }
 
   if (!user || user.role !== "admin") {
-    return <div className="p-4 text-red-600 bg-red-50 rounded-lg border border-red-100">Access denied: Admins only.</div>;
+    return <div className="p-4 text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 rounded-lg border border-red-100 dark:border-red-500/20">Access denied: Admins only.</div>;
   }
 
   return (
@@ -428,18 +428,18 @@ export function UsersManagement({ searchTerm }: { searchTerm?: string }) {
           <p className="text-slate-500 dark:text-slate-400 text-sm">View, edit, and manage all platform users.</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" className="bg-white dark:bg-card-dark border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300">
+          <Button variant="outline" size="sm" className="border border-slate-200 dark:border-slate-800/50 bg-white dark:bg-card-dark hover:bg-slate-50 dark:hover:bg-neutral-dark text-slate-800 dark:text-slate-200 rounded-xl">
             <Download className="w-4 h-4 mr-2" />
             Export CSV
           </Button>
-          <Button variant="ghost" size="icon" onClick={fetchUsers} className="text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400">
+          <Button variant="ghost" size="icon" onClick={fetchUsers} className="text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary hover:bg-slate-100 dark:hover:bg-white/5">
             <RefreshCw className="w-4 h-4" />
           </Button>
         </div>
       </div>
 
       {/* Modern Filter Toolbar */}
-      <Card className="border-0 shadow-sm bg-white dark:bg-card-dark overflow-visible">
+      <Card className="border border-slate-200 dark:border-slate-800/30 bg-white dark:bg-card-dark shadow-sm dark:shadow-none overflow-visible">
         <CardContent className="p-4">
           <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
             <div className="relative w-full md:w-96">
@@ -448,15 +448,15 @@ export function UsersManagement({ searchTerm }: { searchTerm?: string }) {
                 placeholder="Search users..."
                 value={localSearchTerm}
                 onChange={(e) => setLocalSearchTerm(e.target.value)}
-                className="pl-10 bg-slate-50 dark:bg-background-dark border-slate-200 dark:border-white/10 focus:bg-white dark:focus:bg-slate-800 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                className="pl-10 bg-slate-50 dark:bg-background-dark border-slate-200 dark:border-white/10 focus:bg-white dark:focus:bg-slate-800 focus:border-primary transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500"
               />
             </div>
 
             <div className="flex flex-wrap gap-2 w-full md:w-auto">
               <Select value={filterStatus} onValueChange={setFilterStatus}>
-                <SelectTrigger className="w-[140px] bg-slate-50 border-slate-200">
+                <SelectTrigger className="w-[140px] bg-slate-50 dark:bg-background-dark border-slate-200 dark:border-slate-800/50">
                   <div className="flex items-center gap-2">
-                    <Filter className="w-3.5 h-3.5 text-slate-500" />
+                    <Filter className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
                     <SelectValue placeholder="Status" />
                   </div>
                 </SelectTrigger>
@@ -469,9 +469,9 @@ export function UsersManagement({ searchTerm }: { searchTerm?: string }) {
               </Select>
 
               <Select value={filterKyc} onValueChange={setFilterKyc}>
-                <SelectTrigger className="w-[140px] bg-slate-50 border-slate-200">
+                <SelectTrigger className="w-[140px] bg-slate-50 dark:bg-background-dark border-slate-200 dark:border-slate-800/50">
                   <div className="flex items-center gap-2">
-                    <Shield className="w-3.5 h-3.5 text-slate-500" />
+                    <Shield className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
                     <SelectValue placeholder="KYC" />
                   </div>
                 </SelectTrigger>
@@ -487,11 +487,11 @@ export function UsersManagement({ searchTerm }: { searchTerm?: string }) {
         </CardContent>
       </Card>
 
-      <Card className="border-0 shadow-md shadow-slate-200/50 dark:shadow-none bg-white dark:bg-card-dark">
-        <CardHeader className="px-6 py-4 border-b border-slate-100 dark:border-white/5 flex flex-row items-center justify-between">
+      <Card className="border border-slate-200 dark:border-slate-800/30 bg-white dark:bg-card-dark shadow-sm dark:shadow-none">
+        <CardHeader className="px-6 py-4 border-b border-slate-200 dark:border-slate-800/50 flex flex-row items-center justify-between">
           <div>
             <CardTitle className="text-base font-semibold text-slate-800 dark:text-white">All Users</CardTitle>
-            <CardDescription className="dark:text-slate-400">Total {filteredUsers.length} users found</CardDescription>
+            <CardDescription className="text-slate-500 dark:text-slate-400">Total {filteredUsers.length} users found</CardDescription>
           </div>
         </CardHeader>
         <CardContent className="p-0">
@@ -499,8 +499,8 @@ export function UsersManagement({ searchTerm }: { searchTerm?: string }) {
             {/* Desktop / Tablet Table */}
             <div className="hidden md:block overflow-x-auto">
               <Table>
-                <TableHeader className="bg-slate-50/50 dark:bg-white/5">
-                  <TableRow className="border-b border-slate-100 dark:border-white/5 hover:bg-transparent">
+                <TableHeader className="bg-slate-50/50 dark:bg-neutral-dark/30 border-b border-slate-200 dark:border-slate-800/50">
+                  <TableRow className="border-b border-slate-200 dark:border-slate-800/50 hover:bg-transparent">
                     <TableHead className="font-semibold text-slate-600 dark:text-slate-300 pl-6">User Details</TableHead>
                     <TableHead className="font-semibold text-slate-600 dark:text-slate-300">Contact</TableHead>
                     <TableHead className="font-semibold text-slate-600 dark:text-slate-300">Balance</TableHead>
@@ -516,73 +516,73 @@ export function UsersManagement({ searchTerm }: { searchTerm?: string }) {
                     <TableRow>
                       <TableCell colSpan={8} className="h-64 text-center text-slate-500">
                         <div className="flex flex-col items-center justify-center">
-                          <div className="p-4 bg-slate-50 rounded-full mb-3">
-                            <Users className="h-8 w-8 text-slate-300" />
+                          <div className="p-4 bg-slate-50 dark:bg-neutral-dark/40 rounded-full mb-3 animate-pulse">
+                            <Users className="h-8 w-8 text-slate-300 dark:text-slate-600" />
                           </div>
-                          <p>No users found matching your filters.</p>
+                          <p className="text-slate-500 dark:text-slate-400">No users found matching your filters.</p>
                         </div>
                       </TableCell>
                     </TableRow>
                   ) : filteredUsers.map((user) => (
-                    <TableRow key={user.id} className="border-b border-slate-50 dark:border-white/5 hover:bg-slate-50/50 dark:hover:bg-white/5 transition-colors group">
+                    <TableRow key={user.id} className="border-b border-slate-200 dark:border-slate-800/30 hover:bg-slate-50 dark:hover:bg-neutral-dark/40 transition-colors group text-slate-700 dark:text-slate-300">
                       <TableCell className="pl-6 py-4">
                         <div className="flex items-center space-x-3">
-                          <Avatar className="h-9 w-9 border border-slate-100 shadow-sm">
-                            <AvatarFallback className="bg-blue-50 text-blue-600 font-medium text-xs">{getInitials(user.fullName)}</AvatarFallback>
+                          <Avatar className="h-9 w-9 border border-slate-200 dark:border-slate-800/50 shadow-sm">
+                            <AvatarFallback className="bg-primary/10 text-primary font-medium text-xs">{getInitials(user.fullName)}</AvatarFallback>
                           </Avatar>
                           <div>
-                            <div className="font-medium text-slate-900">{user.fullName}</div>
-                            <div className="text-xs text-slate-500 font-mono bg-slate-100 px-1.5 py-0.5 rounded-sm inline-block mt-0.5">{user.referralCode}</div>
+                            <div className="font-medium text-slate-900 dark:text-white">{user.fullName}</div>
+                            <div className="text-xs text-slate-500 dark:text-slate-400 font-mono bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded-sm inline-block mt-0.5">{user.referralCode}</div>
                           </div>
                         </div>
                       </TableCell>
                       <TableCell>
                         <div className="flex flex-col gap-0.5">
-                          <div className="text-sm text-slate-700">{user.email}</div>
-                          <div className="text-xs text-muted-foreground">{user.phone}</div>
+                          <div className="text-sm text-slate-700 dark:text-slate-300">{user.email}</div>
+                          <div className="text-xs text-slate-500 dark:text-slate-400">{user.phone}</div>
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div className="font-medium text-slate-900">{formatCurrency(user.walletBalance)}</div>
+                        <div className="font-medium text-slate-900 dark:text-white">{formatCurrency(user.walletBalance)}</div>
                       </TableCell>
                       <TableCell>{getStatusBadge(user.status)}</TableCell>
                       <TableCell>{getKycBadge(user.kycStatus)}</TableCell>
                       <TableCell>
                         <div className="flex flex-col gap-1">
-                          <div className="text-xs font-medium text-slate-700">{user.totalReferrals} Refs</div>
-                          <div className="text-xs text-green-600 font-medium">+ {formatCurrency(user.totalEarnings)}</div>
+                          <div className="text-xs font-medium text-slate-700 dark:text-slate-300">{user.totalReferrals} Refs</div>
+                          <div className="text-xs text-emerald-400 font-medium">+ {formatCurrency(user.totalEarnings)}</div>
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div className="text-sm text-slate-600">{formatDate(user.createdAt)}</div>
+                        <div className="text-sm text-slate-600 dark:text-slate-400">{formatDate(user.createdAt)}</div>
                       </TableCell>
                       <TableCell className="text-right pr-6">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 group-hover:text-blue-600 transition-colors">
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-primary transition-colors hover:bg-slate-100 dark:hover:bg-white/5">
                               <MoreHorizontal className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-56">
-                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={() => handleViewProfile(user)}>
+                          <DropdownMenuContent align="end" className="w-56 bg-white dark:bg-card-dark border border-slate-200 dark:border-slate-800/50 shadow-2xl">
+                            <DropdownMenuLabel className="text-slate-900 dark:text-white font-bold">Actions</DropdownMenuLabel>
+                            <DropdownMenuSeparator className="border-slate-105 dark:border-slate-800/50" />
+                            <DropdownMenuItem onClick={() => handleViewProfile(user)} className="hover:bg-slate-100 dark:hover:bg-white/5">
                               <Eye className="h-4 w-4 mr-2 text-slate-500" /> View Profile
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleEditUser(user)}>
+                            <DropdownMenuItem onClick={() => handleEditUser(user)} className="hover:bg-slate-100 dark:hover:bg-white/5">
                               <Edit className="h-4 w-4 mr-2 text-slate-500" /> Edit User
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleVerifyKyc(user)}>
-                              <Shield className="h-4 w-4 mr-2 text-blue-500" /> Verify KYC
+                            <DropdownMenuItem onClick={() => handleVerifyKyc(user)} className="hover:bg-slate-100 dark:hover:bg-white/5">
+                              <Shield className="h-4 w-4 mr-2 text-primary" /> Verify KYC
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleChangeReferrer(user)}>
+                            <DropdownMenuItem onClick={() => handleChangeReferrer(user)} className="hover:bg-slate-100 dark:hover:bg-white/5">
                               <UserCog className="h-4 w-4 mr-2 text-slate-500" /> Change Referrer
                             </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={() => handleImpersonateUser(user)}>
+                            <DropdownMenuSeparator className="border-slate-105 dark:border-slate-800/50" />
+                            <DropdownMenuItem onClick={() => handleImpersonateUser(user)} className="hover:bg-slate-100 dark:hover:bg-white/5">
                               <Key className="h-4 w-4 mr-2 text-amber-500" /> Impersonate
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleSuspendUser(user)} className="text-red-600 focus:text-red-600">
+                            <DropdownMenuItem onClick={() => handleSuspendUser(user)} className="text-red-650 hover:bg-red-500/10 focus:text-red-600">
                               <Ban className="h-4 w-4 mr-2" /> Suspend Account
                             </DropdownMenuItem>
                           </DropdownMenuContent>
@@ -595,48 +595,48 @@ export function UsersManagement({ searchTerm }: { searchTerm?: string }) {
             </div>
 
             {/* Mobile: stacked cards */}
-            <div className="block md:hidden bg-slate-50/50 p-4 space-y-4">
+            <div className="block md:hidden bg-slate-50/50 dark:bg-neutral-dark/10 p-4 space-y-4">
               {filteredUsers.map((user) => (
-                <div key={user.id} className="bg-white border border-slate-100 rounded-xl p-4 shadow-sm">
+                <div key={user.id} className="bg-white dark:bg-card-dark border border-slate-200 dark:border-slate-800/30 rounded-xl p-4 shadow-sm dark:shadow-none">
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center space-x-3">
-                      <Avatar className="h-10 w-10 border border-slate-100">
-                        <AvatarFallback className="bg-blue-50 text-blue-600">{getInitials(user.fullName)}</AvatarFallback>
+                      <Avatar className="h-10 w-10 border border-slate-200 dark:border-slate-800/50">
+                        <AvatarFallback className="bg-primary/10 text-primary">{getInitials(user.fullName)}</AvatarFallback>
                       </Avatar>
                       <div>
-                        <div className="font-bold text-slate-900">{user.fullName}</div>
-                        <div className="text-xs text-slate-500">{user.email}</div>
+                        <div className="font-bold text-slate-900 dark:text-white">{user.fullName}</div>
+                        <div className="text-xs text-slate-500 dark:text-slate-400">{user.email}</div>
                       </div>
                     </div>
                     {getStatusBadge(user.status)}
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4 py-3 border-y border-slate-50 mb-4">
+                  <div className="grid grid-cols-2 gap-4 py-3 border-y border-slate-200 dark:border-slate-800/30 mb-4">
                     <div>
-                      <span className="text-xs text-slate-400 block mb-1">Wallet Balance</span>
-                      <span className="text-sm font-semibold text-slate-900">{formatCurrency(user.walletBalance)}</span>
+                      <span className="text-xs text-slate-400 dark:text-slate-500 block mb-1">Wallet Balance</span>
+                      <span className="text-sm font-semibold text-slate-900 dark:text-white">{formatCurrency(user.walletBalance)}</span>
                     </div>
                     <div className="text-right">
-                      <span className="text-xs text-slate-400 block mb-1">Referrals</span>
+                      <span className="text-xs text-slate-400 dark:text-slate-500 block mb-1">Referrals</span>
                       <div className="flex items-center justify-end gap-1">
-                        <Users className="h-3 w-3 text-slate-400" />
-                        <span className="text-sm font-medium text-slate-700">{user.totalReferrals}</span>
+                        <Users className="h-3 w-3 text-slate-400 dark:text-slate-550" />
+                        <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{user.totalReferrals}</span>
                       </div>
                     </div>
                   </div>
 
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-slate-400">Joined {formatDate(user.createdAt)}</span>
+                    <span className="text-xs text-slate-400 dark:text-slate-500">Joined {formatDate(user.createdAt)}</span>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm" className="h-8 text-slate-500">
+                        <Button variant="ghost" size="sm" className="h-8 text-slate-500 dark:text-slate-400 hover:text-primary">
                           Actions <ChevronDown className="ml-1 h-3 w-3" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => handleViewProfile(user)}>View Profile</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleEditUser(user)}>Edit Details</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleSuspendUser(user)} className="text-red-600">Suspend</DropdownMenuItem>
+                      <DropdownMenuContent align="end" className="bg-white dark:bg-card-dark border border-slate-200 dark:border-slate-800/50 shadow-2xl">
+                        <DropdownMenuItem onClick={() => handleViewProfile(user)} className="hover:bg-slate-100 dark:hover:bg-white/5">View Profile</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleEditUser(user)} className="hover:bg-slate-100 dark:hover:bg-white/5">Edit Details</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleSuspendUser(user)} className="text-red-650 hover:bg-red-500/10">Suspend</DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
@@ -649,21 +649,21 @@ export function UsersManagement({ searchTerm }: { searchTerm?: string }) {
 
       {/* Enhanced View Profile Dialog */}
       <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-        <DialogContent className="max-w-4xl max-h-[85vh] p-0 gap-0 overflow-hidden flex flex-col">
-          <div className="p-6 pb-2 border-b border-slate-100 bg-slate-50/50">
+        <DialogContent className="max-w-4xl max-h-[85vh] p-0 gap-0 overflow-hidden flex flex-col bg-white dark:bg-card-dark border-slate-200 dark:border-slate-800/50 shadow-2xl">
+          <div className="p-6 pb-2 border-b border-slate-200 dark:border-slate-800/50 bg-slate-50/50 dark:bg-neutral-dark/30">
             <DialogHeader>
               <div className="flex items-center gap-4">
-                <Avatar className="h-16 w-16 border-2 border-white shadow-sm">
-                  <AvatarFallback className="text-xl bg-blue-100 text-blue-600">
+                <Avatar className="h-16 w-16 border-2 border-white dark:border-slate-800 shadow-sm">
+                  <AvatarFallback className="text-xl bg-primary/10 text-primary">
                     {selectedUser && getInitials(selectedUser.fullName)}
                   </AvatarFallback>
                 </Avatar>
                 <div>
-                  <DialogTitle className="text-2xl font-bold text-slate-900">{selectedUser?.fullName}</DialogTitle>
+                  <DialogTitle className="text-2xl font-bold text-slate-900 dark:text-white">{selectedUser?.fullName}</DialogTitle>
                   <div className="flex items-center gap-2 mt-1">
-                    <span className="text-slate-500 text-sm">{selectedUser?.email}</span>
-                    <span className="h-1 w-1 rounded-full bg-slate-300" />
-                    <span className="text-xs font-mono bg-slate-200 px-1.5 rounded">{selectedUser?.referralCode}</span>
+                    <span className="text-slate-500 dark:text-slate-400 text-sm">{selectedUser?.email}</span>
+                    <span className="h-1 w-1 rounded-full bg-slate-300 dark:bg-slate-700" />
+                    <span className="text-xs font-mono bg-slate-200 dark:bg-slate-800 text-slate-750 dark:text-slate-300 px-1.5 rounded">{selectedUser?.referralCode}</span>
                   </div>
                 </div>
                 <div className="ml-auto flex gap-2">
@@ -677,8 +677,8 @@ export function UsersManagement({ searchTerm }: { searchTerm?: string }) {
           <div className="flex-1 overflow-y-auto">
             {selectedUser && (
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <div className="px-6 pt-4 border-b border-slate-100 sticky top-0 bg-white z-10">
-                  <TabsList className="grid w-full grid-cols-4 bg-slate-100/50 p-1">
+                <div className="px-6 pt-4 border-b border-slate-200 dark:border-slate-800/50 sticky top-0 bg-white dark:bg-card-dark z-10">
+                  <TabsList className="grid w-full grid-cols-4 bg-slate-100 dark:bg-background-dark p-1 rounded-xl">
                     <TabsTrigger value="overview">Overview</TabsTrigger>
                     <TabsTrigger value="transactions">Transactions</TabsTrigger>
                     <TabsTrigger value="referrals">Referrals</TabsTrigger>
@@ -689,101 +689,101 @@ export function UsersManagement({ searchTerm }: { searchTerm?: string }) {
                 <div className="p-6">
                   <TabsContent value="overview" className="space-y-6 mt-0">
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      <Card className="bg-green-50/50 border-green-100 shadow-sm">
+                      <Card className="bg-emerald-500/5 dark:bg-emerald-500/10 border border-emerald-500/20 shadow-sm">
                         <CardContent className="p-4">
-                          <div className="text-xs font-medium text-green-600 mb-1 flex items-center gap-1">
+                          <div className="text-xs font-medium text-emerald-450 dark:text-emerald-400 mb-1 flex items-center gap-1">
                             <Wallet className="w-3 h-3" /> Wallet Balance
                           </div>
-                          <div className="text-xl font-bold text-slate-800">{formatCurrency(selectedUser.walletBalance)}</div>
+                          <div className="text-xl font-bold text-slate-800 dark:text-white">{formatCurrency(selectedUser.walletBalance)}</div>
                         </CardContent>
                       </Card>
-                      <Card className="bg-blue-50/50 border-blue-100 shadow-sm">
+                      <Card className="bg-primary/5 dark:bg-primary/10 border border-primary/20 shadow-sm">
                         <CardContent className="p-4">
-                          <div className="text-xs font-medium text-blue-600 mb-1 flex items-center gap-1">
+                          <div className="text-xs font-medium text-primary mb-1 flex items-center gap-1">
                             <Users className="w-3 h-3" /> Total Referrals
                           </div>
-                          <div className="text-xl font-bold text-slate-800">{selectedUser.totalReferrals}</div>
+                          <div className="text-xl font-bold text-slate-800 dark:text-white">{selectedUser.totalReferrals}</div>
                         </CardContent>
                       </Card>
-                      <Card className="bg-amber-50/50 border-amber-100 shadow-sm">
+                      <Card className="bg-amber-500/5 dark:bg-amber-500/10 border border-amber-500/20 shadow-sm">
                         <CardContent className="p-4">
-                          <div className="text-xs font-medium text-amber-600 mb-1 flex items-center gap-1">
+                          <div className="text-xs font-medium text-amber-500 dark:text-amber-400 mb-1 flex items-center gap-1">
                             <TrendingUp className="w-3 h-3" /> Total Earnings
                           </div>
-                          <div className="text-xl font-bold text-slate-800">{formatCurrency(selectedUser.totalEarnings)}</div>
+                          <div className="text-xl font-bold text-slate-800 dark:text-white">{formatCurrency(selectedUser.totalEarnings)}</div>
                         </CardContent>
                       </Card>
-                      <Card className="bg-slate-50/50 border-slate-100 shadow-sm">
+                      <Card className="bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-slate-800/30 shadow-sm">
                         <CardContent className="p-4">
-                          <div className="text-xs font-medium text-slate-600 mb-1 flex items-center gap-1">
+                          <div className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1 flex items-center gap-1">
                             <Calendar className="w-3 h-3" /> Joined
                           </div>
-                          <div className="text-base font-bold text-slate-800">{formatDate(selectedUser.createdAt)}</div>
+                          <div className="text-base font-bold text-slate-800 dark:text-white">{formatDate(selectedUser.createdAt)}</div>
                         </CardContent>
                       </Card>
                     </div>
 
-                    <Card>
+                    <Card className="bg-white dark:bg-card-dark border border-slate-200 dark:border-slate-800/30">
                       <CardHeader>
-                        <CardTitle className="text-base">Personal Details</CardTitle>
+                        <CardTitle className="text-base font-bold text-slate-900 dark:text-white">Personal Details</CardTitle>
                       </CardHeader>
                       <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
-                        <div className="flex flex-col gap-1 pb-3 border-b border-slate-50">
-                          <span className="text-xs text-slate-400">Full Name</span>
-                          <span className="text-sm font-medium">{selectedUser.fullName}</span>
+                        <div className="flex flex-col gap-1 pb-3 border-b border-slate-200 dark:border-slate-800/30">
+                          <span className="text-xs text-slate-400 dark:text-slate-500">Full Name</span>
+                          <span className="text-sm font-medium text-slate-800 dark:text-slate-200">{selectedUser.fullName}</span>
                         </div>
-                        <div className="flex flex-col gap-1 pb-3 border-b border-slate-50">
-                          <span className="text-xs text-slate-400">Email Address</span>
+                        <div className="flex flex-col gap-1 pb-3 border-b border-slate-200 dark:border-slate-800/30">
+                          <span className="text-xs text-slate-400 dark:text-slate-500">Email Address</span>
                           <div className="flex items-center gap-2">
-                            <span className="text-sm font-medium">{selectedUser.email}</span>
-                            {selectedUser.status === 'active' ? <CheckCircle className="w-3 h-3 text-green-500" /> : <AlertTriangle className="w-3 h-3 text-amber-500" />}
+                            <span className="text-sm font-medium text-slate-800 dark:text-slate-200">{selectedUser.email}</span>
+                            {selectedUser.status === 'active' ? <CheckCircle className="w-3 h-3 text-emerald-450" /> : <AlertTriangle className="w-3 h-3 text-amber-500" />}
                           </div>
                         </div>
-                        <div className="flex flex-col gap-1 pb-3 border-b border-slate-50">
-                          <span className="text-xs text-slate-400">Phone Number</span>
-                          <span className="text-sm font-medium">{selectedUser.phone}</span>
+                        <div className="flex flex-col gap-1 pb-3 border-b border-slate-200 dark:border-slate-800/30">
+                          <span className="text-xs text-slate-400 dark:text-slate-500">Phone Number</span>
+                          <span className="text-sm font-medium text-slate-800 dark:text-slate-200">{selectedUser.phone}</span>
                         </div>
-                        <div className="flex flex-col gap-1 pb-3 border-b border-slate-50">
-                          <span className="text-xs text-slate-400">Last Active</span>
-                          <span className="text-sm font-medium">{selectedUser.lastActive ? new Date(selectedUser.lastActive).toLocaleString() : 'Never'}</span>
+                        <div className="flex flex-col gap-1 pb-3 border-b border-slate-200 dark:border-slate-800/30">
+                          <span className="text-xs text-slate-400 dark:text-slate-500">Last Active</span>
+                          <span className="text-sm font-medium text-slate-800 dark:text-slate-200">{selectedUser.lastActive ? new Date(selectedUser.lastActive).toLocaleString() : 'Never'}</span>
                         </div>
                       </CardContent>
                     </Card>
                   </TabsContent>
 
                   <TabsContent value="transactions" className="mt-0">
-                    <div className="rounded-md border">
+                    <div className="rounded-md border border-slate-200 dark:border-slate-800/50">
                       <Table>
-                        <TableHeader className="bg-slate-50">
-                          <TableRow>
-                            <TableHead>Type</TableHead>
-                            <TableHead>Amount</TableHead>
-                            <TableHead>Status</TableHead>
-                            <TableHead>Date</TableHead>
+                        <TableHeader className="bg-slate-50 dark:bg-neutral-dark/30 border-b border-slate-200 dark:border-slate-800/50">
+                          <TableRow className="border-b border-slate-200 dark:border-slate-800/30">
+                            <TableHead className="font-semibold text-slate-600 dark:text-slate-300">Type</TableHead>
+                            <TableHead className="font-semibold text-slate-600 dark:text-slate-300">Amount</TableHead>
+                            <TableHead className="font-semibold text-slate-600 dark:text-slate-300">Status</TableHead>
+                            <TableHead className="font-semibold text-slate-600 dark:text-slate-300">Date</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
                           {userTransactions.length === 0 ? (
                             <TableRow>
-                              <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">No recent transactions</TableCell>
+                              <TableCell colSpan={4} className="text-center py-8 text-slate-500">No recent transactions</TableCell>
                             </TableRow>
                           ) : (
                             userTransactions.map(tx => (
-                              <TableRow key={tx.id}>
+                              <TableRow key={tx.id} className="border-b border-slate-200 dark:border-slate-800/30 hover:bg-slate-50 dark:hover:bg-neutral-dark/30 text-slate-700 dark:text-slate-350">
                                 <TableCell className="capitalize">{tx.type}</TableCell>
-                                <TableCell className={tx.type === 'deposit' ? 'text-green-600' : 'text-slate-900'}>
+                                <TableCell className={tx.type === 'deposit' ? 'text-emerald-400 font-semibold' : 'text-slate-900 dark:text-white font-semibold'}>
                                   {tx.type === 'deposit' ? '+' : '-'}{formatCurrency(tx.amount)}
                                 </TableCell>
                                 <TableCell>
                                   <Badge variant="outline" className={
-                                    tx.status === 'success' ? 'border-green-200 text-green-700 bg-green-50' :
-                                      tx.status === 'failed' ? 'border-red-200 text-red-700 bg-red-50' :
-                                        'border-amber-200 text-amber-700 bg-amber-50'
+                                    tx.status === 'success' ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' :
+                                      tx.status === 'failed' ? 'text-red-400 bg-red-500/10 border-red-500/20' :
+                                        'text-amber-400 bg-amber-500/10 border-amber-500/20'
                                   }>
                                     {tx.status}
                                   </Badge>
                                 </TableCell>
-                                <TableCell className="text-xs text-slate-500">{new Date(tx.createdAt).toLocaleDateString()}</TableCell>
+                                <TableCell className="text-xs text-slate-500 dark:text-slate-400">{new Date(tx.createdAt).toLocaleDateString()}</TableCell>
                               </TableRow>
                             ))
                           )}
@@ -795,51 +795,54 @@ export function UsersManagement({ searchTerm }: { searchTerm?: string }) {
               </Tabs>
             )}
           </div>
-          <DialogFooter className="p-4 border-t border-slate-100 bg-slate-50 flex-col sm:flex-row gap-2">
-            <Button variant="outline" onClick={() => setIsViewDialogOpen(false)}>Close</Button>
+          <DialogFooter className="p-4 border-t border-slate-200 dark:border-slate-800/50 bg-slate-50/50 dark:bg-neutral-dark/30 flex-col sm:flex-row gap-2">
+            <Button variant="outline" onClick={() => setIsViewDialogOpen(false)} className="border-slate-200 dark:border-slate-800/50 text-slate-800 dark:text-slate-200">Close</Button>
             <Button onClick={() => {
               handleEditUser(selectedUser!);
               setIsViewDialogOpen(false);
-            }}>Edit User</Button>
+            }} className="bg-primary hover:bg-primary/90 text-background-dark font-extrabold shadow-lg shadow-primary/20 transition-all duration-200 active:scale-95 rounded-xl">Edit User</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       {/* Other Dialogs */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent>
+        <DialogContent className="bg-white dark:bg-card-dark border-slate-200 dark:border-slate-800/50 shadow-2xl">
           <DialogHeader>
-            <DialogTitle>Edit User</DialogTitle>
-            <DialogDescription>Update user information.</DialogDescription>
+            <DialogTitle className="text-slate-900 dark:text-white font-bold">Edit User</DialogTitle>
+            <DialogDescription className="text-slate-500 dark:text-slate-400">Update user information.</DialogDescription>
           </DialogHeader>
           {selectedUser && (
             <div className="space-y-4 py-4">
               <div className="space-y-2">
-                <Label>Full Name</Label>
+                <Label className="text-slate-700 dark:text-slate-300 font-semibold">Full Name</Label>
                 <Input
                   value={formData.fullName}
                   onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                  className="border-slate-200 dark:border-slate-800/50 bg-slate-50 dark:bg-background-dark text-slate-900 dark:text-white"
                 />
               </div>
               <div className="space-y-2">
-                <Label>Email</Label>
+                <Label className="text-slate-700 dark:text-slate-300 font-semibold">Email</Label>
                 <Input
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  className="border-slate-200 dark:border-slate-800/50 bg-slate-50 dark:bg-background-dark text-slate-900 dark:text-white"
                 />
               </div>
               <div className="space-y-2">
-                <Label>Phone</Label>
+                <Label className="text-slate-700 dark:text-slate-300 font-semibold">Phone</Label>
                 <Input
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  className="border-slate-200 dark:border-slate-800/50 bg-slate-50 dark:bg-background-dark text-slate-900 dark:text-white"
                 />
               </div>
             </div>
           )}
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>Cancel</Button>
-            <Button onClick={() => saveUserUpdates(formData)} disabled={isLoading}>
+            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)} className="border-slate-200 dark:border-slate-800/50 text-slate-800 dark:text-slate-200 rounded-xl">Cancel</Button>
+            <Button onClick={() => saveUserUpdates(formData)} disabled={isLoading} className="bg-primary hover:bg-primary/90 text-background-dark font-extrabold shadow-lg shadow-primary/20 transition-all duration-200 active:scale-95 rounded-xl">
               {isLoading ? "Saving..." : "Save Changes"}
             </Button>
           </DialogFooter>
@@ -847,14 +850,14 @@ export function UsersManagement({ searchTerm }: { searchTerm?: string }) {
       </Dialog>
 
       <Dialog open={isKycDialogOpen} onOpenChange={setIsKycDialogOpen}>
-        <DialogContent>
+        <DialogContent className="bg-white dark:bg-card-dark border-slate-200 dark:border-slate-800/50 shadow-2xl">
           <DialogHeader>
-            <DialogTitle>Verify KYC</DialogTitle>
+            <DialogTitle className="text-slate-900 dark:text-white font-bold">Verify KYC</DialogTitle>
           </DialogHeader>
           <div className="py-4">
             <Select value={selectedKycStatus} onValueChange={setSelectedKycStatus}>
-              <SelectTrigger><SelectValue placeholder="Select Status" /></SelectTrigger>
-              <SelectContent>
+              <SelectTrigger className="border-slate-200 dark:border-slate-800/50 bg-slate-50 dark:bg-background-dark text-slate-900 dark:text-white"><SelectValue placeholder="Select Status" /></SelectTrigger>
+              <SelectContent className="bg-white dark:bg-card-dark border border-slate-200 dark:border-slate-800/50">
                 <SelectItem value="verified">Verified</SelectItem>
                 <SelectItem value="pending">Pending</SelectItem>
                 <SelectItem value="rejected">Rejected</SelectItem>
@@ -862,50 +865,52 @@ export function UsersManagement({ searchTerm }: { searchTerm?: string }) {
             </Select>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsKycDialogOpen(false)}>Cancel</Button>
-            <Button onClick={() => performAction('Update KYC')}>Update Status</Button>
+            <Button variant="outline" onClick={() => setIsKycDialogOpen(false)} className="border-slate-200 dark:border-slate-800/50 text-slate-800 dark:text-slate-200 rounded-xl">Cancel</Button>
+            <Button onClick={() => performAction('Update KYC')} className="bg-primary hover:bg-primary/90 text-background-dark font-extrabold shadow-lg shadow-primary/20 transition-all duration-200 active:scale-95 rounded-xl">Update Status</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       <Dialog open={isSuspendDialogOpen} onOpenChange={setIsSuspendDialogOpen}>
-        <DialogContent>
+        <DialogContent className="bg-white dark:bg-card-dark border-slate-200 dark:border-slate-800/50 shadow-2xl">
           <DialogHeader>
-            <DialogTitle>Suspend User</DialogTitle>
-            <DialogDescription>Are you sure you want to suspend this user? They will not be able to log in.</DialogDescription>
+            <DialogTitle className="text-slate-900 dark:text-white font-bold">Suspend User</DialogTitle>
+            <DialogDescription className="text-slate-500 dark:text-slate-400">Are you sure you want to suspend this user? They will not be able to log in.</DialogDescription>
           </DialogHeader>
           <div className="py-4">
-            <Label>Reason for suspension</Label>
+            <Label className="text-slate-700 dark:text-slate-300 font-semibold mb-2 block">Reason for suspension</Label>
             <Textarea
               value={suspendReason}
               onChange={(e) => setSuspendReason(e.target.value)}
               placeholder="Violation of terms..."
+              className="border-slate-200 dark:border-slate-800/50 bg-slate-50 dark:bg-background-dark text-slate-900 dark:text-white focus-visible:ring-primary"
             />
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsSuspendDialogOpen(false)}>Cancel</Button>
-            <Button variant="destructive" onClick={() => performAction('Suspend')}>Suspend User</Button>
+            <Button variant="outline" onClick={() => setIsSuspendDialogOpen(false)} className="border-slate-200 dark:border-slate-800/50 text-slate-800 dark:text-slate-200 rounded-xl">Cancel</Button>
+            <Button onClick={() => performAction('Suspend')} className="bg-red-500/15 hover:bg-red-500/25 border border-red-500/30 text-red-400 font-extrabold hover:text-red-300 transition-all duration-200 rounded-xl px-4 py-2">Suspend User</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       <Dialog open={isReferrerDialogOpen} onOpenChange={setIsReferrerDialogOpen}>
-        <DialogContent>
+        <DialogContent className="bg-white dark:bg-card-dark border-slate-200 dark:border-slate-800/50 shadow-2xl">
           <DialogHeader>
-            <DialogTitle>Change Referrer</DialogTitle>
-            <DialogDescription>Enter the new referrer code for this user.</DialogDescription>
+            <DialogTitle className="text-slate-900 dark:text-white font-bold">Change Referrer</DialogTitle>
+            <DialogDescription className="text-slate-500 dark:text-slate-400">Enter the new referrer code for this user.</DialogDescription>
           </DialogHeader>
           <div className="py-4">
-            <Label>New Referrer Code</Label>
+            <Label className="text-slate-700 dark:text-slate-300 font-semibold mb-2 block">New Referrer Code</Label>
             <Input
               value={newReferrerCode}
               onChange={(e) => setNewReferrerCode(e.target.value)}
               placeholder="REF12345"
+              className="border-slate-200 dark:border-slate-800/50 bg-slate-50 dark:bg-background-dark text-slate-900 dark:text-white"
             />
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsReferrerDialogOpen(false)}>Cancel</Button>
-            <Button onClick={() => performAction('Change Referrer')} disabled={isLoading}>
+            <Button variant="outline" onClick={() => setIsReferrerDialogOpen(false)} className="border-slate-200 dark:border-slate-800/50 text-slate-800 dark:text-slate-200 rounded-xl">Cancel</Button>
+            <Button onClick={() => performAction('Change Referrer')} disabled={isLoading} className="bg-primary hover:bg-primary/90 text-background-dark font-extrabold shadow-lg shadow-primary/20 transition-all duration-200 active:scale-95 rounded-xl">
               {isLoading ? "Updating..." : "Update Referrer"}
             </Button>
           </DialogFooter>

@@ -145,6 +145,108 @@ export class Database {
     })
   }
 
+  // =========================
+  // ADMIN DASHBOARD STATS
+  // =========================
+  static async getAllUsers(): Promise<DatabaseUser[]> {
+    const db = await this.getDb()
+    const users = await db.collection("users").find({}).toArray()
+    return users.map(user => ({ ...user, id: user._id.toString() })) as any
+  }
+
+  static async getUserCount(): Promise<number> {
+    const db = await this.getDb()
+    return await db.collection("users").countDocuments()
+  }
+
+  static async getTotalDeposits(): Promise<number> {
+    const db = await this.getDb()
+    const result = await db.collection("transactions").aggregate([
+      { $match: { type: "deposit", status: "completed" } },
+      { $group: { _id: null, total: { $sum: "$amount" } } }
+    ]).toArray()
+    return result[0]?.total || 0
+  }
+
+  static async getTotalWithdrawals(): Promise<number> {
+    const db = await this.getDb()
+    const result = await db.collection("transactions").aggregate([
+      { $match: { type: "withdrawal", status: "completed" } },
+      { $group: { _id: null, total: { $sum: "$amount" } } }
+    ]).toArray()
+    return result[0]?.total || 0
+  }
+
+  static async getPendingWithdrawals(): Promise<number> {
+    const db = await this.getDb()
+    const result = await db.collection("transactions").aggregate([
+      { $match: { type: "withdrawal", status: "pending" } },
+      { $group: { _id: null, total: { $sum: "$amount" } } }
+    ]).toArray()
+    return result[0]?.total || 0
+  }
+
+  static async getMonthlyRevenue(): Promise<number> {
+    const db = await this.getDb()
+    const thirtyDaysAgo = new Date()
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+    
+    const result = await db.collection("transactions").aggregate([
+      { $match: { type: "deposit", status: "completed", createdAt: { $gte: thirtyDaysAgo } } },
+      { $group: { _id: null, total: { $sum: "$amount" } } }
+    ]).toArray()
+    return result[0]?.total || 0
+  }
+
+  static async getTransactionCount(): Promise<number> {
+    const db = await this.getDb()
+    return await db.collection("transactions").countDocuments()
+  }
+
+  static async getSuccessfulTransactionCount(): Promise<number> {
+    const db = await this.getDb()
+    return await db.collection("transactions").countDocuments({ status: "completed" })
+  }
+
+  static async getTotalUsersFund(): Promise<number> {
+    const db = await this.getDb()
+    const result = await db.collection("users").aggregate([
+      { $group: { _id: null, total: { $sum: "$walletBalance" } } }
+    ]).toArray()
+    return result[0]?.total || 0
+  }
+
+  static async getReferralStats(): Promise<any> {
+    const db = await this.getDb()
+    const totalReferrals = await db.collection("referrals").countDocuments()
+    const activeReferrals = await db.collection("referrals").countDocuments({ status: "active" })
+    const bonusResult = await db.collection("referrals").aggregate([
+      { $group: { _id: null, total: { $sum: "$bonusAmount" } } }
+    ]).toArray()
+    
+    return {
+      totalReferrals,
+      activeReferrals,
+      totalBonusPaid: bonusResult[0]?.total || 0,
+      averageTreeSize: 1.5,
+      topReferrer: "Admin"
+    }
+  }
+
+  static async getServiceUsageStats(): Promise<any> {
+    const db = await this.getDb()
+    const airtime = await db.collection("transactions").countDocuments({ type: "payment", "metadata.serviceType": "airtime" })
+    const data = await db.collection("transactions").countDocuments({ type: "payment", "metadata.serviceType": "data" })
+    
+    return {
+      airtimeTransactions: airtime,
+      dataTransactions: data,
+      billPayments: 0,
+      subscriptions: 0,
+      mostPopularService: airtime > data ? "Airtime" : "Data"
+    }
+  }
+
   static async getVerificationToken(token: string) {
     const db = await this.getDb()
     const tokenDoc = await db.collection("verification_tokens").findOne({ token })
