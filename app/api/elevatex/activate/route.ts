@@ -42,14 +42,19 @@ export async function POST(request: NextRequest) {
     matrixParentId = eligible?.id
   }
 
-  // Deduct activation fee and activate ElevateX
-  await Database.updateUserById(user.id, {
-    walletBalance: user.walletBalance - 1000,
-    elevatexActivated: true,
+  // Atomically deduct the activation fee and activate ElevateX. This single
+  // conditional operation prevents both an overdraft race and a double-
+  // activation race from concurrent requests (see Database.activateElevateXAtomic).
+  const activated = await Database.activateElevateXAtomic(user.id, 1000, {
     referralCode,
     matrixParentId,
-    autoPlacedAt: new Date(),
   })
+  if (!activated) {
+    return NextResponse.json(
+      { error: "Insufficient wallet balance or ElevateX already activated" },
+      { status: 400 }
+    )
+  }
 
   // Record transaction
   await Database.createTransaction({

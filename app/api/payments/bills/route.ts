@@ -54,8 +54,15 @@ export async function POST(request: NextRequest) {
     if (!subaRes.ok || subaData.error) {
       return NextResponse.json({ error: subaData.description || "Bill payment failed" }, { status: 400 });
     }
-    // Deduct from wallet
-    await Database.updateUserWallet(session.user.id, -amount);
+    // Deduct from wallet. Note: this happens after the bill was already
+    // paid via SubAndGain, so a failed deduction here (very rare — only if
+    // balance changed between the check above and now) can't be undone by
+    // rejecting the request; we log it clearly so it surfaces in
+    // reconciliation instead of silently under-charging the user.
+    const debit = await Database.updateUserWallet(session.user.id, -amount);
+    if (!debit.success) {
+      console.error("Bill payment delivered but wallet debit failed (insufficient balance at debit time):", { userId: session.user.id, amount });
+    }
     // Record transaction
     await Database.createTransaction({
       userId: session.user.id,
