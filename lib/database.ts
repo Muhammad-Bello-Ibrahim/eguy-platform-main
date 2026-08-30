@@ -102,36 +102,65 @@ export class Database {
   }
 
   static async updateUserById(id: string, updates: any) {
+    if (typeof id !== "string" || id.length !== 24) return null
     const db = await this.getDb()
     const result = await db.collection("users").findOneAndUpdate(
       { _id: new ObjectId(id) },
       { $set: { ...updates, updatedAt: new Date() } },
       { returnDocument: "after" }
     ) as any
-    if (!result || !result.value) return null
-    return { ...result.value, id: result.value._id.toString() }
+    // mongodb driver v6+ returns the document directly; older versions
+    // wrap it as { value: doc }. Handle both shapes safely.
+    const doc = result?.value !== undefined ? result.value : result
+    if (!doc) return null
+    return { ...doc, id: doc._id.toString() }
   }
 
   static async updateUserByEmail(email: string, updates: any) {
+    if (typeof email !== "string") return null
     const db = await this.getDb()
     const result = await db.collection("users").findOneAndUpdate(
       { email },
       { $set: { ...updates, updatedAt: new Date() } },
       { returnDocument: "after" }
     ) as any
-    if (!result || !result.value) return null
-    return { ...result.value, id: result.value._id.toString() }
+    // mongodb driver v6+ returns the document directly; older versions
+    // wrap it as { value: doc }. Handle both shapes safely.
+    const doc = result?.value !== undefined ? result.value : result
+    if (!doc) return null
+    return { ...doc, id: doc._id.toString() }
   }
 
+  /**
+   * Atomically credits or debits a user's wallet.
+   *
+   * For debits (amount < 0), the update is conditioned on the current
+   * balance being sufficient, so concurrent requests can never push the
+   * balance negative (previously a plain $inc with no floor check, which
+   * allowed a race between two simultaneous debits to overdraw the wallet).
+   *
+   * Returns `{ success, matchedCount, modifiedCount }`. Callers performing a
+   * debit MUST check `success` — false means the balance was insufficient
+   * (or the user no longer exists) and the debit did NOT happen.
+   */
   static async updateUserWallet(userId: string, amount: number) {
     const db = await this.getDb()
     const objectId = typeof userId === 'string' && userId.length === 24 ? new ObjectId(userId) : (userId as any)
+
+    const filter: any = { _id: objectId }
+    if (amount < 0) {
+      // Only allow the debit if the balance can cover it.
+      filter.walletBalance = { $gte: -amount }
+    }
+
     const result = await db.collection("users").updateOne(
-      { _id: objectId as any },
+      filter,
       { $inc: { walletBalance: amount }, $set: { updatedAt: new Date() } }
     )
-    console.log("Wallet update result:", { userId, objectId, matchedCount: result.matchedCount, modifiedCount: result.modifiedCount })
-    return result
+
+    const success = result.matchedCount > 0
+    console.log("Wallet update result:", { userId, objectId, amount, success, matchedCount: result.matchedCount, modifiedCount: result.modifiedCount })
+    return { ...result, success }
   }
 
   static async saveVerificationToken(userId: string, token: string, expires: Date | number) {
@@ -420,6 +449,48 @@ export class Database {
   // =========================
   // ELEVATEX SPILLOVER HELPERS
   // =========================
+
+  /**
+   * Atomically deducts the ₦1,000 activation fee and marks the user as
+   * ElevateX-activated in a single conditional update. The condition
+   * (balance >= fee AND not already activated) closes two races that
+   * existed when this was a separate balance-check + updateUserById call:
+   *   1. Two concurrent activations both passing the balance check and
+   *      both deducting, overdrawing the wallet.
+   *   2. Two concurrent activations both passing the "not activated" check
+   *      and both proceeding, double-charging and double-placing the user.
+   * Returns the updated user document, or null if the condition failed
+   * (insufficient balance or already activated).
+   */
+  static async activateElevateXAtomic(
+    userId: string,
+    fee: number,
+    fields: { referralCode: string; matrixParentId?: string }
+  ): Promise<DatabaseUser | null> {
+    const db = await this.getDb()
+    const result = await db.collection("users").findOneAndUpdate(
+      {
+        _id: new ObjectId(userId),
+        walletBalance: { $gte: fee },
+        elevatexActivated: { $ne: true },
+      },
+      {
+        $inc: { walletBalance: -fee },
+        $set: {
+          elevatexActivated: true,
+          referralCode: fields.referralCode,
+          matrixParentId: fields.matrixParentId,
+          autoPlacedAt: new Date(),
+          updatedAt: new Date(),
+        },
+      },
+      { returnDocument: "after" }
+    ) as any
+    const doc = result?.value !== undefined ? result.value : result
+    if (!doc) return null
+    return { ...doc, id: doc._id.toString() }
+  }
+
   static async findEligibleMatrixParent(): Promise<DatabaseUser | null> {
     const db = await this.getDb()
     const eligible = await db.collection("users")

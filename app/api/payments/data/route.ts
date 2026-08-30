@@ -76,8 +76,15 @@ export async function POST(request: NextRequest) {
       const errorMessage = subaData.description || subaData.error || "Data purchase failed";
       return NextResponse.json({ error: errorMessage }, { status: 400 });
     }
-    // Deduct from wallet
-    await Database.updateUserWallet((session.user as any).id, -amount);
+    // Deduct from wallet. Note: this happens after the data bundle was
+    // already delivered by SubAndGain, so a failed deduction here (very
+    // rare — only if balance changed between the check above and now)
+    // can't be undone by rejecting the request; we log it clearly so it
+    // surfaces in reconciliation instead of silently under-charging the user.
+    const debit = await Database.updateUserWallet((session.user as any).id, -amount);
+    if (!debit.success) {
+      console.error("Data purchase delivered but wallet debit failed (insufficient balance at debit time):", { userId: (session.user as any).id, amount });
+    }
     // Record transaction
     await Database.createTransaction({
       userId: (session.user as any).id,
